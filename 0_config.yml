@@ -11,7 +11,7 @@ targets:
 ##-- Fetch configs --##
   
   start_date:
-    command: as.Date(I('2020-10-01'))
+    command: as.Date(I('2020-11-27'))
   end_date:
     command: as.Date(I('2020-12-10'))
   
@@ -26,3 +26,18 @@ targets:
     command: c(I('+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs'))
 
 ##-- Visualize configs --##
+
+  # Width and height are double what they need to be so that resolution looks good when created on Windows
+  # Width/height are halved after video is created.
+  # Need to be specified in inches.
+  width: 
+    command: I(24)
+  height: 
+    command: I(12)
+
+##-- Animate configs --##
+  
+  input_framerate:
+    command: I(2.25)
+  output_framerate:
+    command: I(2.25)

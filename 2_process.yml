@@ -12,14 +12,12 @@ targets:
 
   2_process:
     depends:
-      - gw_sites
       - gw_change_last_7_days_sf
       - gw_change_last_30_days_sf
   
-  gw_site_info:
-    command: readRDS('1_fetch/out/gw_site_info.rds')
-  gw_sites:
-    command: pull(gw_site_info, I('site_no'))
+  # Add site info to gw_data
+  gw_data_w_site_info:
+    command: add_site_info(gw_data, gw_site_info)
   
   # Summarize GWL data
   gw_change_last_7_days:

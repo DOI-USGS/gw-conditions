@@ -1,9 +1,11 @@
-target_default: 2_process
+target_default: 4_animate
 
 include:
   - 0_config.yml
   - 1_fetch.yml
   - 2_process.yml
+  - 3_visualize.yml
+  - 4_animate.yml
 
 targets:
   build_viz:
@@ -11,3 +13,5 @@ targets:
       - 0_config
       - 1_fetch
       - 2_process
+      - 3_visualize
+      - 4_animate

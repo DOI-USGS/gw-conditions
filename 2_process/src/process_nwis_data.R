@@ -1,4 +1,11 @@
 
+add_site_info <- function(gw_data, gw_site_info) {
+  gw_data %>% 
+    left_join(gw_site_info) %>% 
+    left_join(select(stateCd, -STATENS), by = c("state_cd" = "STATE")) %>% 
+    rename(state = STUSAB)
+}
+
 calc_pct_change <- function(new_val, old_val) {
   (new_val - old_val)/old_val * 100
 }

@@ -1,25 +1,31 @@
 #' Fetch all NWIS sites that have groundwater level data during the appropriate time period
-fetch_gw_site_info <- function(filename, start_date, end_date, param_cd){
+fetch_gw_sites <- function(filename, start_date, end_date, param_cd){
   
   hucs <- zeroPad(1:21, 2) # all hucs
   
-  site_info <- data.frame()
+  sites <- c()
   for(huc in hucs){
     message(sprintf("Trying HUC %s ...", huc))
-    site_info <- tryCatch(
+    sites <- tryCatch(
       whatNWISdata(huc = huc, 
                    service = "dv", 
                    startDate = start_date,
                    endDate = end_date,
                    parameterCd = param_cd,
                    statCd = "00003") %>%
-        select(site_no, station_nm, dec_lat_va, dec_long_va) %>%
+        pull(site_no) %>%
         unique(), 
-      error = function(e) return(data.frame())
-    ) %>% rbind(site_info)
+      error = function(e) return()
+    ) %>% c(sites)
   }
   
-  saveRDS(site_info, filename)
+  saveRDS(sites, filename)
+}
+
+fetch_gw_site_info <- function(filename, sites) {
+  readNWISsite(sites) %>% 
+    select(site_no, station_nm, state_cd, dec_lat_va, dec_long_va) %>% 
+    saveRDS(filename)
 }
 
 fetch_gw_data <- function(filename, sites, start_date, end_date, param_cd, request_limit = 10) {
