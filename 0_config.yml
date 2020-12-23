@@ -1,0 +1,28 @@
+target_default: 0_config
+
+targets:
+  
+  0_config:
+    depends:
+      - start_date
+      - end_date
+      - gw_param_cd
+  
+##-- Fetch configs --##
+  
+  start_date:
+    command: as.Date(I('2020-10-01'))
+  end_date:
+    command: as.Date(I('2020-12-10'))
+  
+  gw_param_cd:
+    command: c(I('72019'))
+
+##-- Process configs --##
+
+  date_for_pct_change:
+    command: c(end_date)
+  proj_str:
+    command: c(I('+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs'))
+
+##-- Visualize configs --##

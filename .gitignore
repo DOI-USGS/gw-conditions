@@ -38,3 +38,9 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# scipiper files
+*/tmp/*
+*/out/*
+!*/out/*.ind
+.remake

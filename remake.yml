@@ -1,0 +1,13 @@
+target_default: 2_process
+
+include:
+  - 0_config.yml
+  - 1_fetch.yml
+  - 2_process.yml
+
+targets:
+  build_viz:
+    depends: 
+      - 0_config
+      - 1_fetch
+      - 2_process
