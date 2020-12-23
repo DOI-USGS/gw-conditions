@@ -24,7 +24,7 @@ create_video <- function(video_filename, png_file_yml, input_framerate, output_f
   )
   
   # Downscale to help with resolution when building on Windows
-  system(sprintf("ffmpeg -i %s -vf scale=iw/2:-1 %s", pre_downscale_fn, video_filename))
+  system(sprintf("ffmpeg -y -i %s -vf scale=iw/2:-1 %s", pre_downscale_fn, video_filename))
   
   file.rename(from = file_name_df$newName, to = file_name_df$origName)
   

@@ -37,7 +37,9 @@ targets:
 
 ##-- Animate configs --##
   
-  input_framerate:
+  video_input_framerate:
     command: I(2.25)
-  output_framerate:
+  video_output_framerate:
     command: I(2.25)
+  gif_frame_delay:
+    command: I(50)
