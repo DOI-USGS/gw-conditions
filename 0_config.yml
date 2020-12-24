@@ -4,9 +4,6 @@ targets:
   
   0_config:
     depends:
-      - start_date
-      - end_date
-      - gw_param_cd
   
 ##-- Fetch configs --##
   
