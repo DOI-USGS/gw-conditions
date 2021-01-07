@@ -1,0 +1,29 @@
+target_default: 4_animate
+
+packages:
+  - dplyr
+  - yaml
+
+sources:
+  - 4_animate/src/create_video.R
+  - 4_animate/src/create_gif.R
+
+targets:
+  
+  4_animate:
+    depends:
+      - 4_animate/out/cartogram_animation.mp4
+      - 4_animate/out/cartogram_animation.gif
+
+  4_animate/out/cartogram_animation.mp4:
+    command: create_video(
+      target_name,
+      png_file_yml = '3_visualize/out/daily_timestep_frames.yml',
+      input_framerate = video_input_framerate,
+      output_framerate = video_output_framerate)
+  
+  4_animate/out/cartogram_animation.gif:
+    command: create_gif(
+      target_name,
+      png_file_yml = '3_visualize/out/daily_timestep_frames.yml',
+      frame_delay = gif_frame_delay)

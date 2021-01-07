@@ -1,0 +1,22 @@
+target_default: 3_visualize
+
+packages:
+  - dplyr
+  - scipiper
+
+sources:
+  - 3_visualize/src/do_daily_timestep_tasks.R
+  - 3_visualize/src/visualize_cartogram.R
+
+targets:
+
+  3_visualize:
+    depends:
+      - 3_visualize/out/daily_timestep_frames.yml
+
+  3_visualize/out/daily_timestep_frames.yml:
+    command: do_daily_timestep_tasks(
+      target_name, 
+      start_date, 
+      end_date,
+      '3_visualize/src/visualize_cartogram.R')
