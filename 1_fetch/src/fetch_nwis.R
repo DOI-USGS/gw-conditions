@@ -1,5 +1,5 @@
 #' Fetch all NWIS sites that have groundwater level data during the appropriate time period
-fetch_gw_sites <- function(filename, start_date, end_date, param_cd){
+fetch_gw_sites <- function(start_date, end_date, param_cd){
   
   hucs <- zeroPad(1:21, 2) # all hucs
   
@@ -19,13 +19,12 @@ fetch_gw_sites <- function(filename, start_date, end_date, param_cd){
     ) %>% c(sites)
   }
   
-  saveRDS(sites, filename)
+  return(sites)
 }
 
-fetch_gw_site_info <- function(filename, sites) {
+fetch_gw_site_info <- function(sites) {
   readNWISsite(sites) %>% 
-    select(site_no, station_nm, state_cd, dec_lat_va, dec_long_va) %>% 
-    saveRDS(filename)
+    select(site_no, station_nm, state_cd, dec_lat_va, dec_long_va)
 }
 
 fetch_gw_data <- function(filename, sites, start_date, end_date, param_cd, request_limit = 10) {
