@@ -13,3 +13,11 @@ To build, check the `start_date` and `end_date` in `0_config.yml`. Then, run the
 library(scipiper)
 scmake()
 ```
+
+### How to get Climate Response Network data:
+
+```r
+library(scipiper)
+scmake("1_fetch/out/gw_crn_data.rds")
+crn_data <- readRDS("1_fetch/out/gw_crn_data.rds")
+```
