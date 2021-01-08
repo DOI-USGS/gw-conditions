@@ -1,6 +1,6 @@
 
-add_site_info <- function(gw_data, gw_site_info) {
-  gw_data %>% 
+add_site_info <- function(gw_data_fn, gw_site_info) {
+  readRDS(gw_data_fn) %>% 
     left_join(gw_site_info) %>% 
     left_join(select(stateCd, -STATENS), by = c("state_cd" = "STATE")) %>% 
     rename(state = STUSAB)
