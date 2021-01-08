@@ -17,7 +17,7 @@ targets:
   
   # Add site info to gw_data
   gw_data_w_site_info:
-    command: add_site_info(gw_data, gw_site_info)
+    command: add_site_info('1_fetch/out/gw_data.rds', gw_site_info)
   
   # Summarize GWL data
   gw_change_last_7_days:
