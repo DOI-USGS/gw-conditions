@@ -8,5 +8,5 @@ unzip_and_read_shp <- function(zipfile, tmp_dir) {
 
 extract_crn_sites <- function(gwcrn_sf) {
   # The site ids are read in as factors in st_read
-  gwcrn_sf %>% pull(SITEID) %>% levels()
+  gwcrn_sf %>% pull(SITEID) %>% unique()
 }
