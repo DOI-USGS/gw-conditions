@@ -22,10 +22,10 @@ targets:
   
 ##-- Fetch configs --##
   
-  start_date:
-    command: as.Date(I('2020-11-27'))
-  end_date:
-    command: as.Date(I('2020-12-10'))
+  viz_start_date:
+    command: as.Date(I('2020-10-01'))
+  viz_end_date:
+    command: as.Date(I('2020-12-31'))
   
   gw_param_cd:
     command: c(I('72019'))
@@ -33,7 +33,7 @@ targets:
 ##-- Process configs --##
 
   date_for_pct_change:
-    command: c(end_date)
+    command: c(viz_end_date)
   proj_str:
     command: c(I('+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs'))
 

@@ -29,11 +29,11 @@ targets:
 ##-- GW sites and data for current viz time period --##
   
   gw_sites:
-    command: fetch_gw_sites(start_date, end_date, gw_param_cd)
+    command: fetch_gw_sites(viz_start_date, viz_end_date, gw_param_cd)
   gw_site_info:
     command: fetch_gw_site_info(gw_sites)
   1_fetch/out/gw_data.rds:
-    command: fetch_gw_data(target_name, gw_sites, start_date, end_date, gw_param_cd, stat_cd = I("00003"), 200)
+    command: fetch_gw_data(target_name, gw_sites, viz_start_date, viz_end_date, gw_param_cd, stat_cd = I("00003"), 200)
   
 ##-- Climate Response Network sites --##
   
@@ -47,4 +47,4 @@ targets:
     command: extract_crn_sites(gw_crn_sites_sf)
   
   1_fetch/out/gw_crn_data.rds:
-    command: fetch_gw_data(target_name, gw_crn_sites, start_date, end_date, gw_param_cd, stat_cd = I("00001"), 200)
+    command: fetch_gw_data(target_name, gw_crn_sites, viz_start_date, viz_end_date, gw_param_cd, stat_cd = I("00001"), 200)
