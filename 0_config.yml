@@ -2,8 +2,23 @@ target_default: 0_config
 
 targets:
   
-  0_config:
-    depends:
+##-- Historic data configs --##
+
+  historic_start_date:
+    command: as.Date(I('1800-01-01'))
+  historic_end_date:
+    command: as.Date(I('2020-12-31'))
+  historic_fetch_size_limit:
+    command: I(50)
+  
+  # Building these are completely decoupled from the rest of the pipeline
+  # Use these objects in 1_fetch to s3_get the data
+  historic_site_info_s3_fn:
+    command: c(I('gw-conditions/historic_gw_site_info.rds.ind'))
+  historic_data_s3_fn:
+    command: c(I('gw-conditions/historic_gw_data.csv.ind'))
+  historic_quantiles_s3_fn:
+    command: c(I('gw-conditions/historic_gw_quantiles.csv.ind'))
   
 ##-- Fetch configs --##
   

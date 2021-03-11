@@ -6,6 +6,7 @@ packages:
   - sf
 
 sources:
+  - 1_fetch/src/fetch_s3.R
   - 1_fetch/src/fetch_nwis.R
   - 1_fetch/src/fetch_gwcrn.R
 
@@ -16,7 +17,16 @@ targets:
       - 1_fetch/out/gw_data.rds
       - 1_fetch/out/gw_crn_data.rds
 
-##-- All GW sites with continuous data --##
+##-- Historic GW sites and data --##
+
+  1_fetch/out/historic_gw_site_info.rds:
+    command: fetch_s3(target_name, historic_site_info_s3_fn)
+  1_fetch/out/historic_gw_data.csv:
+    command: fetch_s3(target_name, historic_data_s3_fn)
+  # 1_fetch/out/historic_gw_quantiles.csv:
+  #   command: fetch_s3(target_name, historic_quantiles_s3_fn)
+
+##-- GW sites and data for current viz time period --##
   
   gw_sites:
     command: fetch_gw_sites(start_date, end_date, gw_param_cd)
