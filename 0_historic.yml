@@ -9,6 +9,7 @@ packages:
 
 sources:
   - 0_historic/src/do_gw_fetch.R
+  - 0_historic/src/calculate_historic_quantiles.R
   - 1_fetch/src/fetch_nwis.R
 
 targets:
@@ -17,7 +18,7 @@ targets:
     depends:
       - gw-conditions/historic_gw_site_info.rds.ind
       - gw-conditions/historic_gw_data.csv.ind
-      # - gw-conditions/historic_gw_quantiles.csv.ind
+      - gw-conditions/historic_gw_quantiles.csv.ind
 
 ##-- All GW sites with continuous data for all time --##
   
@@ -37,9 +38,10 @@ targets:
       request_limit = historic_fetch_size_limit,
       '0_historic/src/do_gw_fetch.R')
   
-  # INSERT QUANTILES CODE HERE
-  # 0_historic/out/historic_gw_quantiles.csv:
-  #  command: 
+  quantiles_to_calc:
+    command: seq(0, 1, by = 0.05)
+  0_historic/out/historic_gw_quantiles.csv:
+   command: calculate_historic_quantiles(target_name, "0_historic/out/historic_gw_data.csv", quantiles_to_calc)
   
 ##-- Now push historic data and quantiles to S3 to be used in the rest of the pipeline --##
 
@@ -49,5 +51,5 @@ targets:
   gw-conditions/historic_gw_data.csv.ind:
     command: s3_put(target_name, local_source = '0_historic/out/historic_gw_data.csv')
   
-  # gw-conditions/historic_gw_quantiles.csv.ind:
-  #  command: s3_put(target_name, local_source = '0_historic/out/historic_gw_quantiles.csv')
+  gw-conditions/historic_gw_quantiles.csv.ind:
+   command: s3_put(target_name, local_source = '0_historic/out/historic_gw_quantiles.csv')
