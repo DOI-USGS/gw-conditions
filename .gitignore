@@ -44,3 +44,4 @@ vignettes/*.pdf
 */out/*
 !*/out/*.ind
 .remake
+build/
