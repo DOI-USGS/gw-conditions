@@ -23,8 +23,8 @@ targets:
     command: fetch_s3(target_name, historic_site_info_s3_fn)
   1_fetch/out/historic_gw_data.csv:
     command: fetch_s3(target_name, historic_data_s3_fn)
-  # 1_fetch/out/historic_gw_quantiles.csv:
-  #   command: fetch_s3(target_name, historic_quantiles_s3_fn)
+  1_fetch/out/historic_gw_quantiles.csv:
+    command: fetch_s3(target_name, historic_quantiles_s3_fn)
 
 ##-- GW sites and data for current viz time period --##
   
