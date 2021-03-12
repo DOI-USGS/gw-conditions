@@ -98,6 +98,6 @@ fetch_gw_historic <- function(target_name, gw_sites, start_date, end_date, param
 
 combine_gw_files <- function(target_name, ...) {
   purrr::map(list(...), function(fn) read_feather(fn)) %>% 
-    purrr::reduce(bind_rows) %>% 
+    bind_rows() %>% 
     readr::write_csv(target_name)
 }
