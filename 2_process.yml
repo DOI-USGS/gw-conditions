@@ -7,9 +7,9 @@ packages:
   - sf
 
 sources:
-  - 2_process/src/process_nwis_data.R
   - 2_process/src/compare_to_historic.R
   - 2_process/src/categorize_quantiles.R
+  - 2_process/src/process_spatial.R
 
 targets:
 
