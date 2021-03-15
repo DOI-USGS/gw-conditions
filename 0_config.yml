@@ -38,8 +38,10 @@ targets:
 
 ##-- Process configs --##
 
-  date_for_pct_change:
-    command: c(viz_end_date)
+  anomaly_categories:
+    command: c(I("Very low"), I("Low"), I("Normal"), I("High"), I("Very high"))
+  anomaly_bins:
+    command: c(0, 10, 25, 75, 90, 100)
   proj_str:
     command: c(I('+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs'))
 
