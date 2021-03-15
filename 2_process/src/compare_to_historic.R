@@ -23,10 +23,12 @@ compare_to_historic <- function(target_name, historic_quantile_fn, current_data_
       filter(site_no == site) %>% 
       # Figure out the corresponding quantile for each daily value
       # If there are no non-NA quantiles available, return NA
+      rowwise() %>% 
       mutate(daily_quant = ifelse(
         nrow(site_quantiles) > 0, 
         yes = approx(x = site_quantiles$quantile_va, y = site_quantiles$quantile_nm, xout = GWL)$y,
-        no = NA))
+        no = NA)) %>% 
+      ungroup()
     
     # TODO: Handle any new max or new min values when using dates outside of dates used to calculate historic vals
     
