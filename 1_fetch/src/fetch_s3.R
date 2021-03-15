@@ -1,11 +1,8 @@
 # s3_get will only download and save the file exactly in the filepath it appears on S3
 # So, this function uses S3_get but then moves the file where we want it
 fetch_s3 <- function(target_name, s3_file) {
-  local_file <- s3_get(s3_file) 
-  file.copy(local_file, target_name, overwrite = TRUE)
-  file.remove(local_file)
-  
-  # Clean up and remove the dir if there are no files
-  if(length(list.files("gw-conditions")) == 0) unlink(dirname(local_file), recursive = TRUE)
-  
+  s3_config <- yaml::yaml.load_file(getOption("scipiper.s3_config_file"))
+  aws.signature::use_credentials(profile = s3_config$profile)
+  aws.s3::save_object(object = s3_file, bucket = s3_config$bucket, 
+                      file = target_name)
 }
