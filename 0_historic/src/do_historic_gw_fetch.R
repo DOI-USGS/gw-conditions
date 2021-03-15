@@ -1,4 +1,4 @@
-do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit, ...) {
+do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit, ...) {
   
   # Number indicating how many sites to include per dataRetrieval request to prevent
   # errors from requesting too much at once. More relevant for surface water requests.

@@ -8,6 +8,7 @@ packages:
 sources:
   - 1_fetch/src/fetch_s3.R
   - 1_fetch/src/fetch_nwis.R
+  - 1_fetch/src/do_gw_fetch.R
 
 targets:
 
@@ -32,12 +33,14 @@ targets:
     command: fetch_gw_sites(target_name, viz_start_date, viz_end_date, viz_bounding_box, gw_param_cd)
   1_fetch/out/gw_site_info.csv:
     command: fetch_gw_site_info(target_name, "1_fetch/out/gw_sites.rds")
+  
+  gw_sites:
+    command: readRDS('1_fetch/out/gw_sites.rds')
   1_fetch/out/gw_data.csv:
-    command: fetch_gw_data(
-      target_name, 
-      site_vec_fn = "1_fetch/out/gw_sites.rds", 
-      start_date = viz_start_date, 
-      end_date = viz_end_date, 
-      param_cd = gw_param_cd, 
-      stat_cd = I("00003"), 
-      request_limit = 200)
+    command: do_gw_fetch(
+      final_target = target_name,
+      task_makefile = I('1_fetch_tasks.yml'),
+      gw_site_nums = gw_sites,
+      request_limit = 200,
+      '1_fetch/src/do_gw_fetch.R',
+      '1_fetch/src/fetch_nwis.R')
