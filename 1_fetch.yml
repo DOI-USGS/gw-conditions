@@ -26,7 +26,7 @@ targets:
 ##-- GW sites and data for current viz time period --##
   
   gw_sites:
-    command: fetch_gw_sites(viz_start_date, viz_end_date, gw_param_cd)
+    command: fetch_gw_sites(viz_start_date, viz_end_date, viz_bounding_box, gw_param_cd)
   gw_site_info:
     command: fetch_gw_site_info(gw_sites)
   1_fetch/out/gw_data.rds:
