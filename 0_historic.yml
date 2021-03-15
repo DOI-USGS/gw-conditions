@@ -1,0 +1,55 @@
+target_default: 0_historic
+
+include:
+  - 0_config.yml
+
+packages:
+  - dataRetrieval
+  - tidyverse
+
+sources:
+  - 0_historic/src/do_gw_fetch.R
+  - 0_historic/src/calculate_historic_quantiles.R
+  - 1_fetch/src/fetch_nwis.R
+
+targets:
+
+  0_historic:
+    depends:
+      - gw-conditions/historic_gw_site_info.rds.ind
+      - gw-conditions/historic_gw_data.csv.ind
+      - gw-conditions/historic_gw_quantiles.csv.ind
+
+##-- All GW sites with continuous data for all time --##
+  
+  historic_gw_sites:
+    command: fetch_gw_sites(historic_start_date, historic_end_date, gw_param_cd)
+  
+  historic_gw_site_info:
+    command: fetch_gw_site_info(historic_gw_sites)
+  0_historic/out/historic_gw_site_info.rds:
+    command: saveRDS(file = target_name, historic_gw_site_info)
+  
+  0_historic/out/historic_gw_data.csv:
+    command: do_gw_fetch(
+      final_target = target_name,
+      task_makefile = I('0_historic_fetch_tasks.yml'),
+      gw_site_nums = historic_gw_sites,
+      request_limit = historic_fetch_size_limit,
+      '0_historic/src/do_gw_fetch.R')
+  
+  quantiles_to_calc:
+    command: seq(0, 1, by = 0.05)
+  0_historic/out/historic_gw_quantiles.csv:
+   command: calculate_historic_quantiles(target_name, "0_historic/out/historic_gw_data.csv", quantiles_to_calc)
+  
+##-- Now push historic data and quantiles to S3 to be used in the rest of the pipeline --##
+
+  gw-conditions/historic_gw_site_info.rds.ind:
+    command: s3_put(remote_ind = target_name, local_source = '0_historic/out/historic_gw_site_info.rds')
+  
+  gw-conditions/historic_gw_data.csv.ind:
+    command: s3_put(target_name, local_source = '0_historic/out/historic_gw_data.csv')
+  
+  gw-conditions/historic_gw_quantiles.csv.ind:
+   command: s3_put(target_name, local_source = '0_historic/out/historic_gw_quantiles.csv')

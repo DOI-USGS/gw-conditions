@@ -10,8 +10,16 @@ include:
 targets:
   build_viz:
     depends: 
-      - 0_config
       - 1_fetch
       - 2_process
       - 3_visualize
       - 4_animate
+
+# The historic data used in 1_fetch has been prebuilt by the 0_historic pipeline.
+# 
+# The 1_fetch pipeline will download the needed historic data from S3 using the 
+#   filenames specified in 0_config. 
+# 
+# If you need to regenerate the historic data, you will need to build the 0_historic
+#   pipeline itself (which is decoupled from the rest of this pipeline). To do so,
+#   run, scmake(remake_file = "0_historic.yml")

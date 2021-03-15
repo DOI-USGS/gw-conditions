@@ -6,6 +6,7 @@ packages:
   - sf
 
 sources:
+  - 1_fetch/src/fetch_s3.R
   - 1_fetch/src/fetch_nwis.R
   - 1_fetch/src/fetch_gwcrn.R
 
@@ -16,14 +17,23 @@ targets:
       - 1_fetch/out/gw_data.rds
       - 1_fetch/out/gw_crn_data.rds
 
-##-- All GW sites with continuous data --##
+##-- Historic GW sites and data --##
+
+  1_fetch/out/historic_gw_site_info.rds:
+    command: fetch_s3(target_name, historic_site_info_s3_fn)
+  1_fetch/out/historic_gw_data.csv:
+    command: fetch_s3(target_name, historic_data_s3_fn)
+  1_fetch/out/historic_gw_quantiles.csv:
+    command: fetch_s3(target_name, historic_quantiles_s3_fn)
+
+##-- GW sites and data for current viz time period --##
   
   gw_sites:
-    command: fetch_gw_sites(start_date, end_date, gw_param_cd)
+    command: fetch_gw_sites(viz_start_date, viz_end_date, gw_param_cd)
   gw_site_info:
     command: fetch_gw_site_info(gw_sites)
   1_fetch/out/gw_data.rds:
-    command: fetch_gw_data(target_name, gw_sites, start_date, end_date, gw_param_cd, stat_cd = I("00003"), 200)
+    command: fetch_gw_data(target_name, gw_sites, viz_start_date, viz_end_date, gw_param_cd, stat_cd = I("00003"), 200)
   
 ##-- Climate Response Network sites --##
   
@@ -37,4 +47,4 @@ targets:
     command: extract_crn_sites(gw_crn_sites_sf)
   
   1_fetch/out/gw_crn_data.rds:
-    command: fetch_gw_data(target_name, gw_crn_sites, start_date, end_date, gw_param_cd, stat_cd = I("00001"), 200)
+    command: fetch_gw_data(target_name, gw_crn_sites, viz_start_date, viz_end_date, gw_param_cd, stat_cd = I("00001"), 200)

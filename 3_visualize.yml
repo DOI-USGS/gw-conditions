@@ -17,6 +17,6 @@ targets:
   3_visualize/out/daily_timestep_frames.yml:
     command: do_daily_timestep_tasks(
       target_name, 
-      start_date, 
-      end_date,
+      viz_start_date, 
+      viz_end_date,
       '3_visualize/src/visualize_cartogram.R')
