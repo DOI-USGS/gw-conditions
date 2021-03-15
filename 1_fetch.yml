@@ -3,6 +3,7 @@ target_default: 1_fetch
 packages:
   - dataRetrieval
   - dplyr
+  - readr
 
 sources:
   - 1_fetch/src/fetch_s3.R
@@ -12,6 +13,8 @@ targets:
 
   1_fetch:
     depends:
+      - 1_fetch/out/gw_sites.rds
+      - 1_fetch/out/gw_site_info.csv
       - 1_fetch/out/gw_data.csv
 
 ##-- Historic GW sites and data --##
@@ -25,9 +28,16 @@ targets:
 
 ##-- GW sites and data for current viz time period --##
   
-  gw_sites:
-    command: fetch_gw_sites(viz_start_date, viz_end_date, viz_bounding_box, gw_param_cd)
-  gw_site_info:
-    command: fetch_gw_site_info(gw_sites)
+  1_fetch/out/gw_sites.rds:
+    command: fetch_gw_sites(target_name, viz_start_date, viz_end_date, viz_bounding_box, gw_param_cd)
+  1_fetch/out/gw_site_info.csv:
+    command: fetch_gw_site_info(target_name, "1_fetch/out/gw_sites.rds")
   1_fetch/out/gw_data.csv:
-    command: fetch_gw_data(target_name, gw_sites, viz_start_date, viz_end_date, gw_param_cd, stat_cd = I("00003"), 200)
+    command: fetch_gw_data(
+      target_name, 
+      site_vec_fn = "1_fetch/out/gw_sites.rds", 
+      start_date = viz_start_date, 
+      end_date = viz_end_date, 
+      param_cd = gw_param_cd, 
+      stat_cd = I("00003"), 
+      request_limit = 200)

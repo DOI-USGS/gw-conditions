@@ -26,7 +26,7 @@ fetch_gw_sites <- function(target_name, start_date, end_date, bbox, param_cd){
     ) %>% c(sites)
   }
   
-  return(sites)
+  saveRDS(sites, target_name)
   
 }
 
@@ -79,12 +79,15 @@ extract_cell_bbox <- function(bbox_df, cell_i) {
   unlist(bbox_df$bbox[cell_i])
 }
 
-fetch_gw_site_info <- function(sites) {
-  readNWISsite(sites) %>% 
-    select(site_no, station_nm, state_cd, dec_lat_va, dec_long_va)
+fetch_gw_site_info <- function(target_name, site_vec_fn) {
+  readNWISsite(readRDS(site_vec_fn)) %>% 
+    select(site_no, station_nm, state_cd, dec_lat_va, dec_long_va) %>% 
+    write_csv(target_name)
 }
 
-fetch_gw_data <- function(filename, sites, start_date, end_date, param_cd, stat_cd, request_limit = 10) {
+fetch_gw_data <- function(target_name, site_vec_fn, start_date, end_date, param_cd, stat_cd, request_limit = 10) {
+  
+  sites <- readRDS(site_vec_fn)
   
   # Number indicating how many sites to include per dataRetrieval request to prevent
   # errors from requesting too much at once. More relevant for surface water requests.
@@ -116,6 +119,6 @@ fetch_gw_data <- function(filename, sites, start_date, end_date, param_cd, stat_
   
   gwl_data_unique <- dplyr::distinct(gwl_data) # need this to avoid some duplicates
   
-  write_csv(gwl_data_unique, filename)
+  write_csv(gwl_data_unique, target_name)
   
 }
