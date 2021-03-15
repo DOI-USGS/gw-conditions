@@ -14,11 +14,11 @@ targets:
   # Building these are completely decoupled from the rest of the pipeline
   # Use these objects in 1_fetch to s3_get the data
   historic_site_info_s3_fn:
-    command: c(I('gw-conditions/historic_gw_site_info.rds.ind'))
+    command: c(I('gw-conditions/historic_gw_site_info.rds'))
   historic_data_s3_fn:
-    command: c(I('gw-conditions/historic_gw_data.csv.ind'))
+    command: c(I('gw-conditions/historic_gw_data.csv'))
   historic_quantiles_s3_fn:
-    command: c(I('gw-conditions/historic_gw_quantiles.csv.ind'))
+    command: c(I('gw-conditions/historic_gw_quantiles.csv'))
   
 ##-- Fetch configs --##
   
