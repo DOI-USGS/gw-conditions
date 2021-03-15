@@ -116,6 +116,6 @@ fetch_gw_data <- function(filename, sites, start_date, end_date, param_cd, stat_
   
   gwl_data_unique <- dplyr::distinct(gwl_data) # need this to avoid some duplicates
   
-  saveRDS(gwl_data_unique, filename)
+  write_csv(gwl_data_unique, filename)
   
 }
