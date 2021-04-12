@@ -78,7 +78,7 @@ do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit
 }
 
 combine_gw_files <- function(target_name, ...) {
-  purrr::map(list(...), function(fn) read_csv(fn, col_types = cols())) %>% 
+  purrr::map(list(...), function(fn) read_csv(fn, col_types = 'cDn')) %>% 
     bind_rows() %>% 
     readr::write_csv(target_name)
 }

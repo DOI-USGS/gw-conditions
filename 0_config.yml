@@ -23,9 +23,9 @@ targets:
 ##-- Fetch configs --##
   
   viz_start_date:
-    command: as.Date(I('2020-10-01'))
+    command: as.Date(I('2019-10-01'))
   viz_end_date:
-    command: as.Date(I('2020-12-31'))
+    command: as.Date(I('2020-09-30'))
   # This was a useful resource: https://anthonylouisdagostino.com/bounding-boxes-for-all-us-states/
   # Use bounding box in case we want to do this regionally someday
   # Must be west longitude, south latitude, east longitude, and then north latitude

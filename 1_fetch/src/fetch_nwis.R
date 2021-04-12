@@ -1,5 +1,5 @@
 #' Fetch NWIS sites within the bounding box that have groundwater level data during the appropriate time period
-fetch_gw_sites <- function(target_name, start_date, end_date, bbox, param_cd){
+fetch_gw_sites <- function(target_name, start_date, end_date, bbox, param_cd, stat_cd = "00003", service = "dv"){
   
   # From NWIS services documentation: The product of the range of latitude range 
   #   and longitude multiplied cannot exceed 25 degrees. So, we need to cycle through  
@@ -15,11 +15,11 @@ fetch_gw_sites <- function(target_name, start_date, end_date, bbox, param_cd){
     message(sprintf("Trying cell %s of %s ...", cell, n_cells))
     sites <- tryCatch(
       whatNWISdata(bBox = extract_cell_bbox(query_bbox_cells, cell), 
-                    service = "dv", 
+                    service = service, 
                     startDate = start_date,
                     endDate = end_date,
                     parameterCd = param_cd,
-                    statCd = "00003") %>%
+                    statCd = stat_cd) %>%
         pull(site_no) %>%
         unique(), 
       error = function(e) return()
