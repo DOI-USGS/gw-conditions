@@ -14,26 +14,34 @@ targets:
   # Building these are completely decoupled from the rest of the pipeline
   # Use these objects in 1_fetch to s3_get the data
   historic_site_info_s3_fn:
-    command: c(I('gw-conditions/historic_gw_site_info.rds.ind'))
+    command: c(I('gw-conditions/historic_gw_site_info.rds'))
   historic_data_s3_fn:
-    command: c(I('gw-conditions/historic_gw_data.csv.ind'))
+    command: c(I('gw-conditions/historic_gw_data.csv'))
   historic_quantiles_s3_fn:
-    command: c(I('gw-conditions/historic_gw_quantiles.csv.ind'))
+    command: c(I('gw-conditions/historic_gw_quantiles.csv'))
   
 ##-- Fetch configs --##
   
   viz_start_date:
-    command: as.Date(I('2020-10-01'))
+    command: as.Date(I('2019-10-01'))
   viz_end_date:
-    command: as.Date(I('2020-12-31'))
+    command: as.Date(I('2020-09-30'))
+  # This was a useful resource: https://anthonylouisdagostino.com/bounding-boxes-for-all-us-states/
+  # Use bounding box in case we want to do this regionally someday
+  # Must be west longitude, south latitude, east longitude, and then north latitude
+  # Start with CONUS only
+  viz_bounding_box:
+   command: c(I(-124.409591), I(24.523096), I(-66.949895), I(49.384358))
   
   gw_param_cd:
     command: c(I('72019'))
 
 ##-- Process configs --##
 
-  date_for_pct_change:
-    command: c(viz_end_date)
+  anomaly_categories:
+    command: c(I("Very low"), I("Low"), I("Normal"), I("High"), I("Very high"))
+  anomaly_bins:
+    command: c(0, 10, 25, 75, 90, 100)
   proj_str:
     command: c(I('+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs'))
 

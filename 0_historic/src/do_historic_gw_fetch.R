@@ -1,4 +1,4 @@
-do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit, ...) {
+do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit, ...) {
   
   # Number indicating how many sites to include per dataRetrieval request to prevent
   # errors from requesting too much at once. More relevant for surface water requests.
@@ -82,18 +82,6 @@ do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit
   #   saved in order to decouple task makefile from `remake.yml`.
   file.remove(task_makefile)
   
-}
-
-fetch_gw_historic <- function(target_name, gw_sites, start_date, end_date, param_cd, stat_cd) {
-  readNWISdv(
-    siteNumbers = gw_sites,
-    startDate = start_date,
-    endDate = end_date,
-    parameterCd = param_cd,
-    statCd = stat_cd) %>%
-    rename(GWL := sprintf("X_%s_%s", param_cd, stat_cd)) %>% 
-    select(site_no, Date, GWL) %>% 
-    write_feather(target_name)
 }
 
 combine_gw_files <- function(target_name, ...) {

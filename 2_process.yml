@@ -2,34 +2,38 @@ target_default: 2_process
 
 packages:
   - dplyr
+  - readr
   - tidyr
   - sf
 
 sources:
-  - 2_process/src/process_nwis_data.R
+  - 2_process/src/compare_to_historic.R
+  - 2_process/src/categorize_quantiles.R
+  - 2_process/src/process_spatial.R
 
 targets:
 
   2_process:
     depends:
-      - gw_change_last_7_days_sf
-      - gw_change_last_30_days_sf
+      - 2_process/out/gw_daily_quantiles.csv
+      - 2_process/out/gw_data_anomalies.csv
+      - gw_sites_sf
   
-  # Add site info to gw_data
-  gw_data_w_site_info:
-    command: add_site_info('1_fetch/out/gw_data.rds', gw_site_info)
+  # Calculate quantiles of each  daily value
+  2_process/out/gw_daily_quantiles.csv:
+    command: compare_to_historic(
+      target_name,
+      historic_quantile_fn = "1_fetch/out/historic_gw_quantiles.csv",
+      current_data_fn = "1_fetch/out/gw_data.csv")
   
-  # Summarize GWL data
-  gw_change_last_7_days:
-    command: calc_change_over_time('1_fetch/out/gw_data.rds', date_for_pct_change, n_days = 7)
-  gw_change_last_30_days:
-    command: calc_change_over_time('1_fetch/out/gw_data.rds', date_for_pct_change, n_days = 30)
+  # Summarize GWL data quantiles as very high, high, normal, low, or very low
+  2_process/out/gw_data_anomalies.csv:
+    command: categorize_quantiles(
+      target_name,
+      quantile_data_fn = "2_process/out/gw_daily_quantiles.csv",
+      anomaly_bins = anomaly_bins,
+      anomaly_categories = anomaly_categories)
 
   # Create spatial objects to use in mapping
   gw_sites_sf:
-    command: convert_to_spatial_obj(gw_site_info, proj_str)
-  
-  gw_change_last_7_days_sf:
-    command: join_to_spatial_obj(gw_sites_sf, gw_change_last_30_days)
-  gw_change_last_30_days_sf:
-    command: join_to_spatial_obj(gw_sites_sf, gw_change_last_7_days)
+    command: convert_to_spatial_obj("1_fetch/out/gw_site_info.csv", proj_str)
