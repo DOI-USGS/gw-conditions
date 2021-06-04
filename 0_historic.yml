@@ -55,7 +55,7 @@ targets:
       '0_historic/src/do_historic_gw_fetch.R',
       '0_historic/src/fetch_nwis_historic.R')
   0_historic/out/historic_gw_data.csv:
-    command: combine_gw_data('0_historic/out/historic_gw_data_dv.csv', '0_historic/out/historic_gw_data_uv.csv')
+    command: combine_gw_uv_and_dv(target_name, '0_historic/out/historic_gw_data_dv.csv', '0_historic/out/historic_gw_data_uv.csv')
   
 ##-- Use historic data, filter to sites that meet a min years requirement, and calculate quantiles --##
 
