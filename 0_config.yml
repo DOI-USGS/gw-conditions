@@ -15,6 +15,11 @@ targets:
     command: I(50)
   historic_uv_fetch_size_limit:
     command: I(10)
+    
+  # This one will initiate a rebuild of the quantiles (still lengthy, but not 
+  # like redownloading the data, as the above trigger).
+  historic_min_yrs_per_site_for_quantile_calc:
+    command: I(3)
   
   # Building these are completely decoupled from the rest of the pipeline
   # Use these objects in 1_fetch to s3_get the data
@@ -22,6 +27,8 @@ targets:
     command: c(I('gw-conditions/historic_gw_site_info.rds'))
   historic_data_s3_fn:
     command: c(I('gw-conditions/historic_gw_data.csv'))
+  historic_filtered_data_s3_fn:
+    command: c(I('gw-conditions/filtered_historic_gw_data.csv'))
   historic_quantiles_s3_fn:
     command: c(I('gw-conditions/historic_gw_quantiles.csv'))
   

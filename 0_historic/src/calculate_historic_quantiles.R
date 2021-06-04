@@ -12,3 +12,20 @@ calculate_historic_quantiles <- function(target_name, historic_gw_data_fn, quant
     write_csv(target_name)
   
 }
+
+# Restrict the number of years
+apply_min_years_filter <- function(target_name, historic_gw_data_fn, min_years) {
+  
+  historic_gw_data <- read_csv(historic_gw_data_fn, col_types = 'cDn') 
+  
+  sites_meet_min_yrs <- historic_gw_data %>%  
+    group_by(site_no) %>% 
+    summarize(n_days = n()) %>% 
+    # Check that the number of days of data is at least 3 full years worth
+    filter(n_days >= 365*min_years) %>% 
+    pull(site_no)
+  
+  historic_gw_data %>% 
+    filter(site_no %in% sites_meet_min_yrs) %>% 
+    write_csv(target_name)
+}

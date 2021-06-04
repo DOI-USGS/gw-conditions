@@ -18,6 +18,7 @@ targets:
     depends:
       - gw-conditions/historic_gw_site_info.rds.ind
       - gw-conditions/historic_gw_data.csv.ind
+      - gw-conditions/filtered_historic_gw_data.csv.ind
       - gw-conditions/historic_gw_quantiles.csv.ind
 
 ##-- All GW sites with continuous data for all time --##
@@ -55,11 +56,15 @@ targets:
       '0_historic/src/fetch_nwis_historic.R')
   0_historic/out/historic_gw_data.csv:
     command: combine_gw_data('0_historic/out/historic_gw_data_dv.csv', '0_historic/out/historic_gw_data_uv.csv')
+  
+##-- Use historic data, filter to sites that meet a min years requirement, and calculate quantiles --##
 
   quantiles_to_calc:
     command: seq(0, 1, by = 0.05)
+  0_historic/tmp/filtered_historic_gw_data.csv:
+    command: apply_min_years_filter(target_name, "0_historic/out/historic_gw_data.csv", historic_min_yrs_per_site_for_quantile_calc)
   0_historic/out/historic_gw_quantiles.csv:
-   command: calculate_historic_quantiles(target_name, "0_historic/out/historic_gw_data.csv", quantiles_to_calc)
+   command: calculate_historic_quantiles(target_name, "0_historic/tmp/filtered_historic_gw_data.csv", quantiles_to_calc)
   
 ##-- Now push historic data and quantiles to S3 to be used in the rest of the pipeline --##
 
@@ -68,6 +73,9 @@ targets:
   
   gw-conditions/historic_gw_data.csv.ind:
     command: s3_put(target_name, local_source = '0_historic/out/historic_gw_data.csv')
+  
+  gw-conditions/filtered_historic_gw_data.csv.ind:
+    command: s3_put(target_name, local_source = '0_historic/tmp/filtered_historic_gw_data.csv')
   
   gw-conditions/historic_gw_quantiles.csv.ind:
    command: s3_put(target_name, local_source = '0_historic/out/historic_gw_quantiles.csv')
