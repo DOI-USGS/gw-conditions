@@ -68,7 +68,7 @@ targets:
   svg_height: 
     command: I(700)
   scico_palette:
-    command: I('roma')
+    command: c(I('roma'))
     
 ##-- Animate configs --##
   

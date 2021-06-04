@@ -46,4 +46,4 @@ targets:
   gw_anomaly_data_w_paths:
     command: add_paths_to_data(gw_anomaly_data)
   gw_anomaly_data_w_colors:
-    command: add_colors_to_data(gw_anomaly_data_w_paths)
+    command: add_colors_to_data(gw_anomaly_data_w_paths, scico_palette)
