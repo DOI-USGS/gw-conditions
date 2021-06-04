@@ -8,49 +8,80 @@ packages:
   - tidyverse
 
 sources:
-  - 0_historic/src/do_gw_fetch.R
+  - 0_historic/src/do_historic_gw_fetch.R
   - 0_historic/src/fetch_nwis_historic.R
+  - 0_historic/src/filter_historic_fetched_data.R
   - 0_historic/src/calculate_historic_quantiles.R
 
 targets:
 
   0_historic:
     depends:
-      - gw-conditions/historic_gw_site_info.rds.ind
-      - gw-conditions/historic_gw_data.csv.ind
+      - gw-conditions/historic_gw_site_info_unfiltered.rds.ind
+      - gw-conditions/historic_gw_data_unfiltered.csv.ind
+      - gw-conditions/historic_gw_data_filtered.csv.ind
       - gw-conditions/historic_gw_quantiles.csv.ind
 
 ##-- All GW sites with continuous data for all time --##
   
-  historic_gw_sites:
-    command: fetch_gw_historic_sites(historic_start_date, historic_end_date, gw_param_cd)
+  historic_gw_sites_all:
+    command: fetch_gw_historic_sites(historic_start_date, historic_end_date, viz_bounding_box, gw_param_cd)
+  historic_gw_sites_dv:
+    command: pull_sites_by_service(historic_gw_sites_all, I("dv"))
+  historic_gw_sites_uv:
+    command: pull_sites_by_service(historic_gw_sites_all, I("uv"))
   
   historic_gw_site_info:
-    command: fetch_gw_site_info(historic_gw_sites)
+    command: fetch_gw_site_info(historic_gw_sites_all)
   0_historic/out/historic_gw_site_info.rds:
     command: saveRDS(file = target_name, historic_gw_site_info)
   
-  0_historic/out/historic_gw_data.csv:
+  0_historic/out/historic_gw_data_dv.csv:
     command: do_historic_gw_fetch(
       final_target = target_name,
       task_makefile = I('0_historic_fetch_tasks.yml'),
-      gw_site_nums = historic_gw_sites,
-      request_limit = historic_fetch_size_limit,
-      '0_historic/src/do_gw_fetch.R',
+      gw_site_nums = historic_gw_sites_dv,
+      service_cd = I('dv'),
+      request_limit = historic_dv_fetch_size_limit,
+      '0_historic/src/do_historic_gw_fetch.R',
       '0_historic/src/fetch_nwis_historic.R')
+  # Task table for `uv` includes a step to average the data to daily values.
+  0_historic/out/historic_gw_data_uv.csv:
+    command: do_historic_gw_fetch(
+      final_target = target_name,
+      task_makefile = I('0_historic_fetch_tasks.yml'),
+      gw_site_nums = historic_gw_sites_uv,
+      service_cd = I('uv'),
+      request_limit = historic_uv_fetch_size_limit,
+      '0_historic/src/do_historic_gw_fetch.R',
+      '0_historic/src/fetch_nwis_historic.R')
+  0_historic/out/historic_gw_data.csv:
+    command: combine_gw_uv_and_dv(target_name, '0_historic/out/historic_gw_data_dv.csv', '0_historic/out/historic_gw_data_uv.csv')
+  
+##-- Use historic data, filter to sites that meet a min years requirement, and calculate quantiles --##
+
+  0_historic/out/filtered_historic_gw_data.csv:
+    command: filter_historic_fetched_data(
+      target_name, 
+      historic_gw_data_fn = "0_historic/out/historic_gw_data.csv", 
+      min_years = historic_min_yrs_per_site_for_quantile_calc,
+      allowed_site_types = historic_site_types_for_quantile_calc)
   
   quantiles_to_calc:
     command: seq(0, 1, by = 0.05)
   0_historic/out/historic_gw_quantiles.csv:
-   command: calculate_historic_quantiles(target_name, "0_historic/out/historic_gw_data.csv", quantiles_to_calc)
+   command: calculate_historic_quantiles(target_name, "0_historic/out/filtered_historic_gw_data.csv", quantiles_to_calc)
   
 ##-- Now push historic data and quantiles to S3 to be used in the rest of the pipeline --##
 
-  gw-conditions/historic_gw_site_info.rds.ind:
+  gw-conditions/historic_gw_site_info_unfiltered.rds.ind:
     command: s3_put(remote_ind = target_name, local_source = '0_historic/out/historic_gw_site_info.rds')
   
-  gw-conditions/historic_gw_data.csv.ind:
+  gw-conditions/historic_gw_data_unfiltered.csv.ind:
     command: s3_put(target_name, local_source = '0_historic/out/historic_gw_data.csv')
+  
+  gw-conditions/historic_gw_data_filtered.csv.ind:
+    command: s3_put(target_name, local_source = '0_historic/out/filtered_historic_gw_data.csv')
   
   gw-conditions/historic_gw_quantiles.csv.ind:
    command: s3_put(target_name, local_source = '0_historic/out/historic_gw_quantiles.csv')

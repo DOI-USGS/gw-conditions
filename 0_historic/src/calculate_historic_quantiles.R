@@ -1,7 +1,12 @@
+combine_gw_uv_and_dv <- function(out_file, dv_fn, uv_fn) {
+  bind_rows(read_csv(dv_fn), read_csv(uv_fn)) %>% 
+    write_csv(out_file)
+}
+
 # Per gage, calc quantiles using historic groundwater level data (no seasonality)
-calculate_historic_quantiles <- function(target_name, historic_gw_data, quantiles_to_calc) {
+calculate_historic_quantiles <- function(target_name, historic_gw_data_fn, quantiles_to_calc) {
   
-  read_csv("0_historic/out/historic_gw_data.csv", col_types = 'cDn') %>% 
+  read_csv(historic_gw_data_fn, col_types = 'cDn') %>% 
     split(.$site_no) %>% 
     map_dfr(., function(.x) {
       quants <- quantile(.x$GWL, quantiles_to_calc, na.rm = TRUE)

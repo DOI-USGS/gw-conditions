@@ -4,19 +4,33 @@ targets:
   
 ##-- Historic data configs --##
 
+  # Don't touch these unless you have a REALLY good reason because they
+  # will trigger rebuilds of the historic pipeline and the instantaneous
+  # part takes a VERY long time.
   historic_start_date:
-    command: as.Date(I('1800-01-01'))
+    command: as.Date(I('1900-01-01'))
   historic_end_date:
     command: as.Date(I('2020-12-31'))
-  historic_fetch_size_limit:
+  historic_dv_fetch_size_limit:
     command: I(50)
+  historic_uv_fetch_size_limit:
+    command: I(10)
+    
+  # This one will initiate a rebuild of the quantiles (still lengthy, but not 
+  # like redownloading the data, as the above trigger).
+  historic_min_yrs_per_site_for_quantile_calc:
+    command: I(3)
+  historic_site_types_for_quantile_calc:
+    command: c(I('GW'))
   
   # Building these are completely decoupled from the rest of the pipeline
   # Use these objects in 1_fetch to s3_get the data
-  historic_site_info_s3_fn:
-    command: c(I('gw-conditions/historic_gw_site_info.rds'))
-  historic_data_s3_fn:
-    command: c(I('gw-conditions/historic_gw_data.csv'))
+  historic_unfiltered_site_info_s3_fn:
+    command: c(I('gw-conditions/historic_gw_site_info_unfiltered.rds'))
+  historic_unfiltered_data_s3_fn:
+    command: c(I('gw-conditions/historic_gw_data_unfiltered.csv'))
+  historic_filtered_data_s3_fn:
+    command: c(I('gw-conditions/historic_gw_data_filtered.csv'))
   historic_quantiles_s3_fn:
     command: c(I('gw-conditions/historic_gw_quantiles.csv'))
   
