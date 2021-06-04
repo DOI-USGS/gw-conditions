@@ -56,24 +56,20 @@ targets:
     command: c(I("Very low"), I("Low"), I("Normal"), I("High"), I("Very high"))
   anomaly_bins:
     command: c(0, 10, 25, 75, 90, 100)
+  # Albers Equal Area
   proj_str:
-    command: c(I('+proj=laea +lat_0=45 +lon_0=-100 +x_0=0 +y_0=0 +a=6370997 +b=6370997 +units=m +no_defs'))
+    command: c(I('+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs'))
 
 ##-- Visualize configs --##
 
-  # Width and height are double what they need to be so that resolution looks good when created on Windows
-  # Width/height are halved after video is created.
-  # Need to be specified in inches.
-  width: 
-    command: I(24)
-  height: 
-    command: I(12)
-
+  # SVG dims are in pixels
+  svg_width: 
+    command: I(1000)
+  svg_height: 
+    command: I(700)
+  scico_palette:
+    command: I('roma')
+    
 ##-- Animate configs --##
   
-  video_input_framerate:
-    command: I(2.25)
-  video_output_framerate:
-    command: I(2.25)
-  gif_frame_delay:
-    command: I(50)
+  
