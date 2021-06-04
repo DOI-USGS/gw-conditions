@@ -7,6 +7,13 @@ build_peaks_svg <- function(out_file, data_in, sites_sf, svg_width, svg_height) 
   
   # Add spark line within group per site
   
+  # TODO: THIS ONLY WORKS FOR A SINGLE DAY RIGHT NOW. I CHOSE OCT 31, 2019
+  # TODO: Blanket removing any path with an NA in it. There is a smarter way 
+  # to do this but will come back to that.
+  data_in <- data_in %>% 
+    filter(Date == as.Date("2019-10-31")) %>% 
+    filter(!grepl("NA", path))
+  
   sites <- unique(data_in$site_no)
   for(s in sites) {
     site_coords_svg <- sites_sf %>%
