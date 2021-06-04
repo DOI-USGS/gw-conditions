@@ -21,14 +21,18 @@ targets:
 ##-- Historic GW sites and data --##
 
   # All sites (including those with years < min_years)
-  1_fetch/out/historic_gw_site_info.rds:
-    command: fetch_s3(target_name, historic_site_info_s3_fn)
+  1_fetch/out/historic_gw_site_info_unfiltered.rds:
+    command: fetch_s3(target_name, historic_unfiltered_site_info_s3_fn)
   # All data (including those with years < min_years)
-  1_fetch/out/historic_gw_data.csv:
-    command: fetch_s3(target_name, historic_data_s3_fn)
+  1_fetch/out/historic_gw_data_unfiltered.csv:
+    command: fetch_s3(target_name, historic_unfiltered_data_s3_fn)
   # This data and the quantiles are just for sites with > min_years
-  1_fetch/out/filtered_historic_gw_data.csv:
+  1_fetch/out/historic_gw_data_filtered.csv:
     command: fetch_s3(target_name, historic_filtered_data_s3_fn)
+  
+  # Only this one is absolutely necessary to run the pipeline in its current 
+  # state (2_process/out/gw_daily_quantiles.csv depends on it). The others
+  # will not build unless you manually build the targets.
   1_fetch/out/historic_gw_quantiles.csv:
     command: fetch_s3(target_name, historic_quantiles_s3_fn)
 
