@@ -1,11 +1,11 @@
-target_default: 4_animate
+target_default: 3_visualize
 
 include:
   - 0_config.yml
   - 1_fetch.yml
   - 2_process.yml
   - 3_visualize.yml
-  - 4_animate.yml
+  #- 4_animate.yml
 
 targets:
   build_viz:
@@ -13,7 +13,7 @@ targets:
       - 1_fetch
       - 2_process
       - 3_visualize
-      - 4_animate
+      #- 4_animate
 
 # The historic data used in 1_fetch has been prebuilt by the 0_historic pipeline.
 # 

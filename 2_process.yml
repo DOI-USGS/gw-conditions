@@ -4,12 +4,14 @@ packages:
   - dplyr
   - readr
   - tidyr
+  - scico
   - sf
 
 sources:
   - 2_process/src/compare_to_historic.R
   - 2_process/src/categorize_quantiles.R
   - 2_process/src/process_spatial.R
+  - 2_process/src/prep_data_for_visualizing.R
 
 targets:
 
@@ -37,3 +39,11 @@ targets:
   # Create spatial objects to use in mapping
   gw_sites_sf:
     command: convert_to_spatial_obj("1_fetch/out/gw_site_info.csv", proj_str)
+
+  # Prepare data for peaks SVG
+  gw_anomaly_data:
+    command: read_csv("2_process/out/gw_data_anomalies.csv")
+  gw_anomaly_data_w_paths:
+    command: add_paths_to_data(gw_anomaly_data)
+  gw_anomaly_data_w_colors:
+    command: add_colors_to_data(gw_anomaly_data_w_paths, scico_palette)
