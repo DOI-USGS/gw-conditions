@@ -30,26 +30,42 @@ targets:
   1_fetch/out/historic_gw_data_filtered.csv:
     command: fetch_s3(target_name, historic_filtered_data_s3_fn)
   
-  # Only this one is absolutely necessary to run the pipeline in its current 
-  # state (2_process/out/gw_daily_quantiles.csv depends on it). The others
-  # will not build unless you manually build the targets.
+  # Only these are absolutely necessary to run the pipeline in its current 
+  # state. The others will not build unless you manually build the targets.
+  1_fetch/out/historic_gw_site_info_filtered.rds:
+    command: fetch_s3(target_name, historic_filtered_site_info_s3_fn)
   1_fetch/out/historic_gw_quantiles.csv:
     command: fetch_s3(target_name, historic_quantiles_s3_fn)
 
 ##-- GW sites and data for current viz time period --##
   
-  1_fetch/out/gw_sites.rds:
-    command: fetch_gw_sites(target_name, viz_start_date, viz_end_date, viz_bounding_box, gw_param_cd)
-  1_fetch/out/gw_site_info.csv:
-    command: fetch_gw_site_info(target_name, "1_fetch/out/gw_sites.rds")
+  # Only fetch data for sites that are in the quantiles data
+  gw_quantile_site_info:
+    command: readRDS("1_fetch/out/historic_gw_site_info_filtered.rds")
   
-  gw_sites:
-    command: readRDS('1_fetch/out/gw_sites.rds')
-  1_fetch/out/gw_data.csv:
+  gw_sites_dv:
+    command: pull_sites_by_service(gw_quantile_site_info, I("dv"))
+  gw_sites_uv:
+    command: pull_sites_by_service(gw_quantile_site_info, I("uv"))
+  
+  1_fetch/out/gw_data_dv.csv:
     command: do_gw_fetch(
       final_target = target_name,
       task_makefile = I('1_fetch_tasks.yml'),
-      gw_site_nums = gw_sites,
-      request_limit = 200,
+      gw_site_nums = gw_sites_dv,
+      service_cd = I('dv'),
+      request_limit = dv_fetch_size_limit,
       '1_fetch/src/do_gw_fetch.R',
       '1_fetch/src/fetch_nwis.R')
+  # Task table for `uv` includes a step to average the data to daily values.
+  1_fetch/out/gw_data_uv.csv:
+    command: do_gw_fetch(
+      final_target = target_name,
+      task_makefile = I('1_fetch_tasks.yml'),
+      gw_site_nums = gw_sites_uv,
+      service_cd = I('uv'),
+      request_limit = uv_fetch_size_limit,
+      '1_fetch/src/do_gw_fetch.R',
+      '1_fetch/src/fetch_nwis.R')
+  1_fetch/out/gw_data.csv:
+    command: combine_gw_uv_and_dv(target_name, '1_fetch/out/gw_data_dv.csv', '1_fetch/out/gw_data_uv.csv')

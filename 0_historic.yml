@@ -20,6 +20,7 @@ targets:
       - gw-conditions/historic_gw_site_info_unfiltered.rds.ind
       - gw-conditions/historic_gw_data_unfiltered.csv.ind
       - gw-conditions/historic_gw_data_filtered.csv.ind
+      - gw-conditions/historic_gw_site_info_filtered.rds.ind
       - gw-conditions/historic_gw_quantiles.csv.ind
 
 ##-- All GW sites with continuous data for all time --##
@@ -66,6 +67,12 @@ targets:
       historic_gw_data_fn = "0_historic/out/historic_gw_data.csv", 
       min_years = historic_min_yrs_per_site_for_quantile_calc,
       allowed_site_types = historic_site_types_for_quantile_calc)
+  0_historic/out/filtered_historic_gw_site_info.rds:
+    command: gather_metadata_of_sites_used(
+      target_name, 
+      site_data_filtered_fn = "0_historic/out/filtered_historic_gw_data.csv", 
+      site_data_service_to_pull = historic_gw_sites_all, 
+      site_metadata = historic_gw_site_info)
   
   quantiles_to_calc:
     command: seq(0, 1, by = 0.05)
@@ -82,6 +89,9 @@ targets:
   
   gw-conditions/historic_gw_data_filtered.csv.ind:
     command: s3_put(target_name, local_source = '0_historic/out/filtered_historic_gw_data.csv')
+  
+  gw-conditions/historic_gw_site_info_filtered.rds.ind:
+    command: s3_put(remote_ind = target_name, local_source = '0_historic/out/filtered_historic_gw_site_info.rds')
   
   gw-conditions/historic_gw_quantiles.csv.ind:
    command: s3_put(target_name, local_source = '0_historic/out/historic_gw_quantiles.csv')

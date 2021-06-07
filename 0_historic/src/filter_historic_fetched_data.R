@@ -25,3 +25,13 @@ filter_historic_fetched_data <- function(target_name, historic_gw_data_fn, min_y
     filter(site_no %in% sites_meet_site_tp) %>%
     write_csv(target_name) 
 }
+
+gather_metadata_of_sites_used <- function(target_name, site_data_filtered_fn, site_data_service_to_pull, site_metadata) {
+  
+  sites_actually_used <- read_csv(site_data_filtered_fn) %>% pull(site_no) %>% unique()
+  
+  site_data_service_to_pull %>% 
+    left_join(site_metadata, by = "site_no") %>% 
+    filter(site_no %in% sites_actually_used) %>% 
+    saveRDS(target_name)
+}

@@ -31,6 +31,8 @@ targets:
     command: c(I('gw-conditions/historic_gw_data_unfiltered.csv'))
   historic_filtered_data_s3_fn:
     command: c(I('gw-conditions/historic_gw_data_filtered.csv'))
+  historic_filtered_site_info_s3_fn:
+    command: c(I('gw-conditions/historic_gw_site_info_filtered.rds'))
   historic_quantiles_s3_fn:
     command: c(I('gw-conditions/historic_gw_quantiles.csv'))
   
@@ -40,13 +42,12 @@ targets:
     command: as.Date(I('2019-10-01'))
   viz_end_date:
     command: as.Date(I('2020-09-30'))
-  # This was a useful resource: https://anthonylouisdagostino.com/bounding-boxes-for-all-us-states/
-  # Use bounding box in case we want to do this regionally someday
-  # Must be west longitude, south latitude, east longitude, and then north latitude
-  # Start with CONUS only
-  viz_bounding_box:
-   command: c(I(-124.409591), I(24.523096), I(-66.949895), I(49.384358))
+  dv_fetch_size_limit:
+    command: I(200)
+  uv_fetch_size_limit:
+    command: I(50)
   
+  # DO NOT CHANGE UNLESS YOU WANT TO REBUILD ALL HISTORIC DATA, TOO!
   gw_param_cd:
     command: c(I('72019'))
 
