@@ -56,6 +56,12 @@ targets:
   # DO NOT CHANGE UNLESS YOU WANT TO REBUILD ALL HISTORIC DATA, TOO!
   gw_param_cd:
     command: c(I('72019'))
+  
+  # Additional fetch params for the states that don't report 72019 pcode
+  addl_gw_param_cd:
+    command: c(I('62610'))
+  addl_states:
+    command: c(I('FL'), I('KS'))
 
 ##-- Process configs --##
 
