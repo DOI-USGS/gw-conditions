@@ -44,7 +44,7 @@ targets:
 
   # Create spatial objects to use in mapping
   gw_sites_sf:
-    command: convert_to_spatial_obj("1_fetch/out/gw_site_info.csv", proj_str)
+    command: convert_to_spatial_obj(gw_quantile_site_info, proj_str)
 
   # Prepare data for peaks SVG
   gw_anomaly_data:
