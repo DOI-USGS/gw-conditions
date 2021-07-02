@@ -108,6 +108,9 @@ combine_gw_fetches <- function(target_name, dv_fn, uv_fn, uv_addl_fn) {
     write_csv(target_name)
 }
 
-combine_gw_sites <- function(gw_site_df, uv_addl_sites) {
-  bind_rows(gw_site_df, tibble(site_no = uv_addl_sites, data_type_cd = "uv"))
+combine_gw_sites <- function(gw_site_df, uv_addl_sites, param_cd, addl_param_cd) {
+  mutate(gw_site_df, param_cd = param_cd) %>% 
+    bind_rows(tibble(site_no = uv_addl_sites, 
+                     data_type_cd = "uv", 
+                     param_cd = addl_param_cd))
 }
