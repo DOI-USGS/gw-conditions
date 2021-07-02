@@ -5,7 +5,3 @@ convert_to_spatial_obj <- function(gw_site_info_fn, proj_str) {
              crs = 4326) %>% 
     st_transform(proj_str)
 }
-
-join_to_spatial_obj <- function(gw_site_sf, gw_data) {
-  gw_site_sf %>% left_join(gw_data)
-}
