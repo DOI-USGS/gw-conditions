@@ -44,15 +44,19 @@ targets:
     command: readRDS("1_fetch/out/historic_gw_site_info_filtered.rds")
   
   gw_sites_dv:
-    command: pull_sites_by_service(gw_quantile_site_info, I("dv"))
+    command: pull_sites_by_query(gw_quantile_site_info, I("dv"), gw_param_cd)
   gw_sites_uv:
-    command: pull_sites_by_service(gw_quantile_site_info, I("uv"))
+    command: pull_sites_by_query(gw_quantile_site_info, I("uv"), gw_param_cd)
+  gw_sites_uv_addl:
+    command: pull_sites_by_query(gw_quantile_site_info, I("uv"), addl_gw_param_cd)
   
   1_fetch/out/gw_data_dv.csv:
     command: do_gw_fetch(
       final_target = target_name,
       task_makefile = I('1_fetch_tasks.yml'),
       gw_site_nums = gw_sites_dv,
+      gw_site_nums_obj_nm = I('gw_sites_dv'),
+      param_cd_obj_nm = I('gw_param_cd'),
       service_cd = I('dv'),
       request_limit = dv_fetch_size_limit,
       '1_fetch/src/do_gw_fetch.R',
@@ -63,9 +67,31 @@ targets:
       final_target = target_name,
       task_makefile = I('1_fetch_tasks.yml'),
       gw_site_nums = gw_sites_uv,
+      gw_site_nums_obj_nm = I('gw_sites_uv'),
+      param_cd_obj_nm = I('gw_param_cd'),
       service_cd = I('uv'),
       request_limit = uv_fetch_size_limit,
       '1_fetch/src/do_gw_fetch.R',
       '1_fetch/src/fetch_nwis.R')
+      
+  # Special pull for just KS & just FL using `62610`.
+  # Read all about why on GitHub: https://github.com/USGS-VIZLAB/gw-conditions/issues/9
+  1_fetch/out/gw_data_uv_addl.csv:
+    command: do_gw_fetch(
+      final_target = target_name,
+      task_makefile = I('1_fetch_tasks.yml'),
+      gw_site_nums = gw_sites_uv_addl,
+      gw_site_nums_obj_nm = I('gw_sites_uv_addl'),
+      param_cd_obj_nm = I('addl_gw_param_cd'),
+      service_cd = I('uv'),
+      request_limit = uv_fetch_size_limit,
+      '1_fetch/src/do_gw_fetch.R',
+      '1_fetch/src/fetch_nwis.R')
+
+  # Combine all data
   1_fetch/out/gw_data.csv:
-    command: combine_gw_uv_and_dv(target_name, '1_fetch/out/gw_data_dv.csv', '1_fetch/out/gw_data_uv.csv')
+    command: combine_gw_fetches(
+      target_name, 
+      '1_fetch/out/gw_data_dv.csv', 
+      '1_fetch/out/gw_data_uv.csv',
+      '1_fetch/out/gw_data_uv_addl.csv')
