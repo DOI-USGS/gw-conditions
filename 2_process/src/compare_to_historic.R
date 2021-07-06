@@ -3,7 +3,7 @@ compare_to_historic <- function(target_name, historic_quantile_fn, current_data_
   
   current_data <- read_csv(current_data_fn, col_types = 'cDn')
   gw_sites <- unique(current_data$site_no)
-  historic_quantiles <- read_csv(historic_quantile_fn, col_types = 'ccn') %>% 
+  historic_quantiles <- read_csv(historic_quantile_fn, col_types = 'cnn') %>% 
     # Filter to only sites that exist in our current data
     filter(site_no %in% gw_sites) %>% 
     # Remove any missing quantiles
