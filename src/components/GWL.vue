@@ -67,31 +67,6 @@ export default {
           // for every site, draw a peak for the first day of the time period
           // requires input data with site, site coords in svg, date, and quant_category
 
-      },
-      colorStroke(){
-
-        this.d3.selectAll(".map-bkgrd") // map outline
-          .attr("fill", "transparent")
-          .attr("stroke", "black")
-          .attr("stroke-width", "1px")
-          
-
-      },
-      rainbowStrobe(){
-        this.d3.selectAll(".map")
-          .transition()
-          .duration(2000)
-          .attr("stroke", "yellow")
-          .transition()
-          .duration(2000)
-          .attr("stroke", "red")
-          .transition()
-          .duration(2000)
-          .attr("stroke", "orange")
-          .transition()
-          .duration(2000)
-          .attr("stroke", "orchid")
-          .on("end", this.colorStroke);
       }
     }
 }
