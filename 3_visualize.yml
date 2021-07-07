@@ -24,3 +24,9 @@ targets:
       sites_sf = gw_sites_sf,
       svg_width = svg_width, 
       svg_height = svg_height)
+      
+  3_visualize/out/svg_list.csv:
+    command: list_svg_files(
+      target_name, 
+      I("src/assets"))
+      
