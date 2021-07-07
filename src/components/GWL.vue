@@ -3,17 +3,17 @@
     <div id="title-container">
       <h1>U.S. Groundwater conditions</h1></div>
     <div id="map-container">
-       <SampleSvg class="map" />
+       <GWLmap class="map" />
     </div>
   </section>
 </template>
 <script>
 import * as d3Base from 'd3';
-import SampleSvg from "@/assets/anomaly_peaks 3.svg";
+import GWLmap from "@/assets/anomaly_peaks.svg";
 export default {
   name: "GWLsvg",
     components: {
-      SampleSvg
+      GWLmap
     },
     data() {
     return {
@@ -24,6 +24,7 @@ export default {
 
       this.d3 = Object.assign(d3Base);
       this.colorStroke();
+      this.getSVGs();
       
     },
     methods:{
@@ -63,8 +64,13 @@ export default {
           .duration(2000)
           .attr("stroke", "orchid")
           .on("end", this.colorStroke);
-
-
+      },
+      getSVGs(){
+        const svg_list = require.context(
+          '@/assets',
+          true,/^.*\.svg$/
+        )
+        console.log(svg_list)
       }
     }
 }
