@@ -51,9 +51,24 @@ pull_sites_by_service <- function(site_df, service) {
   site_df %>% filter(data_type_cd == service) %>% pull(site_no)
 }
 
-fetch_gw_site_info <- function(site_df) {
-  readNWISsite(site_df$site_no) %>% 
+fetch_gw_site_info <- function(data_fn) {
+  sites <- read_csv(data_fn, col_types = 'cDn') %>% 
+    pull(site_no) %>% 
+    unique()
+  readNWISsite(sites) %>% 
     select(site_no, station_nm, state_cd, dec_lat_va, dec_long_va)
+}
+
+fetch_addl_uv_sites <- function(addl_states, param_cd, start_date, end_date) {
+  site_nums <- c()
+  for(i in 1:length(addl_states)) {
+    site_nums_i <- whatNWISdata(
+      stateCd = addl_states[i], parameterCd = param_cd, service = 'uv',
+      startDate = start_date, endDate = end_date) %>% 
+      pull(site_no) %>% unique()
+    site_nums <- c(site_nums, site_nums_i)
+  }
+  return(site_nums)
 }
 
 fetch_gw_historic_dv <- function(target_name, gw_sites, start_date, end_date, param_cd) {
@@ -86,6 +101,16 @@ convert_uv_to_dv <- function(target_name, gw_uv_data_fn) {
     write_feather(target_name)
 }
 
-combine_gw_data <- function(dv_fn, uv_fn) {
-  bind_rows(read_csv(dv_fn, col_types = 'cDn'), read_csv(uv_fn, col_types = 'cDn'))
+combine_gw_fetches <- function(target_name, dv_fn, uv_fn, uv_addl_fn) {
+  read_csv(dv_fn, col_types = 'cDn') %>% 
+    bind_rows(read_csv(uv_fn, col_types = 'cDn')) %>% 
+    bind_rows(read_csv(uv_addl_fn, col_types = 'cDn')) %>% 
+    write_csv(target_name)
+}
+
+combine_gw_sites <- function(gw_site_df, uv_addl_sites, param_cd, addl_param_cd) {
+  mutate(gw_site_df, param_cd = param_cd) %>% 
+    bind_rows(tibble(site_no = uv_addl_sites, 
+                     data_type_cd = "uv", 
+                     param_cd = addl_param_cd))
 }

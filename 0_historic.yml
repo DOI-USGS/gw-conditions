@@ -20,6 +20,7 @@ targets:
       - gw-conditions/historic_gw_site_info_unfiltered.rds.ind
       - gw-conditions/historic_gw_data_unfiltered.csv.ind
       - gw-conditions/historic_gw_data_filtered.csv.ind
+      - gw-conditions/historic_gw_site_info_filtered.rds.ind
       - gw-conditions/historic_gw_quantiles.csv.ind
 
 ##-- All GW sites with continuous data for all time --##
@@ -31,16 +32,13 @@ targets:
   historic_gw_sites_uv:
     command: pull_sites_by_service(historic_gw_sites_all, I("uv"))
   
-  historic_gw_site_info:
-    command: fetch_gw_site_info(historic_gw_sites_all)
-  0_historic/out/historic_gw_site_info.rds:
-    command: saveRDS(file = target_name, historic_gw_site_info)
-  
   0_historic/out/historic_gw_data_dv.csv:
     command: do_historic_gw_fetch(
       final_target = target_name,
       task_makefile = I('0_historic_fetch_tasks.yml'),
       gw_site_nums = historic_gw_sites_dv,
+      gw_site_nums_obj_nm = I('historic_gw_sites_dv'),
+      param_cd_obj_nm = I('gw_param_cd'),
       service_cd = I('dv'),
       request_limit = historic_dv_fetch_size_limit,
       '0_historic/src/do_historic_gw_fetch.R',
@@ -51,12 +49,42 @@ targets:
       final_target = target_name,
       task_makefile = I('0_historic_fetch_tasks.yml'),
       gw_site_nums = historic_gw_sites_uv,
+      gw_site_nums_obj_nm = I('historic_gw_sites_uv'),
+      param_cd_obj_nm = I('gw_param_cd'),
       service_cd = I('uv'),
       request_limit = historic_uv_fetch_size_limit,
       '0_historic/src/do_historic_gw_fetch.R',
       '0_historic/src/fetch_nwis_historic.R')
+  
+  # Special pull for just KS & just FL using `62610`.
+  # Read all about why on GitHub: https://github.com/USGS-VIZLAB/gw-conditions/issues/9
+  addl_site_nums:
+    command: fetch_addl_uv_sites(addl_states, addl_gw_param_cd, historic_start_date, historic_end_date)
+  0_historic/out/historic_gw_data_uv_addl.csv:
+    command: do_historic_gw_fetch(
+      final_target = target_name,
+      task_makefile = I('0_historic_fetch_tasks.yml'),
+      gw_site_nums = addl_site_nums,
+      gw_site_nums_obj_nm = I('addl_site_nums'),
+      param_cd_obj_nm = I('addl_gw_param_cd'),
+      service_cd = I('uv'),
+      request_limit = historic_uv_fetch_size_limit,
+      '0_historic/src/do_historic_gw_fetch.R',
+      '0_historic/src/fetch_nwis_historic.R')
+  
   0_historic/out/historic_gw_data.csv:
-    command: combine_gw_uv_and_dv(target_name, '0_historic/out/historic_gw_data_dv.csv', '0_historic/out/historic_gw_data_uv.csv')
+    command: combine_gw_fetches(
+      target_name, 
+      '0_historic/out/historic_gw_data_dv.csv', 
+      '0_historic/out/historic_gw_data_uv.csv',
+      '0_historic/out/historic_gw_data_uv_addl.csv')
+  
+  historic_gw_sites:
+    command: combine_gw_sites(historic_gw_sites_all, addl_site_nums, gw_param_cd, addl_gw_param_cd)
+  historic_gw_site_info:
+    command: fetch_gw_site_info('0_historic/out/historic_gw_data.csv')
+  0_historic/out/historic_gw_site_info.rds:
+    command: saveRDS(file = target_name, historic_gw_site_info)
   
 ##-- Use historic data, filter to sites that meet a min years requirement, and calculate quantiles --##
 
@@ -66,11 +94,25 @@ targets:
       historic_gw_data_fn = "0_historic/out/historic_gw_data.csv", 
       min_years = historic_min_yrs_per_site_for_quantile_calc,
       allowed_site_types = historic_site_types_for_quantile_calc)
+  0_historic/out/filtered_historic_gw_site_info.rds:
+    command: gather_metadata_of_sites_used(
+      target_name, 
+      site_data_filtered_fn = "0_historic/out/filtered_historic_gw_data.csv", 
+      site_data_service_to_pull = historic_gw_sites, 
+      site_metadata = historic_gw_site_info)
   
   quantiles_to_calc:
     command: seq(0, 1, by = 0.05)
+  # Sites that use "depth below" as their gw level need to be inversed. In the 
+  # current implementation, this means any site that used pcode == '72019'
+  depth_below_sites: 
+    command: historic_gw_sites_all[[I('site_no')]]
   0_historic/out/historic_gw_quantiles.csv:
-   command: calculate_historic_quantiles(target_name, "0_historic/out/filtered_historic_gw_data.csv", quantiles_to_calc)
+   command: calculate_historic_quantiles(
+     target_name, 
+     "0_historic/out/filtered_historic_gw_data.csv", 
+     quantiles_to_calc,
+     inverse_sites = depth_below_sites)
   
 ##-- Now push historic data and quantiles to S3 to be used in the rest of the pipeline --##
 
@@ -82,6 +124,9 @@ targets:
   
   gw-conditions/historic_gw_data_filtered.csv.ind:
     command: s3_put(target_name, local_source = '0_historic/out/filtered_historic_gw_data.csv')
+  
+  gw-conditions/historic_gw_site_info_filtered.rds.ind:
+    command: s3_put(remote_ind = target_name, local_source = '0_historic/out/filtered_historic_gw_site_info.rds')
   
   gw-conditions/historic_gw_quantiles.csv.ind:
    command: s3_put(target_name, local_source = '0_historic/out/historic_gw_quantiles.csv')

@@ -1,4 +1,5 @@
-do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit, ...) {
+do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, gw_site_nums_obj_nm, 
+                        param_cd_obj_nm, service_cd, request_limit, ...) {
   
   # Number indicating how many sites to include per dataRetrieval request to prevent
   # errors from requesting too much at once. More relevant for surface water requests.
@@ -10,41 +11,64 @@ do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit
     mutate(i_end = ifelse(i_end > length(gw_site_nums), length(gw_site_nums), i_end),
            task_id = sprintf("%04d_to_%04d", i_start, i_end))
   
-  gw_sites <- readRDS("1_fetch/out/gw_sites.rds")
+  site_sequence <- create_task_step(
+    step_name = 'site_sequence',
+    target_name = function(task_name, ...) {
+      sprintf('sites_i_%s', task_name)
+    },
+    command = function(task_name, ...) {
+      task_df <- filter(tasks, task_id == task_name)
+      sprintf("%s:%s", task_df$i_start, task_df$i_end)
+    }
+  )
   
   subset_sites <- create_task_step(
     step_name = 'subset_sites',
     target_name = function(task_name, ...) {
-      sprintf('gw_sites_%s', task_name)
+      sprintf('gw_sites_%s_%s', service_cd, task_name)
     },
-    command = function(task_name, ...) {
-      task_df <- filter(tasks, task_id == task_name)
-      task_sites <- gw_sites[task_df$i_start:task_df$i_end]
-      sprintf("c(%s)", paste(sprintf("I('%s')", task_sites), collapse = ", "))
+    command = function(..., task_name, steps) {
+      sprintf("%s[%s]", gw_site_nums_obj_nm, steps[["site_sequence"]]$target_name)
     }
   )
   
   download_data <- create_task_step(
     step_name = 'download_data',
     target_name = function(task_name, ...) {
-      sprintf("1_fetch/tmp/gw_data_%s.csv", task_name)
+      sprintf("1_fetch/tmp/gw_data_%s_%s.feather", service_cd, task_name)
     },
     command = function(..., task_name, steps) {
-      psprintf("fetch_gw_data(",
+      psprintf("fetch_gw_%s(" = service_cd,
                "target_name = target_name,",
                "gw_sites = %s," = steps[["subset_sites"]]$target_name,
                "start_date = viz_start_date,",
                "end_date = viz_end_date,",
-               "param_cd = gw_param_cd,",
-               "stat_cd = I('00003'))")
+               "param_cd = %s)" = param_cd_obj_nm)
     }
   )
+  
+  task_steps <- list(site_sequence, subset_sites, download_data)
+  if(service_cd == "uv") {
+    average_data <- create_task_step(
+      step_name = 'average_data',
+      target_name = function(task_name, ...) {
+        sprintf("1_fetch/tmp/gw_data_avg_%s.feather", task_name)
+      },
+      command = function(..., task_name, steps) {
+        psprintf("convert_uv_to_dv(",
+                 "target_name = target_name,",
+                 "gw_uv_data_fn = '%s')" = steps[["download_data"]]$target_name)
+      }
+    )
+    task_steps <- c(task_steps, list(average_data))
+  }
+  
   
   # Create the task plan
   task_plan <- create_task_plan(
     task_names = tasks$task_id,
-    task_steps = list(subset_sites, download_data),
-    final_steps = c('download_data'),
+    task_steps = task_steps,
+    final_steps = ifelse(service_cd == "uv", 'average_data', 'download_data'),
     add_complete = FALSE)
   
   # Create the task remakefile
@@ -53,7 +77,7 @@ do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit
     makefile = task_makefile,
     include = c('0_config.yml', '1_fetch.yml'),
     sources = c(...),
-    packages = c('tidyverse', 'dataRetrieval', 'scipiper', 'purrr'),
+    packages = c('tidyverse', 'dataRetrieval', 'scipiper', 'feather', 'purrr'),
     final_targets = final_target,
     finalize_funs = 'combine_gw_files',
     as_promises = TRUE,
@@ -78,7 +102,7 @@ do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, request_limit
 }
 
 combine_gw_files <- function(target_name, ...) {
-  purrr::map(list(...), function(fn) read_csv(fn, col_types = 'cDn')) %>% 
+  purrr::map(list(...), function(fn) read_feather(fn)) %>% 
     bind_rows() %>% 
     readr::write_csv(target_name)
 }

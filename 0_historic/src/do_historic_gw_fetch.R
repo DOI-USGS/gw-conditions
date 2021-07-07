@@ -1,4 +1,4 @@
-do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums, service_cd, request_limit, ...) {
+do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums, gw_site_nums_obj_nm, param_cd_obj_nm, service_cd, request_limit, ...) {
   
   # Number indicating how many sites to include per dataRetrieval request to prevent
   # errors from requesting too much at once. More relevant for surface water requests.
@@ -34,7 +34,7 @@ do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums, serv
       sprintf('gw_sites_%s_%s', service_cd, task_name)
     },
     command = function(..., task_name, steps) {
-      sprintf("historic_gw_sites_%s[%s]", service_cd, steps[["site_sequence"]]$target_name)
+      sprintf("%s[%s]", gw_site_nums_obj_nm, steps[["site_sequence"]]$target_name)
     }
   )
   
@@ -49,7 +49,7 @@ do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums, serv
                "gw_sites = %s," = steps[["subset_sites"]]$target_name,
                "start_date = historic_start_date,",
                "end_date = historic_end_date,",
-               "param_cd = gw_param_cd)")
+               "param_cd = %s)" = param_cd_obj_nm)
     }
   )
   
