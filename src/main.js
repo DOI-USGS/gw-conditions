@@ -10,8 +10,10 @@ import Vuetify from "vuetify";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import "vuetify/dist/vuetify.min.css";
+import VueCarousel from 'vue-carousel';
 import VueImg from 'v-img';
 import VueSvg from 'vue-svg-loader';
+
 
 // social icons
 import { faTwitterSquare } from "@fortawesome/free-brands-svg-icons";
@@ -20,6 +22,7 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faFlickr } from "@fortawesome/free-brands-svg-icons";
 import { faYoutubeSquare } from "@fortawesome/free-brands-svg-icons";
 import { faInstagram } from "@fortawesome/free-brands-svg-icons";
+
 
 const vueImgConfig = {
   altAsTitle: true
@@ -39,8 +42,9 @@ Vue.config.productionTip = false;
 Vue.use(uswds);
 Vue.use(browserDetect);
 Vue.use(Vuetify);
+Vue.use(VueCarousel);
 Vue.use(VueImg, vueImgConfig);
-Vue.use(VueSvg);
+
 
 const app = new Vue({
   router,
