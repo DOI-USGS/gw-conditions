@@ -34,5 +34,4 @@ build_peaks_svg <- function(out_file, data_in, sites_sf, svg_width, svg_height) 
   }
   
   xml2::write_xml(svg_root, file = out_file)
-  
 }
