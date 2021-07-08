@@ -34,12 +34,11 @@ build_peaks_svg <- function(out_file, data_in, sites_sf, svg_width, svg_height) 
   }
   
   xml2::write_xml(svg_root, file = out_file)
-  
-  # Copy to vue
-  file.copy(out_file, 
-            sprintf("src/assets/anomaly_peaks_%s_%s.svg",
-                    gsub("-", "", min(data_in$Date)),
-                    gsub("-", "", max(data_in$Date))),  
+}
+send_to_vue <- function(out_file, in_file){
+  # Copy current time period to vue
+  file.copy(in_file, 
+            out_file,  
             overwrite = TRUE)
   
 }
