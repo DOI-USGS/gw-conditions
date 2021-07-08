@@ -31,8 +31,3 @@ targets:
       target_name,
       in_file = '3_visualize/out/anomaly_peaks.svg')
       
-  3_visualize/out/svg_list.csv:
-    command: list_svg_files(
-      target_name, 
-      I("src/assets"))
-      

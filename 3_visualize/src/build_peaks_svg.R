@@ -42,14 +42,4 @@ send_to_vue <- function(out_file, in_file){
             overwrite = TRUE)
   
 }
-list_svg_files <- function(out_file, svg_fp = "src/assets"){
-  tibble(fp = list.files(svg_fp, pattern = ".svg")) %>%
-    mutate(date_start = as.Date(word(fp, 3, 3, sep="_"), format = "%Y%m%d"),
-           date_end = as.Date(word(str_replace(fp, ".svg", ""), 4, 4, sep="_"), format = "%Y%m%d")) %>%
-    write_csv(out_file)
-  
-  # Copy to vue
-  file.copy(out_file, 
-            sprintf("public/svg_files.csv"), 
-            overwrite = TRUE)
-}
+
