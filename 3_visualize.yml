@@ -27,7 +27,8 @@ targets:
       svg_height = svg_height)
       
   src/assets/anomaly_peaks.svg:
-    command: send_to_vue(
-      target_name,
-      in_file = '3_visualize/out/anomaly_peaks.svg')
+    command: file.copy(
+      to = target_name,
+      out = '3_visualize/out/anomaly_peaks.svg', 
+      overwrite = TRUE)
       
