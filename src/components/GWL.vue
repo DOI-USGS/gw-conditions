@@ -1,7 +1,7 @@
 <template>
   <section>
     <div id="title-container">
-      <h1>U.S. Groundwater conditions</h1></div>
+      <h1>U.S. Groundwater Conditions</h1></div>
     <div>
 
 </div>
