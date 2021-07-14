@@ -69,3 +69,5 @@ yarn-error.log*
 *.sw?
 .Rproj.user
 
+# Omit large data files in Vue build
+public/*.csv
