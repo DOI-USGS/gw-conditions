@@ -10,6 +10,7 @@ sources:
   - 3_visualize/src/svg_utils_general.R
   - 3_visualize/src/svg_utils_mapping.R
   - 3_visualize/src/svg_utils_paths.R
+  - 3_visualize/src/svg_utils_vue.R
 
 targets:
 
@@ -17,6 +18,8 @@ targets:
     depends:
       - 3_visualize/out/anomaly_peaks.svg
       - src/assets/anomaly_peaks.svg
+      - public/gw_sites.csv
+      - public/date_peaks.csv
 
   3_visualize/out/anomaly_peaks.svg:
     command: build_peaks_svg(
@@ -32,3 +35,14 @@ targets:
       out = '3_visualize/out/anomaly_peaks.svg', 
       overwrite = TRUE)
       
+  public/date_peaks.csv:
+    command: gwl_to_peak(
+      target_name, 
+      gw_anomaly_data_w_colors)
+    
+  public/gw_sites.csv:
+    command: get_site_coords(
+      target_name,
+      sites_sf = gw_sites_sf)
+
+
