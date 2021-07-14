@@ -94,7 +94,7 @@ h1{
   }
 }
 h2{
-  font-weight: 600;
+  font-weight: 300;
   text-align: left;
   font-family:$Assistant;
   font-size: 1.3em;
