@@ -29,7 +29,7 @@ export default {
       peaky: null,
       site_coords: null,
       peak_grp: null,
-      day_length: 50, // frame duratoin in milliseconds
+      day_length: 20, // frame duration in milliseconds
 
     }
   },
@@ -88,16 +88,16 @@ export default {
               this.peaky.push({key: key, wyday: wyday, gwl: gwl, site_x: site_x, site_y: site_y})
           };
 
+       // set color scale for path fill
+        this.quant_color = this.d3.scaleThreshold()
+        .domain([-40, -25, 25, 40])
+        .range(["#1A3399","#479BC5","#669957","#C1A53A","#7E1900"]) // using a slightly darker green
+
         // draw the chart
         this.makeLegend();
         this.drawFrame1(this.peaky);
       },
       makeLegend(){
-
-        // set color scale for path fill
-        this.quant_color = this.d3.scaleThreshold()
-        .domain([-40, -25, 25, 40])
-        .range(["#1A3399","#479BC5","#669957","#C1A53A","#7E1900"]) // using a slightly darker green
 
         // make a legend
           var legend_peak = this.svg.append("g").classed("legend", true)
@@ -128,6 +128,7 @@ export default {
             .style("alignment-baseline", "middle")
       },
       drawFrame1(data){         
+        const self = this;
 
           // select existing paths using class
           // was dropping positioning because svg-loader and svgo are cleaning out <g>s?
@@ -140,7 +141,7 @@ export default {
             // draws a oath for each site, using the first date
             this.peak_grp 
              .attr("class", function(d) { return d.key })
-             .attr("fill", function(d) { return this.quant_color(d.gwl[0]) }) // this is not exactly right
+             .attr("fill", function(d) { return self.quant_color(d.gwl[0]) }) // this is not exactly right
              .attr("stroke-width", "1px")
              .attr("opacity", ".5")
              .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
@@ -148,16 +149,15 @@ export default {
           this.animateGWL(start); // once sites are drawn, trigger animation
       },
       animateGWL(start){
+         const self = this;
         // animate path d and fill by wy day    
-
-        // if its the last day, stop the animation on the last frame
         if (start < 364){
       // transition through days in sequence
         this.peak_grp
         .transition()
         .duration(this.day_length)  // duration of each day
         .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" })
-        .attr("fill", function(d) { return quant_color(d.gwl[start]) }) // this is not exactly right
+        .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) // this is not exactly right
         .end()
         .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 wyday
         // TODO: check why there are 367 days
