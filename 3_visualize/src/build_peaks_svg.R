@@ -14,7 +14,7 @@ build_peaks_svg <- function(out_file, data_in, sites_sf, svg_width, svg_height) 
     filter(Date == as.Date("2019-10-31")) %>% 
     filter(!grepl("NA", path))
   
-  sites <- unique(data_in$site_no)
+  sites <- sites_sf %>% pull(site_no) %>% unique
   for(s in sites) {
     site_coords_svg <- sites_sf %>%
       filter(site_no == s) %>%

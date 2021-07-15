@@ -32,7 +32,7 @@ targets:
   src/assets/anomaly_peaks.svg:
     command: file.copy(
       to = target_name,
-      out = '3_visualize/out/anomaly_peaks.svg', 
+      from = '3_visualize/out/anomaly_peaks.svg', 
       overwrite = TRUE)
       
   public/date_peaks.csv:
