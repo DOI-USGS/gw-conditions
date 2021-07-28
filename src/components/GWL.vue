@@ -102,6 +102,7 @@ export default {
         // make a legend
           var legend_peak = this.svg.append("g").classed("legend", true)
           var legend_keys = ["Very high", "High", "Normal", "Low", "Very low"];
+          var shape_dist = [5,25,42,43,60,83,103];
 
         // draw path shapes
         legend_peak.selectAll("peak_symbol")
@@ -110,11 +111,11 @@ export default {
           .append("path")
             .attr("fill", function(d){return d["color"]})
             .attr("d", function(d){return d["path_quant"]})
-            .attr("transform", function(d, i){return "translate(50, " + (580-i*20) + ") scale(.8)"})
+            .attr("transform", function(d, i){return "translate(50, " + (580-shape_dist[i]) + ") scale(.8)"})
             .attr("id", function(d){return d["quant"]})
             .attr("class", "peak_symbol")
             .attr("x", 50)
-            .attr("y", function(d,i){ return 500 + i*20}) // 100 is where the first dot appears. 25 is the distance between dots
+            //.attr("y", function(d,i){ return 500 + i*20}) // 100 is where the first dot appears. 25 is the distance between dots
             
         // add categorical labels very low - very high
         legend_peak.selectAll("mylabels")
@@ -122,7 +123,7 @@ export default {
           .enter()
           .append("text")
             .attr("x", 70)
-            .attr("y", function(d,i){ return 500 + i*20}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("y", function(d,i){ return 493 + i*23}) // 100 is where the first dot appears. 25 is the distance between dots
             .text(function(d){ return d})
             .attr("text-anchor", "left")
             .style("alignment-baseline", "middle")
