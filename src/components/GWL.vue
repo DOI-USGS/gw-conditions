@@ -7,6 +7,7 @@
        <GWLmap id="map_gwl" class="map" />
     </div>
     <div id="legend-container" />
+    <div id="time-container" />
     </div>
   </section>
 </template>
@@ -29,9 +30,10 @@ export default {
       site_coords: null,
       site_count: null,
       percData: null,
+      days: null,
 
       peak_grp: null,
-      day_length: 20, // frame duration in milliseconds
+      day_length: 200, // frame duration in milliseconds
 
     }
   },
@@ -113,7 +115,10 @@ export default {
           var perc = this.site_count.map(function(d){ return d[key_quant]});
           this.percData.push({key_quant: key_quant, wyday: wyday, perc: perc})
           };
-      console.log(this.percData)
+      //console.log(this.percData)
+
+      this.days = this.site_count.map(function(d) { return  d['wyday']})
+      console.log(this.days)
 
        // draw the chart
         this.makeLegend();
@@ -125,8 +130,8 @@ export default {
       },
       makeLegend(){
 
-        var legend_height = 300;
-        var legend_width = 500;
+        var legend_height = 250;
+        var legend_width = 400;
 
         // make a legend 
           var legend_peak = this.d3.select("#legend-container")
@@ -136,7 +141,7 @@ export default {
           .attr("id", "map-legend")
           .append("g").classed("legend", true)
 
-          var legend_keys = ["Very low", "low", "Normal", "High","Very high"];
+          var legend_keys = ["Very low", "Low", "Normal", "High","Very high"];
           var shape_dist = [5,25,42,42,60,83,103];
 
         // draw path shapes
@@ -146,7 +151,7 @@ export default {
           .append("path")
             .attr("fill", function(d){return d["color"]})
             .attr("d", function(d){return d["path_quant"]})
-            .attr("transform", function(d, i){return "translate(250, " + (legend_height/2-shape_dist[i]) + ") scale(.8)"})
+            .attr("transform", function(d, i){return "translate(130, " + (150-shape_dist[i]) + ") scale(.8)"})
             .attr("id", function(d){return d["quant"]})
             .attr("class", "peak_symbol")
 
@@ -155,10 +160,10 @@ export default {
           .data(legend_keys)
           .enter()
           .append("text")
-            .attr("x", 270)
-            .attr("y", function(d,i){ return legend_height/2 - (i*22)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("x", 110)
+            .attr("y", function(d,i){ return 150 - (i*22)}) // 100 is where the first dot appears. 25 is the distance between dots
             .text(function(d){ return d})
-            .attr("text-anchor", "left")
+            .attr("text-anchor", "end")
             .style("alignment-baseline", "middle")
 
       },
@@ -183,6 +188,7 @@ export default {
 
           this.animateGWL(start); // once sites are drawn, trigger animation
           this.legendBarChart(this.percData, start);
+          this.legendTimeChart(this.percData, start);
       },
       animateGWL(start){
          const self = this;
@@ -211,16 +217,20 @@ export default {
         // bar chart showing proportion of gages in each category
 
         // scales
-        var w = 225;
+        var w = 200;
         var h = 110;
 
         var xScale = this.d3.scaleLinear()
-        .domain([0,0.55])
+        .domain([0, 0.5])
         .range([0, w])
 
         var yScale = this.d3.scaleBand()
         .domain(["Veryhigh", "High", "Normal", "Low", "Verylow"])
         .range([h, 0])
+
+        var bar_color = this.d3.scaleOrdinal()
+        .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
+        .range(["#1A3399","#479BC5","#D1ECC9","#C1A53A","#7E1900"])
 
         // add bar chart
         var svg = this.d3.select("#map-legend")
@@ -236,49 +246,125 @@ export default {
             return xScale(d.perc[start]);
           })
           .attr("y", function(d, i) {
-            return 145 - yScale(d.key_quant)
+            return 146 - yScale(d.key_quant)
           })
           .attr("x", function(d) {
-            return w - xScale(d.perc[start])
+            //return w + xScale(d.perc[start])
+            return 150
           })
           .attr("id", function(d){ return d.key_quant})
-          .attr("height", "10")
-          .attr("fill", "royalblue")
+          .attr("height", "12")
+          .attr("fill", function(d) { return bar_color(d.key_quant) })
+          .attr("opacity", 0.8)
 
-          this.animateBarChart(start);
-          
+          // axes
+          var xAxis = this.d3.axisBottom()
+          .scale(xScale)
+          .ticks(5);
+
+          svg.append("g")
+          .attr("transform", "translate(150," + 170 + ")")
+          .classed("x-axis", true)
+          .call(xAxis)
+
+          // then animate it
+          //this.animateBarChart(start);
 
       },
       animateBarChart(start){
 
          var xScale = this.d3.scaleLinear()
-        .domain([0,0.55])
+        .domain([0,0.5])
         .range([0, 225])
 
- if (start < 364){
+        if (start < 364){
         this.d3.selectAll(".bars")
-        .transition()
-        .duration(this.day_length) 
-        .attr("x", function(d) {
-            return 225 - xScale(d.perc[start])
+         .transition()
+          .duration(this.day_length) 
+           .attr("x", function(d) {
+            return 150 //- xScale(d.perc[start])
           })
           .attr("width", function(d) {
             return xScale(d.perc[start]);
           })
         .end()
         .then(() => this.animateBarChart(start+1))
-  } else {
-    this.d3.selectAll(".bars")
+      } else {
+       this.d3.selectAll(".bars")
         .transition()
         .duration(this.day_length) 
+        .ease(this.d3.easeCubic)
         .attr("x", function(d) {
-            return 225 - xScale(d.perc[364])
+            return 150 //- xScale(d.perc[364])
           })
           .attr("width", function(d) {
             return xScale(d.perc[364]);
           })
+      }
 
-  }
+  },
+  legendTimeChart(data, start){
+        // scales
+        var w = 600;
+        var h = 300;
+
+        // line chart showing proportion of gages in each category
+        var svg = this.d3.select("#time-container")
+          .append("svg")
+          .attr("width", w)
+          .attr("height", h)
+          .attr("id", "time-legend")
+          .append("g").classed("time-chart", true)
+
+
+        var x = this.d3.scaleLinear()
+        .domain([1, 365])
+        .range([5, w-5])
+
+        var y = this.d3.scaleLinear()
+        .domain([0, 0.5])
+        .range([150, 50])
+
+        var bar_color = this.d3.scaleOrdinal()
+        .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
+        .range(["#1A3399","#479BC5","#D1ECC9","#C1A53A","#7E1900"])
+
+        var line = this.d3.line()
+          .defined(d => !isNaN(d))
+          .x((d, i) => x(this.days[i]))
+          .y(d => y(d))
+
+        // add line chart
+      const path = svg.append("g")
+          .attr("fill", "none")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-linecap", "round")
+        .selectAll("path")
+        .data(data)
+        .join("path")
+        .attr("d", d => line(d.perc))
+        .attr("stroke", function(d) { return bar_color(d.key_quant) })
+        .attr("stroke-width", "3px")
+        .attr("opacity", 0.7);
+
+        var xAxis = this.d3.axisBottom()
+          .scale(x)
+          .ticks(5);
+
+        svg.append("g")
+          .classed("x-axis", true)
+          .attr("transform", "translate(0," + 155 + ")")
+          .call(xAxis.tickPadding(4).tickSize(0).tickValues([1,365]))
+
+        svg.append("rect")
+          .data(this.days)
+          .classed("hilite", true)
+          .attr("transform", function(d) { return "translate(5," + 55 + ")" }) 
+          .attr("width", "5")
+          .attr("height", "100")
+          .attr("opacity", 0.5)
+          .attr("fill", "grey")
+          .attr("x", function(d) { return d[200] })
       }
     }
 }
@@ -287,7 +373,7 @@ export default {
 #map-container{
   width: auto;
   //height: 85vh;
-  margin: 2%;
+  margin: 10%;
   margin-bottom: 0;
   position: relative;
   grid-area: map;
@@ -303,16 +389,20 @@ export default {
 // each piece is a separate div that can be positioned or overlapped with grid
 #grid-container {
   display: grid;
-  grid-template-columns: 20% 1fr 20%;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: 2fr 1fr;
   grid-template-areas:
-  "map map map"
-  "legend legend legend"
+  "map map map map"
+  "legend time time time"
 }
 #legend-container {
-  
+  grid-area: legend;
 }
-
+#time-container {
+  grid-area: time;
+  margin: 2%;
+  margin-right: 5%;
+}
 #title-container {
   //width: 100vw;
   height: auto;
