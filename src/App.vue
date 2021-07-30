@@ -83,18 +83,18 @@ body {
       }
   }
 h1{
-  font-size: 4em;
-  font-weight: 600;
-  font-family: $Cairo;
+  font-size: 3.5em;
+  font-weight: 300;
+  font-family: $Assistant;
   line-height: 1;
   text-align: left;
   text-shadow: 1px 1px 100px rgba(0,0,0,.8);
   @media screen and (max-width: 600px) {
-    font-size: 5em;
+    font-size: 2.5em;
   }
 }
 h2{
-  font-weight: 600;
+  font-weight: 300;
   text-align: left;
   font-family:$Assistant;
   font-size: 1.3em;
@@ -113,8 +113,9 @@ h3{
       font-size: 1.4em;
   }  
 }
-p {
+p, text {
   padding: 1em 0 0 0; 
+  font-family: $Assistant;
 }
 
 </style>
