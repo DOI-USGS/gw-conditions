@@ -8,6 +8,7 @@
     </div>
     <div id="legend-container" />
     <div id="time-container" />
+    <div id="dot-container" />
     </div>
   </section>
 </template>
@@ -33,7 +34,7 @@ export default {
       days: null,
 
       peak_grp: null,
-      day_length: 200, // frame duration in milliseconds
+      day_length: 20, // frame duration in milliseconds
 
     }
   },
@@ -46,7 +47,7 @@ export default {
 
       // define style before page fully loads
       this.svg.selectAll(".map-bkgrd")
-        .style("stroke", "black")
+        .style("stroke", "grey")
         .style("stroke-width", "1px")
         .style("fill", "white")
 
@@ -118,7 +119,6 @@ export default {
       //console.log(this.percData)
 
       this.days = this.site_count.map(function(d) { return  d['wyday']})
-      console.log(this.days)
 
        // draw the chart
         this.makeLegend();
@@ -268,11 +268,11 @@ export default {
           .call(xAxis)
 
           // then animate it
-          //this.animateBarChart(start);
+          this.animateBarChart(start);
 
       },
       animateBarChart(start){
-
+        
          var xScale = this.d3.scaleLinear()
         .domain([0,0.5])
         .range([0, 225])
@@ -282,7 +282,7 @@ export default {
          .transition()
           .duration(this.day_length) 
            .attr("x", function(d) {
-            return 150 //- xScale(d.perc[start])
+            return 150
           })
           .attr("width", function(d) {
             return xScale(d.perc[start]);
@@ -295,7 +295,7 @@ export default {
         .duration(this.day_length) 
         .ease(this.d3.easeCubic)
         .attr("x", function(d) {
-            return 150 //- xScale(d.perc[364])
+            return 150
           })
           .attr("width", function(d) {
             return xScale(d.perc[364]);
@@ -356,15 +356,103 @@ export default {
           .attr("transform", "translate(0," + 155 + ")")
           .call(xAxis.tickPadding(4).tickSize(0).tickValues([1,365]))
 
+          var start = 0;
+
         svg.append("rect")
           .data(this.days)
           .classed("hilite", true)
-          .attr("transform", function(d) { return "translate(5," + 55 + ")" }) 
+          .attr("transform", "translate(5, 35)") 
           .attr("width", "5")
-          .attr("height", "100")
+          .attr("height", "120")
           .attr("opacity", 0.5)
           .attr("fill", "grey")
-          .attr("x", function(d) { return d[200] })
+          .attr("x", x(this.days[start]))
+
+          //var slider = svg.append("g")
+          //.attr("class", "slider")
+          //.attr("transform", "translate(" + 50 + "," + h/5 + ")");
+
+          //slider.append("line")
+           // .attr("class", "track")
+           // .attr("x1", x.range()[0])
+           // .attr("x2", x.range()[1])
+         
+          this.animateTime(start)
+      },
+      animateTime(start){
+        var w = 600;
+        var h = 300;
+
+        var x = this.d3.scaleLinear()
+        .domain([1, 365])
+        .range([5, w-5])
+
+        if (start < 364){
+        this.d3.selectAll(".hilite")
+         .transition()
+          .duration(this.day_length) 
+          .attr("x", x(this.days[start]))
+        .end()
+        .then(() => this.animateTime(start+1))
+      } else {
+       this.d3.selectAll(".hilite")
+        .transition()
+        .duration(this.day_length) 
+        .attr("x", x(this.days[364]))
+      }
+  },
+  legendDot(data, start){
+        // scales
+        var w = 600;
+        var h = 300;
+
+        // line chart showing proportion of gages in each category
+        var svg = this.d3.select("#dot-container")
+          .append("svg")
+          .attr("width", w)
+          .attr("height", h)
+          .attr("id", "dot-legend")
+          .append("g").classed("dot-chart", true)
+
+
+        var x = this.d3.scaleLinear()
+        .domain([1, 365])
+        .range([5, w-5])
+
+        var y = this.d3.scaleLinear()
+        .domain([0, 0.5])
+        .range([150, 50])
+
+        var bar_color = this.d3.scaleOrdinal()
+        .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
+        .range(["#1A3399","#479BC5","#D1ECC9","#C1A53A","#7E1900"])
+
+        // add line chart
+      const path = svg.append("g")
+        .selectAll("circle")
+        .data(data)
+        .join("circle")
+        .attr("fill", function(d) { return bar_color(d.key_quant) })
+        .attr("opacity", 0.7)
+        .attr("r", 0.7);
+
+        var xAxis = this.d3.axisBottom()
+          .scale(x)
+          .ticks(5);
+
+        var start = 0;
+
+        svg.append("rcircle")
+          .data(this.days)
+          .classed("hilite", true)
+          .attr("transform", "translate(5, 35)") 
+          .attr("width", "5")
+          .attr("height", "120")
+          .attr("opacity", 0.5)
+          .attr("fill", "grey")
+          .attr("x", x(this.days[start]))
+
+          //this.animateDot(start)
       }
     }
 }
@@ -373,7 +461,8 @@ export default {
 #map-container{
   width: auto;
   //height: 85vh;
-  margin: 10%;
+  margin-left: 5%;
+  margin-top: 2%;
   margin-bottom: 0;
   position: relative;
   grid-area: map;
@@ -382,8 +471,11 @@ export default {
     position: relative;
     left:0;
     top: 0;
-    width: 100%;
+    width: 90vw;
+    max-width: 1000px;
+    max-height: 600px;
     height: auto;
+
   }
 }
 // each piece is a separate div that can be positioned or overlapped with grid
@@ -397,11 +489,15 @@ export default {
 }
 #legend-container {
   grid-area: legend;
+  margin-bottom: 0;
+  height: auto;
 }
 #time-container {
   grid-area: time;
   margin: 2%;
+  margin-bottom: 0;
   margin-right: 5%;
+  height: auto;
 }
 #title-container {
   //width: 100vw;
@@ -417,5 +513,34 @@ export default {
     
   }
 }
+.track,
+    .track-inset,
+    .track-overlay {
+      stroke-linecap: round;
+    }
 
+    .track {
+      stroke: #000;
+      stroke-opacity: 0.3;
+      stroke-width: 10px;
+    }
+
+    .track-inset {
+      stroke: #dcdcdc;
+      stroke-width: 8px;
+    }
+
+    .track-overlay {
+      pointer-events: stroke;
+      stroke-width: 50px;
+      stroke: transparent;
+      cursor: crosshair;
+    }
+
+    .handle {
+      fill: #fff;
+      stroke: #000;
+      stroke-opacity: 0.5;
+      stroke-width: 1.25px;
+    }
 </style>

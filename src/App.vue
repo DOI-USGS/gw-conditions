@@ -63,6 +63,8 @@
 // Fonts
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Abel&display=swap');
+$Abel: 'Abel', sans-serif;
 $Cairo: 'Cairo', sans-serif;
 $Assistant: 'Assistant', sans-serif;
 
@@ -70,6 +72,7 @@ $Assistant: 'Assistant', sans-serif;
 html,
 body {
       height:100%;
+      background-color: rgb(237, 237, 237);
       margin: 0;
       padding: 0;
       line-height: 1.2;
@@ -85,7 +88,7 @@ body {
 h1{
   font-size: 3.5em;
   font-weight: 300;
-  font-family: $Assistant;
+  font-family: $Abel;
   line-height: 1;
   text-align: left;
   text-shadow: 1px 1px 100px rgba(0,0,0,.8);
