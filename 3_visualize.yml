@@ -4,6 +4,8 @@ packages:
   - dplyr
   - sf
   - xml2
+  - data.table
+  - stringr
 
 sources:
   - 3_visualize/src/build_peaks_svg.R
