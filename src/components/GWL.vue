@@ -15,6 +15,8 @@
 <script>
 import * as d3Base from 'd3';
 import GWLmap from "@/assets/anomaly_peaks.svg";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin"; // to trigger scroll events
+import { ScrollTrigger } from "gsap/ScrollTrigger"; // animated scroll events
 export default {
   name: "GWLsvg",
     components: {
@@ -39,7 +41,7 @@ export default {
     }
   },
   mounted(){
-
+      this.$gsap.registerPlugin(ScrollToPlugin, ScrollTrigger); // register gsap plugins for scrollTrigger 
       this.d3 = Object.assign(d3Base);
       this.loadData();   
 

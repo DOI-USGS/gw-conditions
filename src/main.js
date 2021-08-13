@@ -13,6 +13,7 @@ import "vuetify/dist/vuetify.min.css";
 import VueCarousel from 'vue-carousel';
 import VueImg from 'v-img';
 import VueSvg from 'vue-svg-loader';
+import gsap from "gsap"
 
 
 // social icons
@@ -29,6 +30,7 @@ const vueImgConfig = {
 }
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
+Vue.prototype.$gsap = gsap;
 
 // social icons
 library.add(faTwitterSquare);
