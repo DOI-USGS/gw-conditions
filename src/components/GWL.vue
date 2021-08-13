@@ -9,14 +9,19 @@
     <div id="legend-container" />
     <div id="time-container" />
     <div id="dot-container" />
+    <div id="target2">This Moves</div>
+    <div id="scrub-bar">
+        <div id="knob2" class="knob2"></div> 
+        <div id="range2" class="range2"></div>
+ </div>
     </div>
   </section>
 </template>
 <script>
 import * as d3Base from 'd3';
 import GWLmap from "@/assets/anomaly_peaks.svg";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin"; // to trigger scroll events
-import { ScrollTrigger } from "gsap/ScrollTrigger"; // animated scroll events
+import { TimelineMax, Draggable, TweenMax } from "gsap/all"; 
+
 export default {
   name: "GWLsvg",
     components: {
@@ -26,6 +31,13 @@ export default {
     return {
       publicPath: process.env.BASE_URL, // this is need for the data files in the public folder, this allows the application to find the files when on different deployment roots
       d3: null,
+
+      // dimensions
+      width: null,
+      height: null,
+      margin: { top: 50, right: 50, bottom: 50, left: 50 },
+
+      // data mgmt
       quant_peaks: null,
       date_peaks: null,
       svg: null,
@@ -41,13 +53,18 @@ export default {
     }
   },
   mounted(){
-      this.$gsap.registerPlugin(ScrollToPlugin, ScrollTrigger); // register gsap plugins for scrollTrigger 
+      this.$gsap.registerPlugin(Draggable); // register gsap plugins for scrollTrigger 
       this.d3 = Object.assign(d3Base);
+
+      // resize
+      this.width = window.innerWidth - this.margin.left - this.margin.right;
+      this.height = window.innerHeight*.5 - this.margin.top - this.margin.bottom;
+
+      // read in data
       this.loadData();   
 
-      this.svg = this.d3.select("svg.map")
-
       // define style before page fully loads
+      this.svg = this.d3.select("svg.map")
       this.svg.selectAll(".map-bkgrd")
         .style("stroke", "grey")
         .style("stroke-width", "1px")
@@ -73,10 +90,6 @@ export default {
         this.date_peaks = data[1]; // gwl timeseries data
         this.site_coords = data[2]; // site positioning on svg
         this.site_count = data[3]; // number of sites x quant_category x wyday
-        var jtest = data[3];
-       // let jtest = this.d3.json(self.publicPath + "perc_df.json");
-        // console.log(jtest)
-
 
         // water days
         var wyday = this.date_peaks.columns
@@ -118,7 +131,6 @@ export default {
           var perc = this.site_count.map(function(d){ return d[key_quant]});
           this.percData.push({key_quant: key_quant, wyday: wyday, perc: perc})
           };
-      //console.log(this.percData)
 
       this.days = this.site_count.map(function(d) { return  d['wyday']})
 
@@ -128,7 +140,68 @@ export default {
 
       // animated bar chart
         //this.legendBarChart(this.percData);
+        this.animateTimeline();
 
+      },
+      animateTimeline(){
+        // create props
+        let target2 = document.getElementById("target2");
+        let knob2 = document.getElementById("knob2");
+        let knob2Rect = knob2.getBoundingClientRect();
+        let volumeBar = document.getElementById("scrub-bar");
+        let volRect = volumeBar.getBoundingClientRect();
+        let range2 = document.getElementById("range2");
+
+        // create volume controller with draggable
+        Draggable.create(knob2, {
+          type: "x",
+          trigger: "#scrub-bar",
+          bounds:  "#scrub-bar",
+          edgeResistance: 1,
+          lockAxis: true,
+          cursor: "pointer",
+          onDrag: updateRange,
+          onPress: updatePosition,
+          onClick: updateRange,
+
+        });
+
+        //timeline
+        let t2 = new TimelineMax({paused:true});
+        t2.to(target2, 2, {autoAlpha: 1, x:300, backgroundColor:"#FF00FF" });
+        // Set animation 
+        //tl
+
+        function updatePosition () {
+  
+        knob2Rect = knob2.getBoundingClientRect();
+        volRect = volumeBar.getBoundingClientRect();
+        
+        TweenMax.set(knob2, { x: this.pointerX - volRect.left - knob2Rect.width / 2 });
+        TweenMax.set(range2, { width: knob2Rect.left + knob2Rect.width - volRect.left });
+
+        updateRange();
+  
+      };
+      function updateRange () {
+        
+        let x = this.x;
+        if (x < 0.0001 && x > -0.0001) {
+        x = 0;
+        }
+        
+        let volRect = volumeBar.getBoundingClientRect();
+        let knob2Rect = knob2.getBoundingClientRect();
+        
+        t2.progress(x / (volRect.width - knob2Rect.width));
+        
+        TweenMax.set(range2, { width: knob2Rect.left + knob2Rect.width - volRect.left });
+        
+        console.log(x );
+
+      };
+
+        
       },
       makeLegend(){
 
@@ -188,7 +261,7 @@ export default {
              .attr("opacity", ".5")
              .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
-          this.animateGWL(start); // once sites are drawn, trigger animation
+         // this.animateGWL(start); // once sites are drawn, trigger animation
           this.legendBarChart(this.percData, start);
           this.legendTimeChart(this.percData, start);
       },
@@ -304,8 +377,8 @@ export default {
           })
       }
 
-  },
-  legendTimeChart(data, start){
+      },
+      legendTimeChart(data, start){
         // scales
         var w = 600;
         var h = 300;
@@ -488,6 +561,7 @@ export default {
   grid-template-areas:
   "map map map map"
   "legend time time time"
+  ". scrub scrub ."
 }
 #legend-container {
   grid-area: legend;
@@ -495,6 +569,13 @@ export default {
   height: auto;
 }
 #time-container {
+  grid-area:scrub;
+  margin: 2%;
+  margin-bottom: 0;
+  margin-right: 5%;
+  height: auto;
+}
+#scrub-bar {
   grid-area: time;
   margin: 2%;
   margin-bottom: 0;
@@ -545,4 +626,49 @@ export default {
       stroke-opacity: 0.5;
       stroke-width: 1.25px;
     }
+    #target2{
+      grid-area: time;
+   visibility:hidden;
+   margin:50px;
+   background:yellow;
+   line-height:100px;
+  width: 100px;
+  height: 100px;
+}
+
+.range2 {
+    height: 10px;
+    bottom: 14px;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+    position: relative;
+    width: 0;
+}
+
+
+#scrub-bar {
+    background-color: #757575;
+    height:10px;
+    float: left;
+    overflow: visible;
+    padding:0;
+    position:relative;
+    width: 400px;
+    margin-top: 20px;
+    margin-left: 15px;
+    border-radius: 5px;
+}
+
+.knob2 {
+    text-align: center;
+    width: 15px;
+    height: 15px;
+    position: relative;
+    bottom: 2px;
+    z-index:2;
+    border-radius:50%;
+    background-color: #bdbdbd;
+}
+
+
 </style>
