@@ -49,6 +49,7 @@ export default {
 
       peak_grp: null,
       day_length: 20, // frame duration in milliseconds
+      current_time: 0,
 
     }
   },
@@ -123,14 +124,14 @@ export default {
         //same for bar chart data
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
         var n_quant = quant_cat.length
-        var perc = this.site_count.map(function(d){  return d[quant_cat[0]]; });
         this.percData = [];
           for (i = 0; i < n_quant; i++) {
-           var key_quant = quant_cat[i];
+          var key_quant = quant_cat[i];
           var wyday = this.site_count.map(function(d){ return d['wyday']});
           var perc = this.site_count.map(function(d){ return d[key_quant]});
           this.percData.push({key_quant: key_quant, wyday: wyday, perc: perc})
           };
+          console.log(this.percData)
 
       this.days = this.site_count.map(function(d) { return  d['wyday']})
 
@@ -140,19 +141,27 @@ export default {
 
       // animated bar chart
         //this.legendBarChart(this.percData);
-        this.animateTimeline();
+        this.animateTimeline(); // set up scrubber
 
       },
       animateTimeline(){
         // create props
-        let target2 = document.getElementById("target2");
+        //let target2 = this.d3.selectAll(".bars");
         let knob2 = document.getElementById("knob2");
         let knob2Rect = knob2.getBoundingClientRect();
         let volumeBar = document.getElementById("scrub-bar");
         let volRect = volumeBar.getBoundingClientRect();
         let range2 = document.getElementById("range2");
 
-        // create volume controller with draggable
+        // scales
+        var w = 200;
+        var h = 110;
+
+        var xScale = this.d3.scaleLinear()
+        .domain([0, 0.5])
+        .range([0, w])
+
+        // timeline with dragggable scrub effect
         Draggable.create(knob2, {
           type: "x",
           trigger: "#scrub-bar",
@@ -168,9 +177,22 @@ export default {
 
         //timeline
         let t2 = new TimelineMax({paused:true});
-        t2.to(target2, 2, {autoAlpha: 1, x:300, backgroundColor:"#FF00FF" });
-        // Set animation 
-        //tl
+ 
+        // array of units to loop across - gage sites / categories
+        var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
+        for(var i=0;i<quant_cat.length;i++){
+            quant_cat[i]="rect#"+quant_cat[i];
+        }
+        // array of values associated with each unit
+        var perc = this.site_count.map(function(d){  return d[quant_cat]; });
+        console.log(this.percData[1].perc[2])
+
+        // timeline driving animation of multiple objects
+        var distList = [300, 3, 400, 400, 10]; // each spot is a different element
+          t2.to(quant_cat, {
+            width: i => this.percData[i].perc[10],
+            duration: 1
+          });
 
         function updatePosition () {
   
@@ -343,7 +365,7 @@ export default {
           .call(xAxis)
 
           // then animate it
-          this.animateBarChart(start);
+          //this.animateBarChart(start);
 
       },
       animateBarChart(start){
