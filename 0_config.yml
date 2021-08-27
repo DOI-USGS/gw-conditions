@@ -16,6 +16,10 @@ targets:
   historic_uv_fetch_size_limit:
     command: I(10)
   
+  # Use all states and U.S. territories for historic data fetch
+  historic_fetch_bounding_box:
+   command: fetch_usa_bbox()
+  
   # This one will initiate a rebuild of the quantiles (still lengthy, but not 
   # like redownloading the data, as the above trigger).
   historic_min_yrs_per_site_for_quantile_calc:

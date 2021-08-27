@@ -26,7 +26,7 @@ targets:
 ##-- All GW sites with continuous data for all time --##
   
   historic_gw_sites_all:
-    command: fetch_gw_historic_sites(historic_start_date, historic_end_date, viz_bounding_box, gw_param_cd)
+    command: fetch_gw_historic_sites(historic_start_date, historic_end_date, historic_fetch_bounding_box, gw_param_cd)
   historic_gw_sites_dv:
     command: pull_sites_by_service(historic_gw_sites_all, I("dv"))
   historic_gw_sites_uv:
