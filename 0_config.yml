@@ -43,11 +43,12 @@ targets:
 ##-- Fetch configs --##
   
   viz_start_date:
-    command: as.Date(I('2019-10-01'))
+    command: as.Date(I('2020-10-01'))
   viz_end_date:
     command: as.Date(I('2020-09-30'))
   # Use bounding box in case we want to do this regionally someday
   # Start with CONUS only
+  # I don't think this is being used any more ...
   viz_bounding_box:
    command: fetch_usa_bbox(conus_only = TRUE)
   dv_fetch_size_limit:
