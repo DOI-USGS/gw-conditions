@@ -97,7 +97,7 @@ convert_uv_to_dv <- function(target_name, gw_uv_data_fn) {
   read_feather(gw_uv_data_fn) %>% 
     mutate(Date = as.Date(dateTime)) %>% 
     group_by(site_no, Date) %>% 
-    summarize(GWL = mean(GWL_inst, na.rm = TRUE)) %>% 
+    summarize(GWL = mean(GWL_inst, na.rm = TRUE), .groups = "keep") %>% 
     write_feather(target_name)
 }
 
