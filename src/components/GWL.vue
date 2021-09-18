@@ -1,7 +1,9 @@
 <template>
   <section>
       <div id="title-container">
-      <h1>U.S. Groundwater Conditions</h1></div>
+        <h2 class="title" id="title-main">U.S. Groundwater Conditions</h2>
+        <h3 class="title" id="title-sub">The low down on flow down low</h3>
+      </div>
 <div id="grid-container">
     <div id="map-container">
        <GWLmap id="map_gwl" class="map" />
@@ -9,11 +11,7 @@
     <div id="legend-container" />
     <div id="time-container" />
     <div id="dot-container" />
-    <div id="target2">This Moves</div>
-    <div id="scrub-bar">
-        <div id="knob2" class="knob2"></div> 
-        <div id="range2" class="range2"></div>
- </div>
+    <div id="line-container" />
     </div>
   </section>
 </template>
@@ -50,6 +48,9 @@ export default {
       peak_grp: null,
       day_length: 20, // frame duration in milliseconds
       current_time: 0,
+      //x:  0,
+      sites_list: null,
+      //t2: null,
 
     }
   },
@@ -62,13 +63,15 @@ export default {
       this.height = window.innerHeight*.5 - this.margin.top - this.margin.bottom;
 
       // read in data
+      //this.callS3("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv");
       this.loadData();   
 
       // define style before page fully loads
       this.svg = this.d3.select("svg.map")
-      this.svg.selectAll(".map-bkgrd")
-        .style("stroke", "grey")
-        .style("stroke-width", "1px")
+
+       this.svg.selectAll(".map-bkgrd")
+        .style("stroke", "white")
+        .style("stroke-width", "0.1px")
         .style("fill", "white")
 
     },
@@ -78,7 +81,7 @@ export default {
         // read in data 
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes
-        self.d3.csv(self.publicPath + "date_peaks.csv",  this.d3.autotype),
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
         self.d3.csv(self.publicPath + "gw_sites.csv",  this.d3.autotype),
         self.d3.csv(self.publicPath + "gwl_daily_count.csv",  this.d3.autotype),
         self.d3.json(self.publicPath + "perc_df.json",  this.d3.autotype)
@@ -97,8 +100,8 @@ export default {
         wyday.shift();
 
         // sites
-        var sites_list = this.site_coords.map(function(d)  { return d.site_no })
-        var n = sites_list.length // to create nested array for indexing in animation
+        this.sites_list = this.site_coords.map(function(d)  { return d.site_no })
+        var n = this.sites_list.length // to create nested array for indexing in animation
 
         // site placement on map
         this.sites_x = this.site_coords.map(function(d) { return d.x })
@@ -108,7 +111,7 @@ export default {
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
          this.peaky = [];
           for (i = 1; i < n; i++) {
-              var key = sites_list[i];
+              var key = this.sites_list[i];
               var wyday = this.date_peaks.map(function(d){  return d['wyday']; });
               var gwl = this.date_peaks.map(function(d){  return d[key]; });
               var site_x = this.sites_x[i];
@@ -131,7 +134,6 @@ export default {
           var perc = this.site_count.map(function(d){ return d[key_quant]});
           this.percData.push({key_quant: key_quant, wyday: wyday, perc: perc})
           };
-          console.log(this.percData)
 
       this.days = this.site_count.map(function(d) { return  d['wyday']})
 
@@ -140,8 +142,101 @@ export default {
         this.drawFrame1(this.peaky);
 
       // animated bar chart
-        //this.legendBarChart(this.percData);
-        this.animateTimeline(); // set up scrubber
+        this.legendBarChart(this.percData);
+        //this.animateTimeline(); // set up scrubber
+
+        this.drawLine(this.days)
+
+      },
+      createPanel(month) {
+        var tl = new TimelineMax();
+        tl.to("tl_" + month)
+        // add rest of this
+        return tl;
+      },
+      drawLine(date_range) {
+        //console.log(date_range)
+        var line_width = 900;
+        var line_height = 200;
+        var mar = 25;
+
+        var month_list = [1, 30, 61, 80, 110, 140, 170, 200, 230, 261, 291, 322]
+        var month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Oct", "Nov", "Dec"]
+
+      var svg = this.d3.select("#line-container")
+        .append("svg")
+        .attr("width", "100vw")
+        .attr("height", line_height)
+        .attr("id", "x-line")
+
+        // scale space
+      var xScale = this.d3.scaleLinear()
+        .domain([Math.min(date_range), Math.max(date_range)])
+        .range([mar, line_width-mar])
+
+      // axes
+      var xLine = this.d3.axisBottom()
+        .scale(xScale)
+        .ticks(0).tickSize(0);
+
+      var liney = svg.append("g")
+        //.attr("transform", "translate(0," + 170 + ")")
+        //.classed("x-line", true)
+        .call(xLine)
+        .attr("transform", "translate(0," + 20 + ")")
+        .classed("liney", true)
+
+      liney.select("path")
+        .attr("color", "lightgrey")
+        .attr("stroke-width", "3px")
+        //add ticks for each month
+        // add ticks for given dates, or periods?
+        // make them glowy buttons
+
+        var button = this.d3.button()
+        .on('press', function(d, i) { console.log("Pressed", d, i, this.parentNode)})
+        .on('release', function(d, i) { console.log("Released", d, i, this.parentNode)});
+var data = [{label: "Click me",     x: width / 4, y: height / 4 },
+            {label: "Click me too", x: width / 2, y: height / 2 }];
+      var buttons = svg.selectAll('.button')
+      .data(data)
+      .enter()
+      .append('g')
+      .attr('class', 'button')
+      .call(button);
+
+      },
+      initTime(){
+        var tl_jan = new TimelineMax(); //TimelineMax permits repeating animation
+        var tl_feb = new TimelineMax();
+        var tl_mar = new TimelineMax();
+        var tl_apr = new TimelineMax();
+        var tl_may = new TimelineMax();
+        var tl_jun = new TimelineMax();
+        var tl_jul = new TimelineMax();
+        var tl_aug = new TimelineMax();
+        var tl_sep = new TimelineMax()
+        var tl_oct = new TimelineMax()
+        var tl_nov = new TimelineMax()
+        var tl_dec = new TimelineMax()
+        // separate timelines for each month
+
+        createPanel(".gwl_")
+
+        // add to parent timeline
+        var master = new TimelineMax();
+        master.add(tl_jan)
+        .add(tl_feb)
+        .add(tl_mar)
+        .add(tl_apr)
+        .add(tl_may)
+        .add(tl_jun)
+        .add(tl_jul)
+        .add(tl_aug)
+        .add(tl_sep)
+        .add(tl_oct)
+        .add(tl_nov)
+        .add(tl_dec) // nest sites wtihin each month?
 
       },
       animateTimeline(){
@@ -161,53 +256,187 @@ export default {
         .domain([0, 0.5])
         .range([0, w])
 
-        // timeline with dragggable scrub effect
+      // scale to convert x position to time?
+        //var 
+
+        // create dragggable selector
         Draggable.create(knob2, {
-          type: "x",
+          type: "x", 
           trigger: "#scrub-bar",
           bounds:  "#scrub-bar",
           edgeResistance: 1,
           lockAxis: true,
           cursor: "pointer",
           onDrag: updateRange,
-          onPress: updatePosition,
-          onClick: updateRange,
+          onPress: updateRange,
+          onClick: updatePosition,
+          //onComplete: console.log(this.x),
 
         });
 
-        //timeline
-        let t2 = new TimelineMax({paused:true});
+        // init timeline
+        let t2 = new TimelineMax({paused:true, duration: 0.001, repeat: -1});
  
         // array of units to loop across - gage sites / categories
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
         for(var i=0;i<quant_cat.length;i++){
             quant_cat[i]="rect#"+quant_cat[i];
         }
-        // array of values associated with each unit
-        var perc = this.site_count.map(function(d){  return d[quant_cat]; });
-        console.log(this.percData[1].perc[2])
+
+        var xScale = this.d3.scaleLinear()
+        .domain([0,0.5])
+        .range([0, 225])
+
+        var w = 600; // for hilite bar
+
+        // line chart showing proportion of gages in each catego
+        var xpos = this.d3.scaleLinear()
+        .domain([1, 365])
+        .range([5, w-5])
+        
+        var name_in = 'path.' + this.sites_list[210];
+
+        this.d3.select(name_in)
+        .classed("bigbaby", true)
+        .attr("fill", "purple")
+        .attr("opacity", 1)
 
         // timeline driving animation of multiple objects
-        var distList = [300, 3, 400, 400, 10]; // each spot is a different element
-          t2.to(quant_cat, {
-            width: i => this.percData[i].perc[10],
-            duration: 1
-          });
+        var time_now = 0;
+        t2.to(quant_cat, {  width: i => xScale(this.percData[i].perc[time_now]) }); // many things at once but only for a day
 
+        for (i = 0; i < 366; i += 1) {
+           var time_now = time_now + 1;
+           t2
+           .to(quant_cat[0], {  width: xScale(this.percData[0].perc[time_now])}, time_now)
+           .to(quant_cat[1], {  width: xScale(this.percData[1].perc[time_now])}, time_now)
+           .to(quant_cat[2], {  width: xScale(this.percData[2].perc[time_now])}, time_now)
+           .to(quant_cat[3], {  width: xScale(this.percData[3].perc[time_now])}, time_now)
+           .to(quant_cat[4], {  width: xScale(this.percData[4].perc[time_now])}, time_now) 
+           .to(".hilite", { x: xpos(time_now) }, time_now)
+           
+
+           /* for (let j = 0; j < this.sites_list.length; j++) {
+             //console.log(this.peaky[j].gwl[time_now])
+
+            t2.to('path.' + this.sites_list[j], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[j].gwl[time_now] + " 10 0 Z" }, position: time_now 
+            })
+           } */
+
+           /* t2 
+           .to('path.' + this.sites_list[211], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[211].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[212], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[212].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[213], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[213].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[214], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[214].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[215], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[215].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[216], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[216].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[217], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[217].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[218], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[218].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[219], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[219].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1210], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1210].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1211], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1211].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1212], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1212].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1213], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1213].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1214], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1214].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1215], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1215].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1216], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1216].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1217], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[217].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1218], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1218].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1219], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1219].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1210], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1210].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1211], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1211].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[312], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[312].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[313], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[323].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[314], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[314].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[315], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[315].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[316], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[316].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[2317], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[317].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[318], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[318].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[319], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[319].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[211], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[411].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[414], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[414].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[413], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[413].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[414], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[414].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[415], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[415].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[416], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[416].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[417], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[417].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[418], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[418].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[419], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[419].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1410], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1410].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1411], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1411].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1414], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1414].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1413], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1413].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1414], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1414].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1415], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1415].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1416], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1416].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1417], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[417].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1418], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1418].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1419], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1419].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1410], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1410].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1411], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1211].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[512], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[512].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[515], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[525].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[514], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[514].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[515], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[515].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[516], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[516].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[517], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[517].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[518], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[518].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[519], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[519].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[611], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[611].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[612], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[612].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[613], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[613].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[614], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[614].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[615], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[615].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[616], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[616].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[617], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[617].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[618], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[618].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[619], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[619].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1610], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1610].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1611], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1611].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1616], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1616].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1613], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1613].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1614], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1614].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1615], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1615].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1616], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1616].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1617], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[617].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1618], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1618].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1619], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1619].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1610], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1610].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[1611], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1611].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[716], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[716].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[717], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[717].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[714], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[714].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[715], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[715].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[716], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[716].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[717], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[717].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[718], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[718].gwl[time_now] + " 10 0 Z" },position: time_now })
+           .to('path.' + this.sites_list[719], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[719].gwl[time_now] + " 10 0 Z" },position: time_now }) */
+        }
+
+         
+
+         t2.duration(0.0005).play();
+  
+        // struggling to figure out how to write this loop
+        // need to use 'add' or 'to' to add targets to the timeline for each day tween
+        // that uses integers 1:end to index data values for each i (site)
+        // want to be able to use playback controls
+      
         function updatePosition () {
   
-        knob2Rect = knob2.getBoundingClientRect();
-        volRect = volumeBar.getBoundingClientRect();
-        
-        TweenMax.set(knob2, { x: this.pointerX - volRect.left - knob2Rect.width / 2 });
-        TweenMax.set(range2, { width: knob2Rect.left + knob2Rect.width - volRect.left });
+          knob2Rect = knob2.getBoundingClientRect();
+          volRect = volumeBar.getBoundingClientRect();
+          
+          TweenMax.set(knob2, { x: this.pointerX - volRect.left - knob2Rect.width / 2 });
+          TweenMax.set(range2, { width: knob2Rect.left + knob2Rect.width - volRect.left });
 
-        updateRange();
+          updateRange();
   
       };
       function updateRange () {
+        const self = this;
         
-        let x = this.x;
+        var x = this.x;
         if (x < 0.0001 && x > -0.0001) {
         x = 0;
         }
@@ -218,12 +447,8 @@ export default {
         t2.progress(x / (volRect.width - knob2Rect.width));
         
         TweenMax.set(range2, { width: knob2Rect.left + knob2Rect.width - volRect.left });
-        
-        console.log(x );
 
-      };
-
-        
+        };
       },
       makeLegend(){
 
@@ -283,7 +508,7 @@ export default {
              .attr("opacity", ".5")
              .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
-         // this.animateGWL(start); // once sites are drawn, trigger animation
+          this.animateGWL(start); // once sites are drawn, trigger animation
           this.legendBarChart(this.percData, start);
           this.legendTimeChart(this.percData, start);
       },
@@ -295,7 +520,7 @@ export default {
         this.peak_grp
         .transition()
         .duration(this.day_length)  // duration of each day
-        .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" })
+        .attr("d", function(d) { return "M-7 0 C -7 0 0 " + d.gwl[start]*1.5 + " 7 0 Z" })
         .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) // this is not exactly right
         .end()
         .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 wyday
@@ -365,7 +590,7 @@ export default {
           .call(xAxis)
 
           // then animate it
-          //this.animateBarChart(start);
+          this.animateBarChart(start);
 
       },
       animateBarChart(start){
@@ -539,7 +764,7 @@ export default {
 
         var start = 0;
 
-        svg.append("rcircle")
+        svg.append("circle")
           .data(this.days)
           .classed("hilite", true)
           .attr("transform", "translate(5, 35)") 
@@ -549,7 +774,7 @@ export default {
           .attr("fill", "grey")
           .attr("x", x(this.days[start]))
 
-          //this.animateDot(start)
+          this.animateDot(start)
       }
     }
 }
@@ -582,8 +807,13 @@ export default {
   grid-template-rows: 2fr 1fr;
   grid-template-areas:
   "map map map map"
+  "map map map map"
+  "line line line line"
   "legend time time time"
-  ". scrub scrub ."
+  //". scrub scrub ."
+}
+#line-container {
+  grid-area: line;
 }
 #legend-container {
   grid-area: legend;
@@ -591,7 +821,7 @@ export default {
   height: auto;
 }
 #time-container {
-  grid-area:scrub;
+  grid-area: time;
   margin: 2%;
   margin-bottom: 0;
   margin-right: 5%;
@@ -607,90 +837,30 @@ export default {
 #title-container {
   //width: 100vw;
   height: auto;
-  background-color: #0d5fca;
+  background-color: "pink"; //rgb(237, 237, 237);
   grid-area: title;
-  h1 {
+  h1, h2, h3 {
     width: 95vw;
-    color:white;
+    color:rgb(34, 33, 33);
     height: auto;
-    padding: 10px;
-    padding-left: 15px;
+    padding: 4px;
     
   }
 }
-.track,
-    .track-inset,
-    .track-overlay {
-      stroke-linecap: round;
-    }
-
-    .track {
-      stroke: #000;
-      stroke-opacity: 0.3;
-      stroke-width: 10px;
-    }
-
-    .track-inset {
-      stroke: #dcdcdc;
-      stroke-width: 8px;
-    }
-
-    .track-overlay {
-      pointer-events: stroke;
-      stroke-width: 50px;
-      stroke: transparent;
-      cursor: crosshair;
-    }
-
-    .handle {
-      fill: #fff;
-      stroke: #000;
-      stroke-opacity: 0.5;
-      stroke-width: 1.25px;
-    }
-    #target2{
-      grid-area: time;
-   visibility:hidden;
-   margin:50px;
-   background:yellow;
-   line-height:100px;
-  width: 100px;
-  height: 100px;
+.title {
+  text-align: right;
 }
 
-.range2 {
-    height: 10px;
-    bottom: 14px;
-    border-radius: 5px;
-    background-color: #f1f1f1;
-    position: relative;
-    width: 0;
+// drop shadow on map outline
+#bkgrd-map-grp {
+  filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.15));
+  stroke-width: 0.2;
+  color: "white"
 }
-
-
-#scrub-bar {
-    background-color: #757575;
-    height:10px;
-    float: left;
-    overflow: visible;
-    padding:0;
-    position:relative;
-    width: 400px;
-    margin-top: 20px;
-    margin-left: 15px;
-    border-radius: 5px;
+// annotated timeline
+.liney {
+  stroke-width: 2px;
+  color: #4b4a4a;
 }
-
-.knob2 {
-    text-align: center;
-    width: 15px;
-    height: 15px;
-    position: relative;
-    bottom: 2px;
-    z-index:2;
-    border-radius:50%;
-    background-color: #bdbdbd;
-}
-
 
 </style>
