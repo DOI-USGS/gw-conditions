@@ -13,7 +13,7 @@ import "vuetify/dist/vuetify.min.css";
 import VueCarousel from 'vue-carousel';
 import VueImg from 'v-img';
 import VueSvg from 'vue-svg-loader';
-import gsap from "gsap"
+import gsap from "gsap";
 
 
 // social icons

@@ -64,11 +64,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Abel&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url("https://use.typekit.net/yww2frw.css");
+
 $Abel: 'Abel', sans-serif;
 $Cairo: 'Cairo', sans-serif;
 $Assistant: 'Assistant', sans-serif;
+$Noto: 'Noto Serif', serif;
+$acu_bold: 'acumin-pro', sans-serif;
 
-// Type
 html,
 body {
       height:100%;
@@ -88,7 +92,7 @@ body {
 h1{
   font-size: 3.5em;
   font-weight: 300;
-  font-family: $Abel;
+  font-family: $Assistant;
   line-height: 1;
   text-align: left;
   text-shadow: 1px 1px 100px rgba(0,0,0,.8);
@@ -97,23 +101,25 @@ h1{
   }
 }
 h2{
-  font-weight: 300;
+  font-weight: 400;
   text-align: left;
   font-family:$Assistant;
-  font-size: 1.3em;
+  font-size: 3em;
   margin-top: 5px;
-  line-height: 1.2;
+  line-height: 1;
+  text-shadow: 10px 10px 100px rgba(20, 20, 20, 0.8);
   @media screen and (max-width: 600px) {
     font-size: 2em;
   }
+  padding-left: 1rem;
 }
 h3{
   font-size: 1.5em;
-  padding-top: .5em;
+  padding-top: 0em;
   font-family: $Assistant;
   font-weight: 300;
   @media screen and (max-width: 600px) {
-      font-size: 1.4em;
+      font-size: 1em;
   }  
 }
 p, text {
