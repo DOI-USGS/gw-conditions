@@ -1,18 +1,19 @@
 <template>
   <section>
+    <div id="grid-container">
       <div id="title-container">
         <h2 class="title" id="title-main">U.S. Groundwater Conditions</h2>
         <h3 class="title" id="title-sub">The low down on flow down low</h3>
       </div>
-<div id="grid-container">
     <div id="map-container">
        <GWLmap id="map_gwl" class="map" />
     </div>
     <div id="legend-container" />
     <div id="time-container" />
-    <div id="dot-container" />
     <div id="line-container" />
-    </div>
+    <div id="text-container"> <p>Seitan 8-bit in, veniam pickled pitchfork hammock sustainable aliqua edison bulb. Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
+</p></div>
+</div>
   </section>
 </template>
 <script>
@@ -33,7 +34,7 @@ export default {
       // dimensions
       width: null,
       height: null,
-      margin: { top: 50, right: 50, bottom: 50, left: 50 },
+      margin: { top: 50, right: 0, bottom: 50, left: 0 },
 
       // data mgmt
       quant_peaks: null,
@@ -46,11 +47,36 @@ export default {
       days: null,
 
       peak_grp: null,
-      day_length: 20, // frame duration in milliseconds
+      day_length: 50, // frame duration in milliseconds
       current_time: 0,
+      start: 0,
+      n_days: 367,
       //x:  0,
       sites_list: null,
       //t2: null,
+
+      // style for timeline
+      button_color: "grey",
+      button_hilite: "black",
+
+
+       // TODO: derive from pipeline. inputs are months, day sequence nested w/ key
+      // timeline data
+      months: [
+        { 'name': 'Jan', 'day': '1' },
+        { 'name': 'Feb', 'day': '31' },
+        { 'name': 'Mar', 'day': '60' },
+        { 'name': 'Apr', 'day': '90' },
+        { 'name': 'May', 'day': '120' },
+        { 'name': 'Jun', 'day': '150' },
+        { 'name': 'Jul', 'day': '181' },
+        { 'name': 'Aug', 'day': '210' },
+        { 'name': 'Sept', 'day': '240' },
+        { 'name': 'Oct', 'day': '270' },
+        { 'name': 'Nov', 'day': '300' },
+        { 'name': 'Dec', 'day': '331' },
+        { 'name': 'Jan', 'day': '367' }
+      ],
 
     }
   },
@@ -143,9 +169,7 @@ export default {
 
       // animated bar chart
         this.legendBarChart(this.percData);
-        //this.animateTimeline(); // set up scrubber
-
-        this.drawLine(this.days)
+        this.drawLine(this.days, this.percData)
 
       },
       createPanel(month) {
@@ -154,60 +178,237 @@ export default {
         // add rest of this
         return tl;
       },
-      drawLine(date_range) {
-        //console.log(date_range)
-        var line_width = 900;
-        var line_height = 200;
-        var mar = 25;
+      drawLine(date_range, prop_data) {
+        const self = this;
 
-        var month_list = [1, 30, 61, 80, 110, 140, 170, 200, 230, 261, 291, 322]
-        var month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Oct", "Nov", "Dec"]
+        var line_width = this.width;
+        var line_height = 250;
+        var mar = 50;
 
+      // set up svg for timeline
       var svg = this.d3.select("#line-container")
         .append("svg")
-        .attr("width", "100vw")
-        .attr("height", line_height)
+        .attr("width", "100%")
+        //.attr("height", line_height)
+        .attr("preserveAspectRatio", "xMinYMin meet")
+        .attr("viewbox", "0 0 " + line_width + " " + line_height)
         .attr("id", "x-line")
 
-        // scale space
+      // scale space
       var xScale = this.d3.scaleLinear()
-        .domain([Math.min(date_range), Math.max(date_range)])
+        .domain([1, 367])
         .range([mar, line_width-mar])
 
-      // axes
+      // define axes
       var xLine = this.d3.axisBottom()
         .scale(xScale)
         .ticks(0).tickSize(0);
 
+      // draw axes
       var liney = svg.append("g")
-        //.attr("transform", "translate(0," + 170 + ")")
-        //.classed("x-line", true)
         .call(xLine)
-        .attr("transform", "translate(0," + 20 + ")")
+        .attr("transform", "translate(0," + 130 + ")")
         .classed("liney", true)
 
-      liney.select("path")
+      // style axes
+      liney.select("path.domain")
+        .attr("id", "timeline-x")
         .attr("color", "lightgrey")
         .attr("stroke-width", "3px")
-        //add ticks for each month
-        // add ticks for given dates, or periods?
-        // make them glowy buttons
 
-        var button = this.d3.button()
-        .on('press', function(d, i) { console.log("Pressed", d, i, this.parentNode)})
-        .on('release', function(d, i) { console.log("Released", d, i, this.parentNode)});
-var data = [{label: "Click me",     x: width / 4, y: height / 4 },
-            {label: "Click me too", x: width / 2, y: height / 2 }];
-      var buttons = svg.selectAll('.button')
-      .data(data)
+    // timeline events/"buttons"
+      var button_month = svg.append("g")
+      .classed("#btn-month", true)
+      .attr("transform", "translate(0," + 130 + ")")
+      .attr("z-index", 100)
+
+    // month points on timeline
+    // TODO: make functions that accept any date and label
+      button_month.selectAll(".button_inner")
+      .data(this.months).enter()
+      .append("circle")
+      .attr("class", function(d,i) { return "button_inner inner_" + d.name + " " + d.name } ) 
+      .attr("r", 3)
+      .attr("cx", function(d) { return xScale(d.day) })
+      .attr("cy", 0)
+      .attr("stroke", this.button_color)
+      .attr("stroke-width", "2px")
+      .attr("fill", this.button_color)
+      .on('click', function(d, i) {
+        //self.moveTimeline(d); // requires gsap for playback control or some way to cancel playback loop partway
+      })
+      .on('mouseover', function(d, i) {
+        self.buttonSelect(d);
+      })
+      .on('mouseout', function(d, i) {
+        self.buttonDeSelect(d);
+      })
+
+      // month labels
+      button_month.selectAll(".button_name")
+      .data(this.months)
       .enter()
-      .append('g')
-      .attr('class', 'button')
-      .call(button);
+      .append("text")
+      .attr("class", function(d,i) { return "button_name name_" + d.name + " " + d.name } ) 
+      .attr("x", function(d) { return xScale(d.day)-12 }) // centering on pt
+      .attr("y", 25)
+      .attr("stroke", this.button_color)
+      .text(function(d, i) { return d.name })
+      .attr("text-align", "middle")
+      .on('click', function(d, i) {
+        //self.moveTimeline(d);
+      })
+      .on('mouseover', function(d, i) {
+        self.buttonSelect(d);
+      })
+      .on('mouseout', function(d, i) {
+        self.buttonDeSelect(d);
+      })
+
+      // year annotations
+      // TODO: derive from data input via pipeline
+      button_month
+      .append("text")
+      .attr("class", function(d,i) { return "button_year" } ) 
+      .attr("x", function(d) { return xScale(1)-10 }) // centering on pt
+      .attr("y", 45)
+      .attr("stroke", this.button_color)
+      .text(function(d, i) { return 2021 })
+
+      button_month
+      .append("text")
+      .attr("class", function(d,i) { return "button_year" } ) 
+      .attr("x", function(d) { return xScale(367)-10 }) // centering on pt
+      .attr("y", 45)
+      .attr("stroke", this.button_color)
+      .text(function(d, i) { return 2022 })
+
+      button_month
+      .append("text")
+      .attr("class", function(d,i) { return "button_year" } ) 
+      .attr("x", function(d) { return xScale(1)-10 }) // centering on pt
+      .attr("y", -110)
+      .attr("stroke", this.button_color)
+      .text(function(d, i) { return "Proportion of wells" })
+
+      // add line chart
+       // line chart showing proportion of gages in each category
+         var line_chart = svg.append("g")
+          .classed("time-chart", true)
+          .attr("id", "time-legend")
+          .attr("transform", "translate(0," + 30 + ")")
+
+        var y = this.d3.scaleLinear()
+        .domain([0, 0.5])
+        .range([100, 0])
+
+        var bar_color = this.d3.scaleOrdinal()
+        .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
+        .range(["#1A3399","#479BC5","#D1ECC9","#C1A53A","#7E1900"])
+
+        var line = this.d3.line()
+          .defined(d => !isNaN(d))
+          .x((d, i) => xScale(this.days[i]))
+          .y(d => y(d))
+
+        // add line chart
+        const path = line_chart.append("g")
+            .attr("fill", "none")
+            .attr("stroke-linejoin", "round")
+            .attr("stroke-linecap", "round")
+          .selectAll("path")
+          .data(prop_data)
+          .join("path")
+          .attr("d", d => line(d.perc))
+          .attr("stroke", function(d) { return bar_color(d.key_quant) })
+          .attr("stroke-width", "3px")
+          .attr("opacity", 0.7);
+
+      // aimate line to time
+      var start = this.start;
+
+       line_chart.append("rect")
+          .data(this.days)
+          .classed("hilite", true)
+          .attr("transform", "translate(0, 0)") 
+          .attr("width", "5")
+          .attr("height", "100")
+          .attr("opacity", 0.5)
+          .attr("fill", "grey")
+          .attr("x", xScale(this.days[start]))
+         
+        this.animateLine(start)
+
 
       },
+      animateLine(start){
+        // animates grey line on timeseries chart to represent current timepoint
+        var line_width = 1100;
+        var line_height = 200;
+        var mar = 50;
+
+        var x = this.d3.scaleLinear()
+        .domain([1, this.n_days])
+        .range([mar, line_width-mar])
+
+        if (start < this.n_days){
+          this.d3.selectAll(".hilite")
+          .transition()
+            .duration(this.day_length) 
+            .attr("x", x(this.days[start]))
+          .end()
+          .then(() => this.animateLine(start+1))
+        } else {
+        this.d3.selectAll(".hilite")
+          .transition()
+          .duration(this.day_length) 
+          .attr("x", x(this.days[this.n_days]))
+      }
+      },
+      buttonSelect(d){
+        // highlight on timeline when hovered
+        this.d3.selectAll("." + d.name)
+        .transition()
+        .duration(100)
+        .attr("stroke", this.button_hilite)
+
+        this.d3.selectAll(".inner_" + d.name )
+        .transition()
+        .duration(100)
+        .attr("r", 6)
+        .attr("fill", this.button_hilite)
+        .attr("stroke", this.button_hilite)
+      },
+      buttonDeSelect(d){
+        // unhighlight on mouseout
+        this.d3.selectAll(".button_name")
+        .transition()
+        .duration(100)
+        .attr("stroke", this.button_color)
+        .attr("fill", this.button_color)
+
+      this.d3.selectAll(".button_inner")
+        .transition()
+        .duration(100)
+        .attr("stroke", this.button_color)
+        .attr("fill", this.button_color)
+
+        this.d3.selectAll(".inner_" + d.name )
+        .transition()
+        .duration(100)
+        .attr("r", 3)
+        .attr("fill", this.button_color)
+        .attr("stroke", this.button_color)
+      },
+  /*     moveTimeline(d){
+        this.start = d.day;
+        this.animateLine(this.start)
+
+      }, */
       initTime(){
-        var tl_jan = new TimelineMax(); //TimelineMax permits repeating animation
+        // TO DO: init nested timelines for playback control
+        // broken up by month and tagged for user control
+        var tl_jan = new TimelineMax(); // TimelineMax permits repeating animation
         var tl_feb = new TimelineMax();
         var tl_mar = new TimelineMax();
         var tl_apr = new TimelineMax();
@@ -219,11 +420,9 @@ var data = [{label: "Click me",     x: width / 4, y: height / 4 },
         var tl_oct = new TimelineMax()
         var tl_nov = new TimelineMax()
         var tl_dec = new TimelineMax()
-        // separate timelines for each month
-
-        createPanel(".gwl_")
 
         // add to parent timeline
+        // this timeline is used to set timing, duration, speed, stop/start, and keep everythign synchronized
         var master = new TimelineMax();
         master.add(tl_jan)
         .add(tl_feb)
@@ -236,244 +435,55 @@ var data = [{label: "Click me",     x: width / 4, y: height / 4 },
         .add(tl_sep)
         .add(tl_oct)
         .add(tl_nov)
-        .add(tl_dec) // nest sites wtihin each month?
+        .add(tl_dec) 
 
-      },
-      animateTimeline(){
-        // create props
-        //let target2 = this.d3.selectAll(".bars");
-        let knob2 = document.getElementById("knob2");
-        let knob2Rect = knob2.getBoundingClientRect();
-        let volumeBar = document.getElementById("scrub-bar");
-        let volRect = volumeBar.getBoundingClientRect();
-        let range2 = document.getElementById("range2");
-
-        // scales
-        var w = 200;
-        var h = 110;
-
-        var xScale = this.d3.scaleLinear()
-        .domain([0, 0.5])
-        .range([0, w])
-
-      // scale to convert x position to time?
-        //var 
-
-        // create dragggable selector
-        Draggable.create(knob2, {
-          type: "x", 
-          trigger: "#scrub-bar",
-          bounds:  "#scrub-bar",
-          edgeResistance: 1,
-          lockAxis: true,
-          cursor: "pointer",
-          onDrag: updateRange,
-          onPress: updateRange,
-          onClick: updatePosition,
-          //onComplete: console.log(this.x),
-
-        });
-
-        // init timeline
-        let t2 = new TimelineMax({paused:true, duration: 0.001, repeat: -1});
- 
-        // array of units to loop across - gage sites / categories
-        var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
-        for(var i=0;i<quant_cat.length;i++){
-            quant_cat[i]="rect#"+quant_cat[i];
-        }
-
-        var xScale = this.d3.scaleLinear()
-        .domain([0,0.5])
-        .range([0, 225])
-
-        var w = 600; // for hilite bar
-
-        // line chart showing proportion of gages in each catego
-        var xpos = this.d3.scaleLinear()
-        .domain([1, 365])
-        .range([5, w-5])
-        
-        var name_in = 'path.' + this.sites_list[210];
-
-        this.d3.select(name_in)
-        .classed("bigbaby", true)
-        .attr("fill", "purple")
-        .attr("opacity", 1)
-
-        // timeline driving animation of multiple objects
-        var time_now = 0;
-        t2.to(quant_cat, {  width: i => xScale(this.percData[i].perc[time_now]) }); // many things at once but only for a day
-
-        for (i = 0; i < 366; i += 1) {
-           var time_now = time_now + 1;
-           t2
-           .to(quant_cat[0], {  width: xScale(this.percData[0].perc[time_now])}, time_now)
-           .to(quant_cat[1], {  width: xScale(this.percData[1].perc[time_now])}, time_now)
-           .to(quant_cat[2], {  width: xScale(this.percData[2].perc[time_now])}, time_now)
-           .to(quant_cat[3], {  width: xScale(this.percData[3].perc[time_now])}, time_now)
-           .to(quant_cat[4], {  width: xScale(this.percData[4].perc[time_now])}, time_now) 
-           .to(".hilite", { x: xpos(time_now) }, time_now)
-           
-
-           /* for (let j = 0; j < this.sites_list.length; j++) {
-             //console.log(this.peaky[j].gwl[time_now])
-
-            t2.to('path.' + this.sites_list[j], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[j].gwl[time_now] + " 10 0 Z" }, position: time_now 
-            })
-           } */
-
-           /* t2 
-           .to('path.' + this.sites_list[211], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[211].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[212], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[212].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[213], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[213].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[214], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[214].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[215], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[215].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[216], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[216].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[217], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[217].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[218], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[218].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[219], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[219].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1210], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1210].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1211], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1211].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1212], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1212].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1213], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1213].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1214], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1214].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1215], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1215].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1216], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1216].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1217], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[217].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1218], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1218].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1219], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1219].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1210], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1210].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1211], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1211].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[312], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[312].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[313], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[323].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[314], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[314].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[315], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[315].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[316], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[316].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[2317], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[317].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[318], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[318].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[319], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[319].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[211], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[411].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[414], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[414].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[413], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[413].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[414], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[414].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[415], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[415].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[416], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[416].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[417], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[417].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[418], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[418].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[419], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[419].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1410], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1410].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1411], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1411].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1414], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1414].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1413], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1413].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1414], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1414].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1415], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1415].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1416], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1416].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1417], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[417].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1418], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1418].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1419], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1419].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1410], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1410].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1411], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1211].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[512], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[512].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[515], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[525].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[514], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[514].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[515], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[515].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[516], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[516].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[517], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[517].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[518], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[518].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[519], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[519].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[611], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[611].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[612], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[612].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[613], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[613].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[614], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[614].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[615], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[615].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[616], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[616].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[617], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[617].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[618], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[618].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[619], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[619].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1610], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1610].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1611], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1611].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1616], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1616].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1613], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1613].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1614], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1614].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1615], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1615].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1616], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1616].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1617], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[617].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1618], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1618].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1619], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1619].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1610], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1610].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[1611], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[1611].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[716], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[716].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[717], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[717].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[714], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[714].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[715], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[715].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[716], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[716].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[717], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[717].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[718], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[718].gwl[time_now] + " 10 0 Z" },position: time_now })
-           .to('path.' + this.sites_list[719], { attr: { d: "M-10 0 C -10 0 0 " + this.peaky[719].gwl[time_now] + " 10 0 Z" },position: time_now }) */
-        }
-
-         
-
-         t2.duration(0.0005).play();
-  
-        // struggling to figure out how to write this loop
-        // need to use 'add' or 'to' to add targets to the timeline for each day tween
-        // that uses integers 1:end to index data values for each i (site)
-        // want to be able to use playback controls
-      
-        function updatePosition () {
-  
-          knob2Rect = knob2.getBoundingClientRect();
-          volRect = volumeBar.getBoundingClientRect();
-          
-          TweenMax.set(knob2, { x: this.pointerX - volRect.left - knob2Rect.width / 2 });
-          TweenMax.set(range2, { width: knob2Rect.left + knob2Rect.width - volRect.left });
-
-          updateRange();
-  
-      };
-      function updateRange () {
-        const self = this;
-        
-        var x = this.x;
-        if (x < 0.0001 && x > -0.0001) {
-        x = 0;
-        }
-        
-        let volRect = volumeBar.getBoundingClientRect();
-        let knob2Rect = knob2.getBoundingClientRect();
-        
-        t2.progress(x / (volRect.width - knob2Rect.width));
-        
-        TweenMax.set(range2, { width: knob2Rect.left + knob2Rect.width - volRect.left });
-
-        };
       },
       makeLegend(){
 
-        var legend_height = 250;
-        var legend_width = 400;
+        var legend_height = 150;
+        var legend_width = 220;
 
         // make a legend 
           var legend_peak = this.d3.select("#legend-container")
           .append("svg")
           .attr("width", legend_width)
           .attr("height", legend_height)
-          .attr("id", "map-legend")
+          .attr("id", "map-legend") 
+          .attr("preserveAspectRatio", "xMinYMin meet")
+          .attr("viewbox", "0 0 " + legend_width + " " + legend_height)
           .append("g").classed("legend", true)
+          .attr("transform", "translate(100, 0)")
+                  
+          var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
+          var shape_dist = [5,25,42,42,60,83,103]; // y positioning (normal has 2 shapes butted together)
+          var perc_label = ["0 - 0.1", "0.1 - 0.25" ,"0.25 - 0.75", "0.75 - 0.9", "0.9+"]
 
-          var legend_keys = ["Very low", "Low", "Normal", "High","Very high"];
-          var shape_dist = [5,25,42,42,60,83,103];
+        // draw path shapes and labels
+        legend_peak
+        .append("text")
+        .text("GWL")
+        .attr("x", -20)
+        .attr("y", "30")
+        .style("font-size", "20")
+        .style("font-weight", 700)
+        .attr("text-anchor", "end")
 
-        // draw path shapes
+        legend_peak
+        .append("text")
+        .text("Percentile")
+        .attr("x", 105)
+        .attr("y", "30")
+        .style("font-size", "20")
+        .style("font-weight", 700)
+        .attr("text-anchor", "end")
+        
         legend_peak.selectAll("peak_symbol")
           .data(this.quant_peaks)
           .enter()
           .append("path")
             .attr("fill", function(d){return d["color"]})
             .attr("d", function(d){return d["path_quant"]})
-            .attr("transform", function(d, i){return "translate(130, " + (150-shape_dist[i]) + ") scale(.8)"})
+            .attr("transform", function(d, i){return "translate(0, " + (140-shape_dist[i]) + ") scale(.8)"})
             .attr("id", function(d){return d["quant"]})
             .attr("class", "peak_symbol")
 
@@ -482,19 +492,30 @@ var data = [{label: "Click me",     x: width / 4, y: height / 4 },
           .data(legend_keys)
           .enter()
           .append("text")
-            .attr("x", 110)
-            .attr("y", function(d,i){ return 150 - (i*22)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("x", -20)
+            .attr("y", function(d,i){ return 140 - (i*22)}) // 100 is where the first dot appears. 25 is the distance between dots
             .text(function(d){ return d})
             .attr("text-anchor", "end")
             .style("alignment-baseline", "middle")
 
+         legend_peak.selectAll("percLabels")
+          .data(perc_label)
+          .enter()
+          .append("text")
+            .attr("x", 20)
+            .attr("y", function(d,i){ return 140 - (i*22)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .text(function(d){ return d})
+            .attr("text-anchor", "start")
+            .style("alignment-baseline", "middle")
+
       },
       drawFrame1(data){         
+        // draw the first frame of the animation
         const self = this;
 
           // select existing paths using class
           // was dropping positioning because svg-loader and svgo are cleaning out <g>s?
-          var start = 0;
+          var start = this.start;
             this.peak_grp = this.svg.selectAll("path.peak")
               .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
               .join("path") // match with selection
@@ -506,32 +527,30 @@ var data = [{label: "Click me",     x: width / 4, y: height / 4 },
              .attr("fill", function(d) { return self.quant_color(d.gwl[0]) }) // this is not exactly right
              .attr("stroke-width", "1px")
              .attr("opacity", ".5")
-             .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
+             .attr("d", function(d) { return "M-7 0 C -7 0 0 " + d.gwl[start]*1.5 + " 7 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
           this.animateGWL(start); // once sites are drawn, trigger animation
-          this.legendBarChart(this.percData, start);
-          this.legendTimeChart(this.percData, start);
+          //this.legendBarChart(this.percData, start);
       },
       animateGWL(start){
          const self = this;
-        // animate path d and fill by wy day    
-        if (start < 364){
+      // animate path d and fill by wy day    
+        if (start < this.n_days ){
       // transition through days in sequence
         this.peak_grp
         .transition()
         .duration(this.day_length)  // duration of each day
         .attr("d", function(d) { return "M-7 0 C -7 0 0 " + d.gwl[start]*1.5 + " 7 0 Z" })
-        .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) // this is not exactly right
+        .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
         .end()
         .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 wyday
-        // TODO: check why there are 367 days
 
         } else {
       // if it's the last day of the water year, stop animation 
        this.peak_grp
           .transition()
           .duration(this.day_length)  // duration of each day
-          .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[364] + " 10 0 Z" })
+          .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[this.n_days] + " 10 0 Z" })
         }
 
       },
@@ -559,7 +578,8 @@ var data = [{label: "Click me",     x: width / 4, y: height / 4 },
         .append("g")
         .classed("bar-chart", true)
 
-        svg.selectAll("rect")
+        // the dancing bar chart legend
+        /* svg.selectAll("rect")
           .data(data)
           .enter()
           .append("rect")
@@ -577,25 +597,25 @@ var data = [{label: "Click me",     x: width / 4, y: height / 4 },
           .attr("id", function(d){ return d.key_quant})
           .attr("height", "12")
           .attr("fill", function(d) { return bar_color(d.key_quant) })
-          .attr("opacity", 0.8)
+          .attr("opacity", 0.8) */
 
           // axes
-          var xAxis = this.d3.axisBottom()
+    /*       var xAxis = this.d3.axisBottom()
           .scale(xScale)
           .ticks(5);
 
           svg.append("g")
           .attr("transform", "translate(150," + 170 + ")")
           .classed("x-axis", true)
-          .call(xAxis)
+          .call(xAxis) */
 
           // then animate it
           this.animateBarChart(start);
 
       },
       animateBarChart(start){
-        
-         var xScale = this.d3.scaleLinear()
+
+        var xScale = this.d3.scaleLinear()
         .domain([0,0.5])
         .range([0, 225])
 
@@ -624,232 +644,76 @@ var data = [{label: "Click me",     x: width / 4, y: height / 4 },
           })
       }
 
-      },
-      legendTimeChart(data, start){
-        // scales
-        var w = 600;
-        var h = 300;
-
-        // line chart showing proportion of gages in each category
-        var svg = this.d3.select("#time-container")
-          .append("svg")
-          .attr("width", w)
-          .attr("height", h)
-          .attr("id", "time-legend")
-          .append("g").classed("time-chart", true)
-
-
-        var x = this.d3.scaleLinear()
-        .domain([1, 365])
-        .range([5, w-5])
-
-        var y = this.d3.scaleLinear()
-        .domain([0, 0.5])
-        .range([150, 50])
-
-        var bar_color = this.d3.scaleOrdinal()
-        .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
-        .range(["#1A3399","#479BC5","#D1ECC9","#C1A53A","#7E1900"])
-
-        var line = this.d3.line()
-          .defined(d => !isNaN(d))
-          .x((d, i) => x(this.days[i]))
-          .y(d => y(d))
-
-        // add line chart
-      const path = svg.append("g")
-          .attr("fill", "none")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-linecap", "round")
-        .selectAll("path")
-        .data(data)
-        .join("path")
-        .attr("d", d => line(d.perc))
-        .attr("stroke", function(d) { return bar_color(d.key_quant) })
-        .attr("stroke-width", "3px")
-        .attr("opacity", 0.7);
-
-        var xAxis = this.d3.axisBottom()
-          .scale(x)
-          .ticks(5);
-
-        svg.append("g")
-          .classed("x-axis", true)
-          .attr("transform", "translate(0," + 155 + ")")
-          .call(xAxis.tickPadding(4).tickSize(0).tickValues([1,365]))
-
-          var start = 0;
-
-        svg.append("rect")
-          .data(this.days)
-          .classed("hilite", true)
-          .attr("transform", "translate(5, 35)") 
-          .attr("width", "5")
-          .attr("height", "120")
-          .attr("opacity", 0.5)
-          .attr("fill", "grey")
-          .attr("x", x(this.days[start]))
-
-          //var slider = svg.append("g")
-          //.attr("class", "slider")
-          //.attr("transform", "translate(" + 50 + "," + h/5 + ")");
-
-          //slider.append("line")
-           // .attr("class", "track")
-           // .attr("x1", x.range()[0])
-           // .attr("x2", x.range()[1])
-         
-          this.animateTime(start)
-      },
-      animateTime(start){
-        var w = 600;
-        var h = 300;
-
-        var x = this.d3.scaleLinear()
-        .domain([1, 365])
-        .range([5, w-5])
-
-        if (start < 364){
-        this.d3.selectAll(".hilite")
-         .transition()
-          .duration(this.day_length) 
-          .attr("x", x(this.days[start]))
-        .end()
-        .then(() => this.animateTime(start+1))
-      } else {
-       this.d3.selectAll(".hilite")
-        .transition()
-        .duration(this.day_length) 
-        .attr("x", x(this.days[364]))
-      }
-  },
-  legendDot(data, start){
-        // scales
-        var w = 600;
-        var h = 300;
-
-        // line chart showing proportion of gages in each category
-        var svg = this.d3.select("#dot-container")
-          .append("svg")
-          .attr("width", w)
-          .attr("height", h)
-          .attr("id", "dot-legend")
-          .append("g").classed("dot-chart", true)
-
-
-        var x = this.d3.scaleLinear()
-        .domain([1, 365])
-        .range([5, w-5])
-
-        var y = this.d3.scaleLinear()
-        .domain([0, 0.5])
-        .range([150, 50])
-
-        var bar_color = this.d3.scaleOrdinal()
-        .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
-        .range(["#1A3399","#479BC5","#D1ECC9","#C1A53A","#7E1900"])
-
-        // add line chart
-      const path = svg.append("g")
-        .selectAll("circle")
-        .data(data)
-        .join("circle")
-        .attr("fill", function(d) { return bar_color(d.key_quant) })
-        .attr("opacity", 0.7)
-        .attr("r", 0.7);
-
-        var xAxis = this.d3.axisBottom()
-          .scale(x)
-          .ticks(5);
-
-        var start = 0;
-
-        svg.append("circle")
-          .data(this.days)
-          .classed("hilite", true)
-          .attr("transform", "translate(5, 35)") 
-          .attr("width", "5")
-          .attr("height", "120")
-          .attr("opacity", 0.5)
-          .attr("fill", "grey")
-          .attr("x", x(this.days[start]))
-
-          this.animateDot(start)
       }
     }
 }
 </script>
 <style scoped lang="scss">
-#map-container{
-  width: auto;
-  //height: 85vh;
-  margin-left: 5%;
-  margin-top: 2%;
-  margin-bottom: 0;
-  position: relative;
-  grid-area: map;
 
-    .map {
-    position: relative;
-    left:0;
-    top: 0;
-    width: 90vw;
-    max-width: 1000px;
-    max-height: 600px;
-    height: auto;
-
-  }
-}
 // each piece is a separate div that can be positioned or overlapped with grid
+// mobile first
 #grid-container {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-template-rows: 2fr 1fr;
+  width: 100%;
+  vertical-align: middle;
+  overflow: hidden;
   grid-template-areas:
-  "map map map map"
-  "map map map map"
-  "line line line line"
-  "legend time time time"
-  //". scrub scrub ."
+  "title title"
+  "text legend"
+  "map map"
+  "line line"
+}
+#map-container{
+  grid-area: map;
+    .map {
+      padding: 1rem;
+  }
+}
+#text-container {
+  grid-area: text;
+  padding:20px;
+  padding-top: 0px;
+  // controlling positioning within div as page scales
+  display: flex;
+  justify-content: center;
+  align-items: top;
 }
 #line-container {
   grid-area: line;
+  margin-bottom: 20px;
+/*   display: flex;
+  justify-content: center;
+  align-items: center; */
+
+  svg {
+  }
 }
 #legend-container {
   grid-area: legend;
-  margin-bottom: 0;
-  height: auto;
+  display: flex;
+  justify-content: end;
+  align-items: start;
 }
 #time-container {
   grid-area: time;
   margin: 2%;
-  margin-bottom: 0;
-  margin-right: 5%;
-  height: auto;
-}
-#scrub-bar {
-  grid-area: time;
-  margin: 2%;
-  margin-bottom: 0;
+  margin-bottom: 2px;
   margin-right: 5%;
   height: auto;
 }
 #title-container {
-  //width: 100vw;
+  padding:20px;
+  padding-bottom: 0px;
   height: auto;
-  background-color: "pink"; //rgb(237, 237, 237);
   grid-area: title;
   h1, h2, h3 {
     width: 95vw;
     color:rgb(34, 33, 33);
     height: auto;
     padding: 4px;
-    
   }
 }
-.title {
-  text-align: right;
-}
+
 
 // drop shadow on map outline
 #bkgrd-map-grp {
@@ -861,6 +725,28 @@ var data = [{label: "Click me",     x: width / 4, y: height / 4 },
 .liney {
   stroke-width: 2px;
   color: #4b4a4a;
+}
+
+// desktop
+@media (min-width:1024px) {
+  #grid-container {
+    grid-template-columns: 3fr 1fr;
+    grid-template-areas:
+    "title title"
+    "map legend"
+    "map text"
+    "map text"
+    "line line"
+  }
+  .title {
+  text-align: right;
+  }
+  #legend-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+  }
 }
 
 </style>
