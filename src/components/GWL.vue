@@ -9,7 +9,6 @@
        <GWLmap id="map_gwl" class="map" />
     </div>
     <div id="legend-container" />
-    <div id="time-container" />
     <div id="line-container" />
     <div id="text-container"> <p>Seitan 8-bit in, veniam pickled pitchfork hammock sustainable aliqua edison bulb. Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
 </p></div>
@@ -167,8 +166,7 @@ export default {
         this.makeLegend();
         this.drawFrame1(this.peaky);
 
-      // animated bar chart
-        this.legendBarChart(this.percData);
+      // animated time chart
         this.drawLine(this.days, this.percData)
 
       },
@@ -191,7 +189,7 @@ export default {
         .attr("width", "100%")
         //.attr("height", line_height)
         .attr("preserveAspectRatio", "xMinYMin meet")
-        .attr("viewbox", "0 0 " + line_width + " " + line_height)
+        .attr("viewBox", "0 0 " + line_width + " " + line_height)
         .attr("id", "x-line")
 
       // scale space
@@ -207,7 +205,7 @@ export default {
       // draw axes
       var liney = svg.append("g")
         .call(xLine)
-        .attr("transform", "translate(0," + 130 + ")")
+        .attr("transform", "translate(0," + 100 + ")")
         .classed("liney", true)
 
       // style axes
@@ -219,7 +217,7 @@ export default {
     // timeline events/"buttons"
       var button_month = svg.append("g")
       .classed("#btn-month", true)
-      .attr("transform", "translate(0," + 130 + ")")
+      .attr("transform", "translate(0," + 100 + ")")
       .attr("z-index", 100)
 
     // month points on timeline
@@ -296,7 +294,7 @@ export default {
          var line_chart = svg.append("g")
           .classed("time-chart", true)
           .attr("id", "time-legend")
-          .attr("transform", "translate(0," + 30 + ")")
+          .attr("transform", "translate(0," + 0 + ")")
 
         var y = this.d3.scaleLinear()
         .domain([0, 0.5])
@@ -324,7 +322,7 @@ export default {
           .attr("stroke-width", "3px")
           .attr("opacity", 0.7);
 
-      // aimate line to time
+      // animate line to time
       var start = this.start;
 
        line_chart.append("rect")
@@ -441,7 +439,7 @@ export default {
       makeLegend(){
 
         var legend_height = 150;
-        var legend_width = 220;
+        var legend_width = 240;
 
         // make a legend 
           var legend_peak = this.d3.select("#legend-container")
@@ -452,7 +450,7 @@ export default {
           .attr("preserveAspectRatio", "xMinYMin meet")
           .attr("viewbox", "0 0 " + legend_width + " " + legend_height)
           .append("g").classed("legend", true)
-          .attr("transform", "translate(100, 0)")
+          .attr("transform", "translate(90, 0)")
                   
           var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
           var shape_dist = [5,25,42,42,60,83,103]; // y positioning (normal has 2 shapes butted together)
@@ -552,98 +550,6 @@ export default {
           .duration(this.day_length)  // duration of each day
           .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[this.n_days] + " 10 0 Z" })
         }
-
-      },
-      legendBarChart(data, start){
-        // bar chart showing proportion of gages in each category
-
-        // scales
-        var w = 200;
-        var h = 110;
-
-        var xScale = this.d3.scaleLinear()
-        .domain([0, 0.5])
-        .range([0, w])
-
-        var yScale = this.d3.scaleBand()
-        .domain(["Veryhigh", "High", "Normal", "Low", "Verylow"])
-        .range([h, 0])
-
-        var bar_color = this.d3.scaleOrdinal()
-        .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
-        .range(["#1A3399","#479BC5","#D1ECC9","#C1A53A","#7E1900"])
-
-        // add bar chart
-        var svg = this.d3.select("#map-legend")
-        .append("g")
-        .classed("bar-chart", true)
-
-        // the dancing bar chart legend
-        /* svg.selectAll("rect")
-          .data(data)
-          .enter()
-          .append("rect")
-          .classed("bars", true)
-          .attr("width", function(d) {
-            return xScale(d.perc[start]);
-          })
-          .attr("y", function(d, i) {
-            return 146 - yScale(d.key_quant)
-          })
-          .attr("x", function(d) {
-            //return w + xScale(d.perc[start])
-            return 150
-          })
-          .attr("id", function(d){ return d.key_quant})
-          .attr("height", "12")
-          .attr("fill", function(d) { return bar_color(d.key_quant) })
-          .attr("opacity", 0.8) */
-
-          // axes
-    /*       var xAxis = this.d3.axisBottom()
-          .scale(xScale)
-          .ticks(5);
-
-          svg.append("g")
-          .attr("transform", "translate(150," + 170 + ")")
-          .classed("x-axis", true)
-          .call(xAxis) */
-
-          // then animate it
-          this.animateBarChart(start);
-
-      },
-      animateBarChart(start){
-
-        var xScale = this.d3.scaleLinear()
-        .domain([0,0.5])
-        .range([0, 225])
-
-        if (start < 364){
-        this.d3.selectAll(".bars")
-         .transition()
-          .duration(this.day_length) 
-           .attr("x", function(d) {
-            return 150
-          })
-          .attr("width", function(d) {
-            return xScale(d.perc[start]);
-          })
-        .end()
-        .then(() => this.animateBarChart(start+1))
-      } else {
-       this.d3.selectAll(".bars")
-        .transition()
-        .duration(this.day_length) 
-        .ease(this.d3.easeCubic)
-        .attr("x", function(d) {
-            return 150
-          })
-          .attr("width", function(d) {
-            return xScale(d.perc[364]);
-          })
-      }
-
       }
     }
 }
@@ -654,6 +560,7 @@ export default {
 // mobile first
 #grid-container {
   display: grid;
+  padding: 1rem;
   width: 100%;
   vertical-align: middle;
   overflow: hidden;
@@ -691,8 +598,8 @@ export default {
 #legend-container {
   grid-area: legend;
   display: flex;
-  justify-content: end;
-  align-items: start;
+  justify-content: flex-end;
+  align-items: flex-start;
 }
 #time-container {
   grid-area: time;
