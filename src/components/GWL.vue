@@ -181,13 +181,12 @@ export default {
 
         var line_width = this.width;
         var line_height = 250;
-        var mar = 50;
+        var mar = 20;
 
       // set up svg for timeline
       var svg = this.d3.select("#line-container")
         .append("svg")
         .attr("width", "100%")
-        //.attr("height", line_height)
         .attr("preserveAspectRatio", "xMinYMin meet")
         .attr("viewBox", "0 0 " + line_width + " " + line_height)
         .attr("id", "x-line")
@@ -195,7 +194,7 @@ export default {
       // scale space
       var xScale = this.d3.scaleLinear()
         .domain([1, 367])
-        .range([mar, line_width-mar])
+        .range([mar, line_width-2*mar])
 
       // define axes
       var xLine = this.d3.axisBottom()
@@ -276,14 +275,14 @@ export default {
       button_month
       .append("text")
       .attr("class", function(d,i) { return "button_year" } ) 
-      .attr("x", function(d) { return xScale(367)-10 }) // centering on pt
+      .attr("x", function(d) { return xScale(367)-20 }) // centering on pt
       .attr("y", 45)
       .attr("stroke", this.button_color)
       .text(function(d, i) { return 2022 })
 
       button_month
       .append("text")
-      .attr("class", function(d,i) { return "button_year" } ) 
+      .attr("class", function(d,i) { return "axis_label" } ) 
       .attr("x", function(d) { return xScale(1)-10 }) // centering on pt
       .attr("y", -110)
       .attr("stroke", this.button_color)
@@ -328,7 +327,7 @@ export default {
        line_chart.append("rect")
           .data(this.days)
           .classed("hilite", true)
-          .attr("transform", "translate(0, 0)") 
+          .attr("transform", "translate(1, 0)") 
           .attr("width", "5")
           .attr("height", "100")
           .attr("opacity", 0.5)
@@ -525,7 +524,7 @@ export default {
              .attr("fill", function(d) { return self.quant_color(d.gwl[0]) }) // this is not exactly right
              .attr("stroke-width", "1px")
              .attr("opacity", ".5")
-             .attr("d", function(d) { return "M-7 0 C -7 0 0 " + d.gwl[start]*1.5 + " 7 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
+             .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start]*1.5 + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
           this.animateGWL(start); // once sites are drawn, trigger animation
           //this.legendBarChart(this.percData, start);
@@ -560,7 +559,7 @@ export default {
 // mobile first
 #grid-container {
   display: grid;
-  padding: 1rem;
+  padding-right: 2rem;
   width: 100%;
   vertical-align: middle;
   overflow: hidden;
@@ -572,14 +571,16 @@ export default {
 }
 #map-container{
   grid-area: map;
+  padding: 1rem;
+  padding-right: 2rem;
     .map {
-      padding: 1rem;
   }
 }
 #text-container {
   grid-area: text;
   padding:20px;
   padding-top: 0px;
+  padding-right: 2rem;
   // controlling positioning within div as page scales
   display: flex;
   justify-content: center;
@@ -587,26 +588,17 @@ export default {
 }
 #line-container {
   grid-area: line;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 /*   display: flex;
   justify-content: center;
   align-items: center; */
 
-  svg {
-  }
 }
 #legend-container {
   grid-area: legend;
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
-}
-#time-container {
-  grid-area: time;
-  margin: 2%;
-  margin-bottom: 2px;
-  margin-right: 5%;
-  height: auto;
 }
 #title-container {
   padding:20px;
@@ -634,6 +626,7 @@ export default {
   color: #4b4a4a;
 }
 
+
 // desktop
 @media (min-width:1024px) {
   #grid-container {
@@ -654,6 +647,18 @@ export default {
     align-items: center;
 
   }
+  #line-container {
+  grid-area: line;
+  margin-bottom: 10px;
+  margin-left: 10px;
+
+/*   display: flex;
+  justify-content: center;
+  align-items: center; */
+
+  svg {
+  }
+}
 }
 
 </style>
