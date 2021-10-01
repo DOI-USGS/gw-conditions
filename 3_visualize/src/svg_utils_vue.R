@@ -14,7 +14,7 @@ gwl_to_peak <- function(file_out, gw_anomaly_data_w_colors){
 get_site_coords <- function(file_out, sites_sf){
   # Get site positioning to draw sites with d3
   convert_coords_to_svg(sites_sf, svg_width = 1000, view_bbox = st_bbox(generate_usa_map_data()))%>% 
-    mutate(site_no = paste0('gwl_', site_sf$site_no)) %>% 
+    mutate(site_no = paste0('gwl_', sites_sf$site_no)) %>% 
     filter(!is.na(x)) %>%
     write_csv(file_out)
 }

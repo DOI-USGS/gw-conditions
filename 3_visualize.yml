@@ -5,6 +5,8 @@ packages:
   - sf
   - xml2
   - jsonlite 
+  - data.table
+  - stringr
 
 sources:
   - 3_visualize/src/build_peaks_svg.R
