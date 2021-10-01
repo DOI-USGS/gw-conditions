@@ -126,7 +126,7 @@ export default {
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
         self.d3.csv(self.publicPath + "gw_sites.csv",  this.d3.autotype),
         self.d3.csv(self.publicPath + "gwl_daily_count.csv",  this.d3.autotype),
-        self.d3.json(self.publicPath + "perc_df.json",  this.d3.autotype)
+        //self.d3.json(self.publicPath + "perc_df.json",  this.d3.autotype)
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
