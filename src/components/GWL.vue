@@ -74,14 +74,29 @@ export default {
       button_color: "grey",
       button_hilite: "black",
 
-      // 5 color scale of peaks
-      verylow: "#7E1900",
+      // roma color scale
+   /*    verylow: "#7E1900",
       low: "#C1A53A",
       normal: "#8fce83",
       high: "#479BC5",
-      veryhigh: "#1A3399",
+      veryhigh: "#1A3399", */
       pal_roma: null,
       pal_roma_rev: null,
+
+      // color scale alternatives
+/*       // Green-Brown
+      verylow: "#a6611a",
+      low: "#dfc27d",
+      normal: "#f5f5f5",
+      high: "#80cdc1",
+      veryhigh: "#018571", */
+
+     // Blue-Brown
+      verylow: "#BF6200",
+      low: "#FEB100",
+      normal: "#B3B3B3",
+      high: "#2E9EC6",
+      veryhigh: "#28648A",
 
 
 
@@ -114,6 +129,7 @@ export default {
 
       this.pal_roma = [this.verylow, this.low, this.normal, this.high, this.veryhigh];
       this.pal_roma_rev = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
+      
 
       // read in data
       this.loadData();   
