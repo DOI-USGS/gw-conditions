@@ -2,17 +2,33 @@
   <section>
     <div id="grid-container">
       <div id="title-container">
-        <h2 class="title" id="title-main">U.S. Groundwater Conditions</h2>
-        <h3 class="title" id="title-sub">The low down on flow down low</h3>
+        <h2
+          id="title-main"
+          class="title"
+        >
+          U.S. Groundwater Conditions
+        </h2>
+        <h3
+          id="title-sub"
+          class="title"
+        >
+          The low down on flow down low
+        </h3>
       </div>
-    <div id="map-container">
-       <GWLmap id="map_gwl" class="map" />
+      <div id="map-container">
+        <GWLmap
+          id="map_gwl"
+          class="map"
+        />
+      </div>
+      <div id="legend-container" />
+      <div id="line-container" />
+      <div id="text-container">
+        <p>
+          Seitan 8-bit in, veniam pickled pitchfork hammock sustainable aliqua edison bulb. Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
+        </p>
+      </div>
     </div>
-    <div id="legend-container" />
-    <div id="line-container" />
-    <div id="text-container"> <p>Seitan 8-bit in, veniam pickled pitchfork hammock sustainable aliqua edison bulb. Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
-</p></div>
-</div>
   </section>
 </template>
 <script>

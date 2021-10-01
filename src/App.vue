@@ -3,7 +3,7 @@
     <!-- <WindowSize v-if="checkTypeOfEnv === '-test build-'" /> -->
     <HeaderUSGS />
     <InternetExplorerPage v-if="isInternetExplorer" />
- <!-- an empty string in this case means the 'prod' version of the application   -->
+    <!-- an empty string in this case means the 'prod' version of the application   -->
     <router-view
       v-if="!isInternetExplorer"
     />

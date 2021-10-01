@@ -1,24 +1,47 @@
 <template>
-
-  <section class="dropDownMenuWrapper" :class="{ 'dropDownMenuWrapper--dark' : isDarkMode, 'dropDownMenuWrapper--noTitle' : !menuTitle }">
-
-    <button class="dropDownMenuButton" ref="menu" @click="openClose" :class="{ 'dropDownMenuButton--dark' : isDarkMode }">
+  <section
+    class="dropDownMenuWrapper"
+    :class="{ 'dropDownMenuWrapper--dark' : isDarkMode, 'dropDownMenuWrapper--noTitle' : !menuTitle }"
+  >
+    <button
+      ref="menu"
+      class="dropDownMenuButton"
+      :class="{ 'dropDownMenuButton--dark' : isDarkMode }"
+      @click="openClose"
+    >
       {{ menuTitle }}
     </button>
 
-    <div class="iconWrapper" :class="{ 'iconWrapper--noTitle' : !menuTitle }">
-      <div class="bar1" :class="{ 'bar1--open' : isOpen , 'bar1--dark' : isDarkMode }" />
-      <div class="bar2" :class="{ 'bar2--open' : isOpen , 'bar2--dark' : isDarkMode }" />
-      <div class="bar3" :class="{ 'bar3--open' : isOpen , 'bar3--dark' : isDarkMode }" />
+    <div
+      class="iconWrapper"
+      :class="{ 'iconWrapper--noTitle' : !menuTitle }"
+    >
+      <div
+        class="bar1"
+        :class="{ 'bar1--open' : isOpen , 'bar1--dark' : isDarkMode }"
+      />
+      <div
+        class="bar2"
+        :class="{ 'bar2--open' : isOpen , 'bar2--dark' : isDarkMode }"
+      />
+      <div
+        class="bar3"
+        :class="{ 'bar3--open' : isOpen , 'bar3--dark' : isDarkMode }"
+      />
     </div>
 
-    <section class="dropdownMenu" v-if="isOpen" :class="{ 'dropdownMenu--dark' : isDarkMode }">
-      <div class="menuArrow" :class="{ 'menuArrow--dark' : isDarkMode }" />
-      <slot/>
+    <section
+      v-if="isOpen"
+      class="dropdownMenu"
+      :class="{ 'dropdownMenu--dark' : isDarkMode }"
+    >
+      <div
+        class="menuArrow"
+        :class="{ 'menuArrow--dark' : isDarkMode }"
+      />
+      <slot />
     </section>
-
   </section>
-
 </template>
 
 <script>
@@ -29,6 +52,23 @@ export default {
     return {
       isOpen: false,
       isDarkMode: false
+    }
+  },
+  watch: {
+    darkMode(val) {
+
+      // Force dark mode
+      if( !val )
+        this.isDarkMode = false
+
+      // Force dark mode
+      if( val == 'force' )
+        this.isDarkMode = true
+
+      // Switch dark / light mode automatically according to what user prefer
+      if( val == 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches )
+        this.isDarkMode = true
+
     }
   },
 
@@ -65,23 +105,6 @@ export default {
 
     }
 
-  },
-  watch: {
-    darkMode(val) {
-
-      // Force dark mode
-      if( !val )
-        this.isDarkMode = false
-
-      // Force dark mode
-      if( val == 'force' )
-        this.isDarkMode = true
-
-      // Switch dark / light mode automatically according to what user prefer
-      if( val == 'auto' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches )
-        this.isDarkMode = true
-
-    }
   }
 
 }
