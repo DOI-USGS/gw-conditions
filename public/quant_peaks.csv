@@ -1,7 +1,7 @@
-color,peak_mid,quant,path_quant
-#7E1900,5,Verylow,M-10 0 C -10 0 0 45 10 0 Z
-#C1A53A,17.5,Low,M-10 0 C -10 0 0 32 10 0 Z
-#8fce83,50,Normal,M-10 0 C -10 0 0 15 10 0 Z
-#8fce83,50,Normal,M-10 0 C -10 0 0 -15 10 0 Z
-#479BC5,82.5,High,M-10 0 C -10 0 0 -32 10 0 Z
-#1A3399,95,Veryhigh,M-10 0 C -10 0 0 -45 10 0 Z
+peak_mid,quant,path_quant
+5,Verylow,M-10 0 C -10 0 0 45 10 0 Z
+17.5,Low,M-10 0 C -10 0 0 32 10 0 Z
+50,Normal,M-10 0 C -10 0 0 15 10 0 Z
+50,Normal,M-10 0 C -10 0 0 -15 10 0 Z
+82.5,High,M-10 0 C -10 0 0 -32 10 0 Z
+95,Veryhigh,M-10 0 C -10 0 0 -45 10 0 Z

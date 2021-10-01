@@ -73,7 +73,16 @@ export default {
       // style for timeline
       button_color: "grey",
       button_hilite: "black",
-      green: "rgb(143, 206, 131)",
+
+      // 5 color scale of peaks
+      verylow: "#7E1900",
+      low: "#C1A53A",
+      normal: "#8fce83",
+      high: "#479BC5",
+      veryhigh: "#1A3399",
+      pal_roma: null,
+      pal_roma_rev: null,
+
 
 
        // TODO: derive from pipeline. inputs are months, day sequence nested w/ key
@@ -103,6 +112,9 @@ export default {
       this.width = window.innerWidth - this.margin.left - this.margin.right;
       this.height = window.innerHeight*.5 - this.margin.top - this.margin.bottom;
 
+      this.pal_roma = [this.verylow, this.low, this.normal, this.high, this.veryhigh];
+      this.pal_roma_rev = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
+
       // read in data
       this.loadData();   
 
@@ -131,7 +143,7 @@ export default {
         // assign data
         this.quant_peaks = data[0]; // peak shapes for legend
         this.date_peaks = data[1]; // gwl timeseries data
-        this.site_coords = data[2]; // site positioning on svg
+        this.site_coords = data[2]; // site positioning on svg - not needed with svg fix?
         this.site_count = data[3]; // number of sites x quant_category x wyday
 
         // water days
@@ -161,7 +173,7 @@ export default {
        // set color scale for path fill
         this.quant_color = this.d3.scaleThreshold()
         .domain([-40, -25, 25, 40])
-        .range(["#1A3399","#479BC5",this.green,"#C1A53A","#7E1900"]) // using a slightly darker green
+        .range(this.pal_roma_rev) 
 
         //same for bar chart data
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
@@ -310,12 +322,12 @@ export default {
           .attr("transform", "translate(0," + 20 + ")")
 
         var y = this.d3.scaleLinear()
-        .domain([0, 0.5])
+        .domain([0, 0.6])
         .range([100, 0])
 
         var bar_color = this.d3.scaleOrdinal()
         .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
-        .range(["#1A3399","#479BC5",this.green,"#C1A53A","#7E1900"])
+        .range(this.pal_roma_rev)
 
         var line = this.d3.line()
           .defined(d => !isNaN(d))
@@ -460,8 +472,9 @@ export default {
           .attr("transform", "translate(90, 0)")
                   
         var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
+        var legend_color = [this.verylow, this.low, this.normal,this.normal, this.high, this.veryhigh];
         var shape_dist = [5,25,42,42,60,83,103]; // y positioning (normal has 2 shapes butted together)
-        var perc_label = ["0 - 0.1", "0.1 - 0.25" ,"0.25 - 0.75", "0.75 - 0.9", "0.9+"]
+        var perc_label = ["0 - 0.1", "0.1 - 0.25" ,"0.25 - 0.75", "0.75 - 0.9", "0.9 +"]
 
         // draw path shapes and labels
         legend_peak
@@ -486,7 +499,7 @@ export default {
           .data(this.quant_peaks)
           .enter()
           .append("path")
-            .attr("fill", function(d){return d["color"]})
+            .attr("fill", function(d, i){return legend_color[i]})
             .attr("d", function(d){return d["path_quant"]})
             .attr("transform", function(d, i){return "translate(0, " + (140-shape_dist[i]) + ") scale(.8)"})
             .attr("id", function(d){return d["quant"]})
@@ -543,7 +556,7 @@ export default {
         this.peak_grp
         .transition()
         .duration(this.day_length)  // duration of each day
-        .attr("d", function(d) { return "M-7 0 C -7 0 0 " + d.gwl[start]*1.5 + " 7 0 Z" })
+        .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" })
         .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
         .end()
         .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 wyday
