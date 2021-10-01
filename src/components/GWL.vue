@@ -57,6 +57,7 @@ export default {
       // style for timeline
       button_color: "grey",
       button_hilite: "black",
+      green: "rgb(143, 206, 131)",
 
 
        // TODO: derive from pipeline. inputs are months, day sequence nested w/ key
@@ -147,7 +148,7 @@ export default {
        // set color scale for path fill
         this.quant_color = this.d3.scaleThreshold()
         .domain([-40, -25, 25, 40])
-        .range(["#1A3399","#479BC5","#669957","#C1A53A","#7E1900"]) // using a slightly darker green
+        .range(["#1A3399","#479BC5",this.green,"#C1A53A","#7E1900"]) // using a slightly darker green
 
         //same for bar chart data
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
@@ -193,7 +194,7 @@ export default {
 
       // scale space
       var xScale = this.d3.scaleLinear()
-        .domain([1, 367])
+        .domain([0, this.n_days])
         .range([mar, line_width-2*mar])
 
       // define axes
@@ -204,7 +205,7 @@ export default {
       // draw axes
       var liney = svg.append("g")
         .call(xLine)
-        .attr("transform", "translate(0," + 100 + ")")
+        .attr("transform", "translate(0," + 120 + ")")
         .classed("liney", true)
 
       // style axes
@@ -216,11 +217,11 @@ export default {
     // timeline events/"buttons"
       var button_month = svg.append("g")
       .classed("#btn-month", true)
-      .attr("transform", "translate(0," + 100 + ")")
+      .attr("transform", "translate(0," + 120 + ")")
       .attr("z-index", 100)
 
     // month points on timeline
-    // TODO: make functions that accept any date and label
+    // TODO: make functions that accept any date and label for annotations
       button_month.selectAll(".button_inner")
       .data(this.months).enter()
       .append("circle")
@@ -293,7 +294,7 @@ export default {
          var line_chart = svg.append("g")
           .classed("time-chart", true)
           .attr("id", "time-legend")
-          .attr("transform", "translate(0," + 0 + ")")
+          .attr("transform", "translate(0," + 20 + ")")
 
         var y = this.d3.scaleLinear()
         .domain([0, 0.5])
@@ -301,7 +302,7 @@ export default {
 
         var bar_color = this.d3.scaleOrdinal()
         .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
-        .range(["#1A3399","#479BC5","#D1ECC9","#C1A53A","#7E1900"])
+        .range(["#1A3399","#479BC5",this.green,"#C1A53A","#7E1900"])
 
         var line = this.d3.line()
           .defined(d => !isNaN(d))
@@ -327,22 +328,21 @@ export default {
        line_chart.append("rect")
           .data(this.days)
           .classed("hilite", true)
-          .attr("transform", "translate(1, 0)") 
+          //.attr("transform", "translate(1, 0)") 
           .attr("width", "5")
           .attr("height", "100")
           .attr("opacity", 0.5)
           .attr("fill", "grey")
           .attr("x", xScale(this.days[start]))
          
-        this.animateLine(start)
-
+        this.animateLine(start);
 
       },
       animateLine(start){
         // animates grey line on timeseries chart to represent current timepoint
-        var line_width = 1100;
-        var line_height = 200;
-        var mar = 50;
+        var line_width = this.width;
+        var line_height = 250;
+        var mar = 20;
 
         var x = this.d3.scaleLinear()
         .domain([1, this.n_days])
@@ -356,11 +356,11 @@ export default {
           .end()
           .then(() => this.animateLine(start+1))
         } else {
-        this.d3.selectAll(".hilite")
-          .transition()
-          .duration(this.day_length) 
-          .attr("x", x(this.days[this.n_days]))
-      }
+          this.d3.selectAll(".hilite")
+            .transition()
+            .duration(this.day_length) 
+            .attr("x", x(this.days[this.n_days]))
+        }
       },
       buttonSelect(d){
         // highlight on timeline when hovered
@@ -397,11 +397,6 @@ export default {
         .attr("fill", this.button_color)
         .attr("stroke", this.button_color)
       },
-  /*     moveTimeline(d){
-        this.start = d.day;
-        this.animateLine(this.start)
-
-      }, */
       initTime(){
         // TO DO: init nested timelines for playback control
         // broken up by month and tagged for user control
@@ -441,7 +436,7 @@ export default {
         var legend_width = 240;
 
         // make a legend 
-          var legend_peak = this.d3.select("#legend-container")
+        var legend_peak = this.d3.select("#legend-container")
           .append("svg")
           .attr("width", legend_width)
           .attr("height", legend_height)
@@ -451,28 +446,28 @@ export default {
           .append("g").classed("legend", true)
           .attr("transform", "translate(90, 0)")
                   
-          var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
-          var shape_dist = [5,25,42,42,60,83,103]; // y positioning (normal has 2 shapes butted together)
-          var perc_label = ["0 - 0.1", "0.1 - 0.25" ,"0.25 - 0.75", "0.75 - 0.9", "0.9+"]
+        var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
+        var shape_dist = [5,25,42,42,60,83,103]; // y positioning (normal has 2 shapes butted together)
+        var perc_label = ["0 - 0.1", "0.1 - 0.25" ,"0.25 - 0.75", "0.75 - 0.9", "0.9+"]
 
         // draw path shapes and labels
         legend_peak
-        .append("text")
-        .text("GWL")
-        .attr("x", -20)
-        .attr("y", "30")
-        .style("font-size", "20")
-        .style("font-weight", 700)
-        .attr("text-anchor", "end")
+          .append("text")
+          .text("GWL")
+          .attr("x", -20)
+          .attr("y", "30")
+          .style("font-size", "20")
+          .style("font-weight", 700)
+          .attr("text-anchor", "end")
 
         legend_peak
-        .append("text")
-        .text("Percentile")
-        .attr("x", 105)
-        .attr("y", "30")
-        .style("font-size", "20")
-        .style("font-weight", 700)
-        .attr("text-anchor", "end")
+          .append("text")
+          .text("Percentile")
+          .attr("x", 105)
+          .attr("y", "30")
+          .style("font-size", "20")
+          .style("font-weight", 700)
+          .attr("text-anchor", "end")
         
         legend_peak.selectAll("peak_symbol")
           .data(this.quant_peaks)
@@ -511,7 +506,6 @@ export default {
         const self = this;
 
           // select existing paths using class
-          // was dropping positioning because svg-loader and svgo are cleaning out <g>s?
           var start = this.start;
             this.peak_grp = this.svg.selectAll("path.peak")
               .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
@@ -524,10 +518,9 @@ export default {
              .attr("fill", function(d) { return self.quant_color(d.gwl[0]) }) // this is not exactly right
              .attr("stroke-width", "1px")
              .attr("opacity", ".5")
-             .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start]*1.5 + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
+             .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start]*1 + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
           this.animateGWL(start); // once sites are drawn, trigger animation
-          //this.legendBarChart(this.percData, start);
       },
       animateGWL(start){
          const self = this;
@@ -573,8 +566,6 @@ export default {
   grid-area: map;
   padding: 1rem;
   padding-right: 2rem;
-    .map {
-  }
 }
 #text-container {
   grid-area: text;
@@ -589,10 +580,6 @@ export default {
 #line-container {
   grid-area: line;
   margin-bottom: 10px;
-/*   display: flex;
-  justify-content: center;
-  align-items: center; */
-
 }
 #legend-container {
   grid-area: legend;
@@ -607,12 +594,11 @@ export default {
   grid-area: title;
   h1, h2, h3 {
     width: 95vw;
-    color:rgb(34, 33, 33);
+    color:"black";
     height: auto;
     padding: 4px;
   }
 }
-
 
 // drop shadow on map outline
 #bkgrd-map-grp {
@@ -623,9 +609,8 @@ export default {
 // annotated timeline
 .liney {
   stroke-width: 2px;
-  color: #4b4a4a;
+  color: rgb(143, 206, 131);
 }
-
 
 // desktop
 @media (min-width:1024px) {
@@ -645,19 +630,11 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-
   }
   #line-container {
   grid-area: line;
   margin-bottom: 10px;
   margin-left: 10px;
-
-/*   display: flex;
-  justify-content: center;
-  align-items: center; */
-
-  svg {
-  }
 }
 }
 
