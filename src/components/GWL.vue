@@ -34,7 +34,7 @@
 <script>
 import * as d3Base from 'd3';
 import GWLmap from "@/assets/anomaly_peaks.svg";
-import { TimelineMax, Draggable, TweenMax } from "gsap/all"; 
+import { TimelineMax } from "gsap/all"; 
 
 export default {
   name: "GWLsvg",
@@ -97,7 +97,6 @@ export default {
     }
   },
   mounted(){
-      this.$gsap.registerPlugin(Draggable); // register gsap plugins for scrollTrigger 
       this.d3 = Object.assign(d3Base);
 
       // resize
@@ -105,7 +104,6 @@ export default {
       this.height = window.innerHeight*.5 - this.margin.top - this.margin.bottom;
 
       // read in data
-      //this.callS3("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv");
       this.loadData();   
 
       // define style before page fully loads
@@ -125,8 +123,7 @@ export default {
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
         self.d3.csv(self.publicPath + "gw_sites.csv",  this.d3.autotype),
-        self.d3.csv(self.publicPath + "gwl_daily_count.csv",  this.d3.autotype),
-        //self.d3.json(self.publicPath + "perc_df.json",  this.d3.autotype)
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype)
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
