@@ -122,7 +122,7 @@ export default {
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-gw_sites.csv",  this.d3.autotype), 
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-sites.csv",  this.d3.autotype), 
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype)
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
