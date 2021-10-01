@@ -71,4 +71,3 @@ yarn-error.log*
 
 # Omit large data files in Vue build
 public/*.csv
-public/*.json

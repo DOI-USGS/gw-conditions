@@ -48,7 +48,7 @@ targets:
       target_name,
       sites_sf = gw_sites_sf)
       
-  public/perc_df.json:
+  public/gwl_daily_count.csv:
     command: site_prop_timeseries(target_name, 
       gw_anomaly_data_w_colors)
 

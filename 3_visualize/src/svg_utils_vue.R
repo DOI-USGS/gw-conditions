@@ -34,9 +34,11 @@ site_prop_timeseries <- function(file_out, gw_anomaly_data_w_colors){
                 summarize(n_sites_total = length(unique(site_no)))) %>%
     mutate(perc = n_sites/n_sites_total) %>%
     ungroup() %>%
-    group_by(quant_category)%>%
-    nest(!quant_category) %>%
-    toJSON() %>%
-    write_json(file_out)
+    mutate(cat = gsub(" ", "", quant_category),
+           perc = round(perc, 3)) %>%
+    select(-quant_category) %>%
+    reshape2::dcast(Date+wyday+n_sites_total~cat, value.var = "perc") %>%
+    arrange(wyday) %>%
+    write_csv(file_out)
   
 }
