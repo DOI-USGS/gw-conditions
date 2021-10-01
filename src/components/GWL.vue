@@ -448,7 +448,7 @@ export default {
       },
       makeLegend(){
 
-        var legend_height = 150;
+        var legend_height = 160;
         var legend_width = 240;
 
         // make a legend 
