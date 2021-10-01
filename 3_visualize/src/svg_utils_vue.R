@@ -18,3 +18,25 @@ get_site_coords <- function(file_out, sites_sf){
     filter(!is.na(x)) %>%
     write_csv(file_out)
 }
+
+site_prop_timeseries <- function(file_out, gw_anomaly_data_w_colors){
+  gw <- gw_anomaly_data_w_colors %>% 
+    filter(!is.na(quant_category)) %>% 
+    group_by(Date) %>%
+    filter(wyday == max(wyday))
+  
+  ## write json with timeseries of sites in each category 
+  gw %>% 
+    group_by(Date, wyday, quant_category) %>%
+    summarize(n_sites = length(unique(site_no))) %>% 
+    left_join(gw  %>% 
+                group_by(Date, wyday) %>%
+                summarize(n_sites_total = length(unique(site_no)))) %>%
+    mutate(perc = n_sites/n_sites_total) %>%
+    ungroup() %>%
+    group_by(quant_category)%>%
+    nest(!quant_category) %>%
+    toJSON() %>%
+    write_json(file_out)
+  
+}

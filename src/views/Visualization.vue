@@ -10,13 +10,11 @@ export default {
     name: 'Visualization',
     components: {
       GWL: () => import( /* webpackPreload: true */ /*webpackChunkName: "section"*/ "./../components/GWL")
-
+      
     },
     computed: {
     },
-    mounted(){
-      const self = this;
-      
+    mounted(){      
     },
     methods:{
     }

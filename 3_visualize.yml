@@ -4,6 +4,7 @@ packages:
   - dplyr
   - sf
   - xml2
+  - jsonlite 
   - data.table
   - stringr
 
@@ -46,5 +47,9 @@ targets:
     command: get_site_coords(
       target_name,
       sites_sf = gw_sites_sf)
+      
+  public/perc_df.json:
+    command: site_prop_timeseries(target_name, 
+      gw_anomaly_data_w_colors)
 
 
