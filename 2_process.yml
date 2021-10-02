@@ -20,6 +20,7 @@ targets:
       - 2_process/out/gw_daily_quantiles.csv
       - 2_process/out/gw_data_anomalies.csv
       - gw_sites_sf
+      - public/gw-conditions-time-labels.csv
   
   # Sites that use "depth below" as their gw level need to be inversed. In the 
   # current implementation, this means any site that used pcode == '72019'

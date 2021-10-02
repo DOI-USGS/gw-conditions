@@ -75,9 +75,12 @@ export default {
       button_color: "grey",
       button_hilite: "black",
 
-      // sclaes
+      // scales
+      dates: null,
       xScale: null,
       yScale: null,
+      pal_roma: null,
+      pal_roma_rev: null,
 
       // roma color scale
    /*    verylow: "#7E1900",
@@ -85,8 +88,6 @@ export default {
       normal: "#8fce83",
       high: "#479BC5",
       veryhigh: "#1A3399", */
-      pal_roma: null,
-      pal_roma_rev: null,
 
       // color scale alternatives
 /*       // Green-Brown
@@ -137,7 +138,6 @@ export default {
       
       // read in data
       this.loadData();   
-      this.setScales();
 
       // define style before page fully loads
       this.svg = this.d3.select("svg.map")
@@ -163,7 +163,7 @@ export default {
       callback(data) {
         // assign data
         this.quant_peaks = data[0]; // peak shapes for legend
-        this.date_peaks = data[1]; // gwl timeseries data
+        this.date_peaks = data[1]; // gwl site level timeseries data
         this.site_coords = data[2]; // site positioning on svg - not needed with svg fix?
         this.site_count = data[3]; // number of sites x quant_category x wyday
 
@@ -196,27 +196,36 @@ export default {
         .domain([-40, -25, 25, 40])
         .range(this.pal_roma_rev) 
 
-        //same for bar chart data
+        //same for timeseries data
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
         var n_quant = quant_cat.length
         this.percData = [];
           for (i = 0; i < n_quant; i++) {
           var key_quant = quant_cat[i];
-          var wyday = this.site_count.map(function(d){ return d['wyday']});
+          var wyday = this.site_count.map(function(d){ return d['Date']});
+          //var date = this.site_count.map(function(d) { return  d['Date']});
           var perc = this.site_count.map(function(d){ return d[key_quant]});
           this.percData.push({key_quant: key_quant, wyday: wyday, perc: perc})
           };
 
       this.days = this.site_count.map(function(d) { return  d['wyday']})
+      this.date = this.site_count.map(function(d) { return  d['Date']})
+      this.n_days = this.date.length
+     
+      //console.log(this.date)
+
+      var date_par = Date.parse(this.date)
+      console.log(date_par)
 
        // draw the chart
+       this.setScales();
         this.makeLegend();
         this.drawFrame1(this.peaky);
 
         this.playButton(this.svg, this.width*(2.5/7) , 300);
 
       // animated time chart
-        this.drawLine(this.days, this.percData)
+        this.drawLine(this.percData)
 
       },
       createPanel(month) {
@@ -225,7 +234,7 @@ export default {
         // add rest of this
         return tl;
       },
-      drawLine(date_range, prop_data) {
+      drawLine(prop_data) {
         const self = this;
 
         var line_height = 250;
@@ -367,10 +376,12 @@ export default {
           .attr("fill", "grey")
           .attr("x", self.xScale(this.days[start]))
          
-        this.animateLine(start);
+        //this.animateLine(start);
 
       },
       setScales(){
+
+        console.log(this.date.range)
 
         this.xScale = this.d3.scaleLinear()
         .domain([0, this.n_days])
@@ -407,8 +418,8 @@ export default {
             
         button
             .on("mousedown", function() {
-              self.animateLine(0);
-              self.animateGWL(0);
+              //self.animateLine(0);
+              //self.animateGWL(0);
             });
       },
       pressButton(playing) {
@@ -486,7 +497,7 @@ export default {
         .attr("fill", this.button_color)
       },
       initTime(){
-        // TO DO: init nested timelines for playback control
+        // nested timelines for playback control
         // broken up by month and tagged for user control
         var tl_jan = new TimelineMax(); // TimelineMax permits repeating animation
         var tl_feb = new TimelineMax();
@@ -516,6 +527,10 @@ export default {
         .add(tl_oct)
         .add(tl_nov)
         .add(tl_dec) 
+
+      },
+      animateCharts(){
+        // link animation functions to same day
 
       },
       makeLegend(){
@@ -608,7 +623,7 @@ export default {
              .attr("opacity", ".5")
              .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
-          this.animateGWL(start); // once sites are drawn, trigger animation
+          //this.animateGWL(start); // once sites are drawn, trigger animation
       },
       animateGWL(start){
          const self = this;
