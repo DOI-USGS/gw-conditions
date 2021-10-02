@@ -49,7 +49,11 @@ targets:
   # Prepare data for peaks SVG
   gw_anomaly_data:
     command: read_csv("2_process/out/gw_data_anomalies.csv")
+  gw_time:
+    command: generate_time(gw_anomaly_data)
+  public/gw-conditions-time-labels.csv:
+    command: generate_months(target_name, gw_time)
   gw_anomaly_data_w_paths:
     command: add_paths_to_data(gw_anomaly_data)
   gw_anomaly_data_w_colors:
-    command: add_colors_to_data(gw_anomaly_data_w_paths, scico_palette)
+    command: add_colors_to_data(gw_anomaly_data_w_paths, scico_palette, gw_time)
