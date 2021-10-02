@@ -79,6 +79,7 @@ export default {
       dates: null,
       xScale: null,
       yScale: null,
+      line: null,
       pal_roma: null,
       pal_roma_rev: null,
 
@@ -154,9 +155,11 @@ export default {
         // read in data 
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
+        //self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
+         self.d3.csv(self.publicPath + "gw-conditions-wy20.csv",  this.d3.autotype), // needs to go to aws
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-sites.csv",  this.d3.autotype), 
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype)
+        //self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype)
+        self.d3.csv(self.publicPath + "gw-conditions-daily-count.csv",  this.d3.autotype) // needs to go to aws
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
@@ -165,11 +168,11 @@ export default {
         this.quant_peaks = data[0]; // peak shapes for legend
         this.date_peaks = data[1]; // gwl site level timeseries data
         this.site_coords = data[2]; // site positioning on svg - not needed with svg fix?
-        this.site_count = data[3]; // number of sites x quant_category x wyday
+        this.site_count = data[3]; // number of sites x quant_category x day_seq
 
         // water days
-        var wyday = this.date_peaks.columns
-        wyday.shift();
+        var day_seq = this.date_peaks.columns
+        day_seq.shift();
 
         // sites
         this.sites_list = this.site_coords.map(function(d)  { return d.site_no })
@@ -184,11 +187,11 @@ export default {
          this.peaky = [];
           for (i = 1; i < n; i++) {
               var key = this.sites_list[i];
-              var wyday = this.date_peaks.map(function(d){  return d['wyday']; });
+              var day_seq = this.date_peaks.map(function(d){  return d['day_seq']; });
               var gwl = this.date_peaks.map(function(d){  return d[key]; });
               var site_x = this.sites_x[i];
               var site_y = this.sites_y[i];
-              this.peaky.push({key: key, wyday: wyday, gwl: gwl, site_x: site_x, site_y: site_y})
+              this.peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
           };
 
        // set color scale for path fill
@@ -202,20 +205,16 @@ export default {
         this.percData = [];
           for (i = 0; i < n_quant; i++) {
           var key_quant = quant_cat[i];
-          var wyday = this.site_count.map(function(d){ return d['Date']});
+          var day_seq = this.site_count.map(function(d){ return d['day_seq']});
           //var date = this.site_count.map(function(d) { return  d['Date']});
           var perc = this.site_count.map(function(d){ return d[key_quant]});
-          this.percData.push({key_quant: key_quant, wyday: wyday, perc: perc})
+          this.percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
           };
 
-      this.days = this.site_count.map(function(d) { return  d['wyday']})
-      this.date = this.site_count.map(function(d) { return  d['Date']})
-      this.n_days = this.date.length
+      this.days = this.site_count.map(function(d) { return  d['day_seq']})
+      //this.date = this.site_count.map(function(d) { return  d['Date']})
+      this.n_days = this.days.length
      
-      //console.log(this.date)
-
-      var date_par = Date.parse(this.date)
-      console.log(date_par)
 
        // draw the chart
        this.setScales();
@@ -346,11 +345,6 @@ export default {
         .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
         .range(this.pal_roma_rev)
 
-        var line = this.d3.line()
-          .defined(d => !isNaN(d))
-          .x((d, i) => self.xScale(this.days[i]))
-          .y(d => self.yScale(d))
-
         // add line chart
         line_chart.append("g")
             .attr("fill", "none")
@@ -359,7 +353,7 @@ export default {
           .selectAll("path")
           .data(prop_data)
           .join("path")
-          .attr("d", d => line(d.perc))
+          .attr("d", d => self.line(d.perc))
           .attr("stroke", function(d) { return bar_color(d.key_quant) })
           .attr("stroke-width", "3px")
           .attr("opacity", 0.7);
@@ -376,12 +370,10 @@ export default {
           .attr("fill", "grey")
           .attr("x", self.xScale(this.days[start]))
          
-        //this.animateLine(start);
+        this.animateLine(start);
 
       },
       setScales(){
-
-        console.log(this.date.range)
 
         this.xScale = this.d3.scaleLinear()
         .domain([0, this.n_days])
@@ -390,6 +382,12 @@ export default {
         this.yScale = this.d3.scaleLinear()
         .domain([0, 0.6])
         .range([100, 0])
+
+
+        this.line = this.d3.line()
+          .defined(d => !isNaN(d))
+          .x((d, i) => this.xScale(this.days[i]))
+          .y(d => this.yScale(d))
 
       },
       playButton(svg, x, y) {
@@ -418,8 +416,8 @@ export default {
             
         button
             .on("mousedown", function() {
-              //self.animateLine(0);
-              //self.animateGWL(0);
+            self.animateLine(0);
+              self.animateGWL(0);
             });
       },
       pressButton(playing) {
@@ -623,7 +621,7 @@ export default {
              .attr("opacity", ".5")
              .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
-          //this.animateGWL(start); // once sites are drawn, trigger animation
+          this.animateGWL(start); // once sites are drawn, trigger animation
       },
       animateGWL(start){
          const self = this;
@@ -636,7 +634,7 @@ export default {
         .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" })
         .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
         .end()
-        .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 wyday
+        .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day_seq
 
         } else {
       // if it's the last day of the water year, stop animation 

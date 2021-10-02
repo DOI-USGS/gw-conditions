@@ -23,10 +23,10 @@ site_prop_timeseries <- function(file_out, gw_anomaly_data_w_colors){
 
   ## write timeseries % of sites in each category 
   gw_anomaly_data_w_colors %>% 
-    filter(!is.na(quant_category)) #%>% # filtering out dates with no category 
+    filter(!is.na(quant_category)) %>% # filtering out dates with no category 
     group_by(Date, day_seq, quant_category) %>%
     summarize(n_sites = length(unique(site_no))) %>% 
-    left_join(gw  %>% 
+    left_join(gw_anomaly_data_w_colors  %>% 
                 group_by(Date, day_seq) %>%
                 summarize(n_sites_total = length(unique(site_no)))) %>%
     mutate(perc = n_sites/n_sites_total) %>%
