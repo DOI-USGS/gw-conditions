@@ -59,6 +59,7 @@ export default {
       peaky: null,
       site_coords: null,
       site_count: null,
+      time_labels: null,
       percData: null,
       days: null,
 
@@ -158,8 +159,9 @@ export default {
         //self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
          self.d3.csv(self.publicPath + "gw-conditions-wy20.csv",  this.d3.autotype), // needs to go to aws
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-sites.csv",  this.d3.autotype), 
-        //self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype)
-        self.d3.csv(self.publicPath + "gw-conditions-daily-count.csv",  this.d3.autotype) // needs to go to aws
+        //self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype),
+        self.d3.csv(self.publicPath + "gw-conditions-daily-count.csv",  this.d3.autotype), // needs to go to aws
+        self.d3.csv(self.publicPath + "gw-conditions-time-labels.csv",  this.d3.autotype)
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
@@ -169,6 +171,7 @@ export default {
         this.date_peaks = data[1]; // gwl site level timeseries data
         this.site_coords = data[2]; // site positioning on svg - not needed with svg fix?
         this.site_count = data[3]; // number of sites x quant_category x day_seq
+        this.time_labels = data[4]; // timeline annotations - including months 
 
         // water days
         var day_seq = this.date_peaks.columns
@@ -206,16 +209,13 @@ export default {
           for (i = 0; i < n_quant; i++) {
           var key_quant = quant_cat[i];
           var day_seq = this.site_count.map(function(d){ return d['day_seq']});
-          //var date = this.site_count.map(function(d) { return  d['Date']});
           var perc = this.site_count.map(function(d){ return d[key_quant]});
           this.percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
           };
 
       this.days = this.site_count.map(function(d) { return  d['day_seq']})
-      //this.date = this.site_count.map(function(d) { return  d['Date']})
-      this.n_days = this.days.length
+      this.n_days = this.days.length-1
      
-
        // draw the chart
        this.setScales();
         this.makeLegend();
@@ -232,6 +232,78 @@ export default {
         tl.to("tl_" + month)
         // add rest of this
         return tl;
+      },
+      addButtons(svg){
+        const self = this;
+       // timeline events/"buttons"
+       // want these to be buttons that rewind the animation to the date
+       // and also drive annotations to events
+       console.log(this.time_labels)
+
+      var button_month = svg.append("g")
+      .classed("#btn-month", true)
+      .attr("transform", "translate(0," + 120 + ")")
+      .attr("z-index", 100)
+
+    // month points on timeline
+      button_month.selectAll(".button_inner")
+      .data(this.time_labels).enter()
+      .append("circle")
+      .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
+      .attr("r", 3)
+      .attr("cx", function(d) { return self.xScale(d.day_seq) })
+      .attr("cy", 0)
+      .attr("stroke", this.button_color)
+      .attr("stroke-width", "2px")
+      .attr("fill", this.button_color)
+      //.on('click', function(d, i) {
+        //self.moveTimeline(d); 
+     // })
+      .on('mouseover', function(d, i) {
+        self.buttonSelect(d);
+      })
+      .on('mouseout', function(d, i) {
+        self.buttonDeSelect(d);
+      })
+
+      // month labels
+      button_month.selectAll(".button_name")
+      .data(this.time_labels)
+      .enter()
+      .append("text")
+      .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
+      .attr("x", function(d) { return self.xScale(d.day_seq)-12 }) // centering on pt
+      .attr("y", 25)
+      .text(function(d, i) { return d.month_label })
+      .attr("text-align", "middle")
+      //.on('click', function(d, i) {
+        //self.moveTimeline(d);
+      //})
+      .on('mouseover', function(d, i) {
+        self.buttonSelect(d);
+      })
+      .on('mouseout', function(d, i) {
+        self.buttonDeSelect(d);
+      })
+
+      // year annotations
+      button_month.selectAll(".button_year")
+      .data(this.time_labels)
+      .enter()
+      .append("text")
+      .attr("class", function(d,i) { return "button_year button_" + d.year } ) 
+      .attr("x", function(d) { return self.xScale(d.day_seq)-10 }) // centering on pt
+      .attr("y", 45)
+      .text(function(d, i) { return d.year })
+
+      button_month
+      .append("text")
+      .attr("class", function(d,i) { return "axis_label" } ) 
+      .attr("x", function(d) { return self.xScale(1)-10 }) // centering on pt
+      .attr("y", -100)
+      .text(function(d, i) { return "Proportion of wells" })
+
+
       },
       drawLine(prop_data) {
         const self = this;
@@ -263,76 +335,7 @@ export default {
         .attr("color", "lightgrey")
         .attr("stroke-width", "3px")
 
-    // timeline events/"buttons"
-      var button_month = svg.append("g")
-      .classed("#btn-month", true)
-      .attr("transform", "translate(0," + 120 + ")")
-      .attr("z-index", 100)
-
-    // month points on timeline
-    // TODO: make functions that accept any date and label for annotations
-      button_month.selectAll(".button_inner")
-      .data(this.months).enter()
-      .append("circle")
-      .attr("class", function(d,i) { return "button_inner inner_" + d.name + " " + d.name } ) 
-      .attr("r", 3)
-      .attr("cx", function(d) { return self.xScale(d.day) })
-      .attr("cy", 0)
-      .attr("stroke", this.button_color)
-      .attr("stroke-width", "2px")
-      .attr("fill", this.button_color)
-      .on('click', function(d, i) {
-        //self.moveTimeline(d); // requires gsap for playback control or some way to cancel playback loop partway
-      })
-      .on('mouseover', function(d, i) {
-        self.buttonSelect(d);
-      })
-      .on('mouseout', function(d, i) {
-        self.buttonDeSelect(d);
-      })
-
-      // month labels
-      button_month.selectAll(".button_name")
-      .data(this.months)
-      .enter()
-      .append("text")
-      .attr("class", function(d,i) { return "button_name name_" + d.name + " " + d.name } ) 
-      .attr("x", function(d) { return self.xScale(d.day)-12 }) // centering on pt
-      .attr("y", 25)
-      .text(function(d, i) { return d.name })
-      .attr("text-align", "middle")
-      .on('click', function(d, i) {
-        //self.moveTimeline(d);
-      })
-      .on('mouseover', function(d, i) {
-        self.buttonSelect(d);
-      })
-      .on('mouseout', function(d, i) {
-        self.buttonDeSelect(d);
-      })
-
-      // year annotations
-      // TODO: derive from data input via pipeline
-      button_month
-      .append("text")
-      .attr("class", function(d,i) { return "button_year" } ) 
-      .attr("x", function(d) { return self.xScale(1)-10 }) // centering on pt
-      .attr("y", 45)
-      .text(function(d, i) { return 2021 })
-
-      button_month
-      .append("text")
-      .attr("class", function(d,i) { return "button_year" } ) 
-      .attr("x", function(d) { return self.xScale(367)-20 }) // centering on pt
-      .attr("y", 45)
-      .text(function(d, i) { return 2022 })
-
-      button_month
-      .append("text")
-      .attr("class", function(d,i) { return "axis_label" } ) 
-      .attr("x", function(d) { return self.xScale(1)-10 }) // centering on pt
-      .attr("y", -100)
-      .text(function(d, i) { return "Proportion of wells" })
+        self.addButtons(svg)
 
       // add line chart
        // line chart showing proportion of gages in each category
