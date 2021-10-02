@@ -29,10 +29,10 @@
     display: flex;
     justify-content: right;
     width: 100%;
-    background-color:#323333;;
+    background-color:#323333;
     margin: 0 auto;
     padding: 0.4rem;
-    border-bottom: 2px solid black;
+    border-bottom: 2px solid #323333;
     a {
       color: white;
       margin-left: 10px;

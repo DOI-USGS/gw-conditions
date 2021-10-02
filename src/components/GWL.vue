@@ -50,6 +50,7 @@ export default {
       width: null,
       height: null,
       margin: { top: 50, right: 0, bottom: 50, left: 0 },
+      mar: 20,
 
       // data mgmt
       quant_peaks: null,
@@ -66,13 +67,16 @@ export default {
       current_time: 0,
       start: 0,
       n_days: 365,
-      //x:  0,
       sites_list: null,
       //t2: null,
 
       // style for timeline
       button_color: "grey",
       button_hilite: "black",
+
+      // sclaes
+      xScale: null,
+      yScale: null,
 
       // roma color scale
    /*    verylow: "#7E1900",
@@ -130,9 +134,9 @@ export default {
       this.pal_roma = [this.verylow, this.low, this.normal, this.high, this.veryhigh];
       this.pal_roma_rev = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
       
-
       // read in data
       this.loadData();   
+      this.setScales();
 
       // define style before page fully loads
       this.svg = this.d3.select("svg.map")
@@ -221,26 +225,19 @@ export default {
       drawLine(date_range, prop_data) {
         const self = this;
 
-        var line_width = this.width;
         var line_height = 250;
-        var mar = 20;
 
       // set up svg for timeline
       var svg = this.d3.select("#line-container")
         .append("svg")
         .attr("width", "100%")
         .attr("preserveAspectRatio", "xMinYMin meet")
-        .attr("viewBox", "0 0 " + line_width + " " + line_height)
+        .attr("viewBox", "0 0 " + this.width + " " + line_height)
         .attr("id", "x-line")
-
-      // scale space
-      var xScale = this.d3.scaleLinear()
-        .domain([0, this.n_days])
-        .range([mar, line_width-2*mar])
 
       // define axes
       var xLine = this.d3.axisBottom()
-        .scale(xScale)
+        .scale(this.xScale)
         .ticks(0).tickSize(0);
 
       // draw axes
@@ -268,7 +265,7 @@ export default {
       .append("circle")
       .attr("class", function(d,i) { return "button_inner inner_" + d.name + " " + d.name } ) 
       .attr("r", 3)
-      .attr("cx", function(d) { return xScale(d.day) })
+      .attr("cx", function(d) { return self.xScale(d.day) })
       .attr("cy", 0)
       .attr("stroke", this.button_color)
       .attr("stroke-width", "2px")
@@ -289,7 +286,7 @@ export default {
       .enter()
       .append("text")
       .attr("class", function(d,i) { return "button_name name_" + d.name + " " + d.name } ) 
-      .attr("x", function(d) { return xScale(d.day)-12 }) // centering on pt
+      .attr("x", function(d) { return self.xScale(d.day)-12 }) // centering on pt
       .attr("y", 25)
       .attr("stroke", this.button_color)
       .text(function(d, i) { return d.name })
@@ -309,7 +306,7 @@ export default {
       button_month
       .append("text")
       .attr("class", function(d,i) { return "button_year" } ) 
-      .attr("x", function(d) { return xScale(1)-10 }) // centering on pt
+      .attr("x", function(d) { return self.xScale(1)-10 }) // centering on pt
       .attr("y", 45)
       .attr("stroke", this.button_color)
       .text(function(d, i) { return 2021 })
@@ -317,7 +314,7 @@ export default {
       button_month
       .append("text")
       .attr("class", function(d,i) { return "button_year" } ) 
-      .attr("x", function(d) { return xScale(367)-20 }) // centering on pt
+      .attr("x", function(d) { return self.xScale(367)-20 }) // centering on pt
       .attr("y", 45)
       .attr("stroke", this.button_color)
       .text(function(d, i) { return 2022 })
@@ -325,7 +322,7 @@ export default {
       button_month
       .append("text")
       .attr("class", function(d,i) { return "axis_label" } ) 
-      .attr("x", function(d) { return xScale(1)-10 }) // centering on pt
+      .attr("x", function(d) { return self.xScale(1)-10 }) // centering on pt
       .attr("y", -110)
       .attr("stroke", this.button_color)
       .text(function(d, i) { return "Proportion of wells" })
@@ -337,21 +334,17 @@ export default {
           .attr("id", "time-legend")
           .attr("transform", "translate(0," + 20 + ")")
 
-        var y = this.d3.scaleLinear()
-        .domain([0, 0.6])
-        .range([100, 0])
-
         var bar_color = this.d3.scaleOrdinal()
         .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
         .range(this.pal_roma_rev)
 
         var line = this.d3.line()
           .defined(d => !isNaN(d))
-          .x((d, i) => xScale(this.days[i]))
-          .y(d => y(d))
+          .x((d, i) => self.xScale(this.days[i]))
+          .y(d => self.yScale(d))
 
         // add line chart
-        const path = line_chart.append("g")
+        line_chart.append("g")
             .attr("fill", "none")
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
@@ -369,31 +362,36 @@ export default {
        line_chart.append("rect")
           .data(this.days)
           .classed("hilite", true)
-          //.attr("transform", "translate(1, 0)") 
           .attr("width", "5")
           .attr("height", "100")
           .attr("opacity", 0.5)
           .attr("fill", "grey")
-          .attr("x", xScale(this.days[start]))
+          .attr("x", self.xScale(this.days[start]))
          
         this.animateLine(start);
 
       },
+      setScales(){
+
+        this.xScale = this.d3.scaleLinear()
+        .domain([0, this.n_days])
+        .range([this.mar, this.width-2*this.mar])
+
+        this.yScale = this.d3.scaleLinear()
+        .domain([0, 0.6])
+        .range([100, 0])
+
+      },
       animateLine(start){
         // animates grey line on timeseries chart to represent current timepoint
-        var line_width = this.width;
+        const self = this;
         var line_height = 250;
-        var mar = 20;
-
-        var x = this.d3.scaleLinear()
-        .domain([1, this.n_days])
-        .range([mar, line_width-mar])
 
         if (start < this.n_days){
           this.d3.selectAll(".hilite")
           .transition()
             .duration(this.day_length) 
-            .attr("x", x(this.days[start]))
+            .attr("x", self.xScale(this.days[start]))
           .end()
           .then(() => this.animateLine(start+1))
         } else {
@@ -566,7 +564,7 @@ export default {
       animateGWL(start){
          const self = this;
       // animate path d and fill by wy day    
-      console.log(start)
+
         if (start < 365 ){
       // transition through days in sequence
         this.peak_grp
