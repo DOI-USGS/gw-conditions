@@ -50,7 +50,7 @@ export default {
       width: null,
       height: null,
       margin: { top: 50, right: 0, bottom: 50, left: 0 },
-      mar: 20,
+      mar: 50,
 
       // data mgmt
       quant_peaks: null,
@@ -69,6 +69,7 @@ export default {
       n_days: 365,
       sites_list: null,
       //t2: null,
+      isPlaying: null,
 
       // style for timeline
       button_color: "grey",
@@ -212,6 +213,8 @@ export default {
         this.makeLegend();
         this.drawFrame1(this.peaky);
 
+        this.playButton(this.svg, this.width*(2.5/7) , 300);
+
       // animated time chart
         this.drawLine(this.days, this.percData)
 
@@ -288,7 +291,6 @@ export default {
       .attr("class", function(d,i) { return "button_name name_" + d.name + " " + d.name } ) 
       .attr("x", function(d) { return self.xScale(d.day)-12 }) // centering on pt
       .attr("y", 25)
-      .attr("stroke", this.button_color)
       .text(function(d, i) { return d.name })
       .attr("text-align", "middle")
       .on('click', function(d, i) {
@@ -308,7 +310,6 @@ export default {
       .attr("class", function(d,i) { return "button_year" } ) 
       .attr("x", function(d) { return self.xScale(1)-10 }) // centering on pt
       .attr("y", 45)
-      .attr("stroke", this.button_color)
       .text(function(d, i) { return 2021 })
 
       button_month
@@ -316,15 +317,13 @@ export default {
       .attr("class", function(d,i) { return "button_year" } ) 
       .attr("x", function(d) { return self.xScale(367)-20 }) // centering on pt
       .attr("y", 45)
-      .attr("stroke", this.button_color)
       .text(function(d, i) { return 2022 })
 
       button_month
       .append("text")
       .attr("class", function(d,i) { return "axis_label" } ) 
       .attr("x", function(d) { return self.xScale(1)-10 }) // centering on pt
-      .attr("y", -110)
-      .attr("stroke", this.button_color)
+      .attr("y", -100)
       .text(function(d, i) { return "Proportion of wells" })
 
       // add line chart
@@ -375,17 +374,69 @@ export default {
 
         this.xScale = this.d3.scaleLinear()
         .domain([0, this.n_days])
-        .range([this.mar, this.width-2*this.mar])
+        .range([this.mar/2, this.width-2*this.mar])
 
         this.yScale = this.d3.scaleLinear()
         .domain([0, 0.6])
         .range([100, 0])
 
       },
+      playButton(svg, x, y) {
+        const self = this;
+        
+        var button = svg.append("g")
+            .attr("transform", "translate("+ x +","+ y +")")
+            .attr("class", "play_button");
+
+        button
+          .append("rect")
+            .attr("width", 50)
+            .attr("height", 50)
+            .attr("rx", 4)
+            .style("fill", "steelblue");
+
+        // append hover title
+          button
+            .append("title")
+              .text("replay animation")
+
+        button
+          .append("path")
+            .attr("d", "M15 10 L15 40 L35 25 Z")
+            .style("fill", "white");
+            
+        button
+            .on("mousedown", function() {
+              self.animateLine(0);
+              self.animateGWL(0);
+            });
+      },
+      pressButton(playing) {
+          const self = this;
+
+          // trigger animation if animation is not already playing
+          if (playing == false) {
+            self.animateChart_Map()
+          }
+        },
+        resetPlayButton() {
+          const self = this;
+
+          // reset global playing variable to false now that animation is complete
+          self.isPlaying = false;
+
+          // undim button
+          let button_rect = this.d3.selectAll(".play_button").selectAll("rect")
+            .style("fill", 'rgb(250,109,49)')
+
+        },
       animateLine(start){
         // animates grey line on timeseries chart to represent current timepoint
         const self = this;
         var line_height = 250;
+        
+        // set indicator for play button
+        self.isPlaying = true
 
         if (start < this.n_days){
           this.d3.selectAll(".hilite")
@@ -398,7 +449,7 @@ export default {
           this.d3.selectAll(".hilite")
             .transition()
             .duration(this.day_length) 
-            .attr("x", x(this.days[this.n_days]))
+            .attr("x", self.xScale(this.days[this.n_days]))
         }
       },
       buttonSelect(d){
@@ -413,7 +464,6 @@ export default {
         .duration(100)
         .attr("r", 6)
         .attr("fill", this.button_hilite)
-        .attr("stroke", this.button_hilite)
       },
       buttonDeSelect(d){
         // unhighlight on mouseout
@@ -434,7 +484,6 @@ export default {
         .duration(100)
         .attr("r", 3)
         .attr("fill", this.button_color)
-        .attr("stroke", this.button_color)
       },
       initTime(){
         // TO DO: init nested timelines for playback control
@@ -525,7 +574,7 @@ export default {
           .enter()
           .append("text")
             .attr("x", -20)
-            .attr("y", function(d,i){ return 140 - (i*22)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("y", function(d,i){ return 140 - (i*22)}) 
             .text(function(d){ return d})
             .attr("text-anchor", "end")
             .style("alignment-baseline", "middle")
@@ -535,7 +584,7 @@ export default {
           .enter()
           .append("text")
             .attr("x", 20)
-            .attr("y", function(d,i){ return 140 - (i*22)}) // 100 is where the first dot appears. 25 is the distance between dots
+            .attr("y", function(d,i){ return 145 - (i*23)}) 
             .text(function(d){ return d})
             .attr("text-anchor", "start")
             .style("alignment-baseline", "middle")
@@ -566,7 +615,6 @@ export default {
       // animate path d and fill by wy day    
 
         if (start < 365 ){
-      // transition through days in sequence
         this.peak_grp
         .transition()
         .duration(this.day_length)  // duration of each day
@@ -588,13 +636,15 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-
+$dark: #323333;
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
 #grid-container {
   display: grid;
   padding-right: 2rem;
+  margin: 1rem;
   width: 100%;
+  height: 98vh;
   vertical-align: middle;
   overflow: hidden;
   grid-template-areas:
@@ -606,13 +656,18 @@ export default {
 #map-container{
   grid-area: map;
   padding: 1rem;
-  padding-right: 2rem;
+  padding-bottom: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .map {
+    max-height: 650px;
+  }
 }
 #text-container {
   grid-area: text;
   padding:20px;
   padding-top: 0px;
-  padding-right: 2rem;
   // controlling positioning within div as page scales
   display: flex;
   justify-content: center;
@@ -634,8 +689,8 @@ export default {
   height: auto;
   grid-area: title;
   h1, h2, h3 {
-    width: 95vw;
-    color:"black";
+   // width: 95vw;
+    color:$dark;
     height: auto;
     padding: 4px;
   }
@@ -650,39 +705,42 @@ export default {
 // annotated timeline
 .liney {
   stroke-width: 2px;
-  color: rgb(143, 206, 131);
 }
 
 // desktop
 @media (min-width:1024px) {
   #grid-container {
-    grid-template-columns: 3fr 1fr;
+    margin: 50px;
+    grid-template-columns: 2fr 5fr;
     grid-template-areas:
-    "title title"
-    "map legend"
-    "map text"
-    "map text"
+    "title map"
+    "legend map"
+    "text map"
     "line line"
   }
   .title {
-  text-align: right;
+  text-align: left;
   }
   #legend-container {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-left: 50px;
     align-items: center;
   }
   #line-container {
   grid-area: line;
-  margin-bottom: 10px;
-  margin-left: 10px;
+}
+.map {
+  margin-top: 50px;
+}
+text-container {
+  padding-left: 50px;
 }
 }
 // glyph paths
 .gwl_glyph {
   stroke: none; 
   fill-opacity: 50%;
-  //transform: scale(0.35, 0.35);
 }
 
 </style>

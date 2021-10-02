@@ -63,11 +63,9 @@
 // Fonts
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Abel&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url("https://use.typekit.net/yww2frw.css");
 
-$Abel: 'Abel', sans-serif;
 $Cairo: 'Cairo', sans-serif;
 $Assistant: 'Assistant', sans-serif;
 $Noto: 'Noto Serif', serif;
@@ -91,7 +89,7 @@ body {
   }
 h1{
   font-size: 3.5em;
-  font-weight: 300;
+  font-weight: 600;
   font-family: $Assistant;
   line-height: 1;
   text-align: left;
@@ -101,7 +99,7 @@ h1{
   }
 }
 h2{
-  font-weight: 400;
+  font-weight: 600;
   text-align: left;
   font-family:$Assistant;
   font-size: 3em;
@@ -124,7 +122,8 @@ h3{
 }
 p, text {
   padding: 1em 0 0 0; 
-  font-family: $Assistant;
+  font-family: $acu_bold;
+  line-height: 1.5;
 }
 
 </style>
