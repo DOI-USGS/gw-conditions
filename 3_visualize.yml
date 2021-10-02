@@ -19,24 +19,17 @@ targets:
 
   3_visualize:
     depends:
-      - 3_visualize/out/anomaly_peaks.svg
-      - src/assets/anomaly_peaks.svg
-      - public/gw_sites.csv
-      - public/date_peaks.csv
+      - src/assets/anomaly_peaks.svg 
+      - public/gw_sites.csv ## this is in aws as gw-conditions-sites.csv
+      - public/date_peaks.csv ## in aws as gw-conditions-wy20.csv
+      - public/gw-conditions-daily-count.csv ## in aws as gw-conditions-daily-count.csv
 
-  3_visualize/out/anomaly_peaks.svg:
+  # exports that are leveraged by vue
+  src/assets/anomaly_peaks.svg:
     command: build_peaks_svg(
       target_name, 
-      data_in = gw_anomaly_data_w_colors, 
-      sites_sf = gw_sites_sf,
       svg_width = svg_width, 
       svg_height = svg_height)
-      
-  src/assets/anomaly_peaks.svg:
-    command: file.copy(
-      to = target_name,
-      from = '3_visualize/out/anomaly_peaks.svg', 
-      overwrite = TRUE)
       
   public/date_peaks.csv:
     command: gwl_to_peak(
@@ -47,8 +40,8 @@ targets:
     command: get_site_coords(
       target_name,
       sites_sf = gw_sites_sf)
-      
-  public/gwl_daily_count.csv:
+  
+  public/gw-conditions-daily-count.csv:
     command: site_prop_timeseries(target_name, 
       gw_anomaly_data_w_colors)
 
