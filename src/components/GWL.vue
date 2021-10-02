@@ -62,10 +62,10 @@ export default {
       days: null,
 
       peak_grp: null,
-      day_length: 50, // frame duration in milliseconds
+      day_length: 1, // frame duration in milliseconds
       current_time: 0,
       start: 0,
-      n_days: 367,
+      n_days: 365,
       //x:  0,
       sites_list: null,
       //t2: null,
@@ -549,25 +549,25 @@ export default {
 
           // select existing paths using class
           var start = this.start;
-            this.peak_grp = this.svg.selectAll("path.peak")
+            this.peak_grp = this.svg.selectAll("path.gwl_glyph")
               .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
               .join("path") // match with selection
               .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
 
-            // draws a oath for each site, using the first date
+            // draws a path for each site, using the first date
             this.peak_grp 
              .attr("class", function(d) { return d.key })
-             .attr("fill", function(d) { return self.quant_color(d.gwl[0]) }) // this is not exactly right
-             .attr("stroke-width", "1px")
+             .attr("fill", function(d) { return self.quant_color(d.gwl[0]) }) 
              .attr("opacity", ".5")
-             .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start]*1 + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
+             .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
           this.animateGWL(start); // once sites are drawn, trigger animation
       },
       animateGWL(start){
          const self = this;
       // animate path d and fill by wy day    
-        if (start < this.n_days ){
+      console.log(start)
+        if (start < 365 ){
       // transition through days in sequence
         this.peak_grp
         .transition()
@@ -582,7 +582,8 @@ export default {
        this.peak_grp
           .transition()
           .duration(this.day_length)  // duration of each day
-          .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[this.n_days] + " 10 0 Z" })
+          .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[365] + " 10 0 Z" })
+          .attr("fill", function(d) { return self.quant_color(d.gwl[365]) })
         }
       }
     }
@@ -678,6 +679,12 @@ export default {
   margin-bottom: 10px;
   margin-left: 10px;
 }
+}
+// glyph paths
+.gwl_glyph {
+  stroke: none; 
+  fill-opacity: 50%;
+  //transform: scale(0.35, 0.35);
 }
 
 </style>
