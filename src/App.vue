@@ -86,6 +86,10 @@ body {
       @media screen and (max-width: 600px) {
         font-size: 16px;
       }
+      .axis_label {
+        font-size: 20px;
+        font-weight: 600;
+      }
   }
 h1{
   font-size: 3.5em;

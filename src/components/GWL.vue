@@ -63,7 +63,7 @@ export default {
       days: null,
 
       peak_grp: null,
-      day_length: 1, // frame duration in milliseconds
+      day_length: 10, // frame duration in milliseconds
       current_time: 0,
       start: 0,
       n_days: 365,
@@ -188,10 +188,6 @@ export default {
 
        // draw the map
       var map_svg = this.d3.select("svg.map")
-      /*  map_svg.selectAll(".map-bkgrd")
-        .style("stroke", "white")
-        .style("stroke-width", "0.1px")
-        .style("fill", "white") */
        this.drawFrame1(map_svg, peaky);
 
       // animated time chart
@@ -218,8 +214,7 @@ export default {
 
       var button_month = time_container.select('svg')
       .append("g")
-      .classed("#btn-month", true)
-      .attr("transform", "translate(0," + 120 + ")")
+      .attr("transform", "translate(20," + 120 + ")")
       .attr("z-index", 100)
 
     // month points on timeline
@@ -227,10 +222,10 @@ export default {
       .data(this.time_labels).enter()
       .append("circle")
       .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
-      .attr("r", 3)
+      .attr("r", 5)
       .attr("cx", function(d) { return self.xScale(d.day_seq) })
       .attr("cy", 0)
-      .attr("stroke", this.button_color)
+      .attr("stroke", "white")
       .attr("stroke-width", "2px")
       .attr("fill", this.button_color)
       //.on('click', function(d, i) {
@@ -249,7 +244,7 @@ export default {
       .enter()
       .append("text")
       .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
-      .attr("x", function(d) { return self.xScale(d.day_seq)-12 }) // centering on pt
+      .attr("x", function(d) { return self.xScale(d.day_seq)-10 }) // centering on pt
       .attr("y", 25)
       .text(function(d, i) { return d.month_label })
       .attr("text-align", "start")
@@ -263,7 +258,7 @@ export default {
         self.buttonDeSelect(d);
       }) */
 
-      // filter to just year annotations
+      // filter to just year annotations for first month they appear
       var year_labels = this.time_labels.filter(function(el) {
         return el.year_label >= 2000;
       });
@@ -278,12 +273,13 @@ export default {
       .attr("y", 45)
       .text(function(d, i) { return d.year })
 
+      // chart title
       button_month
       .append("text")
       .attr("class", function(d,i) { return "axis_label" } ) 
-      .attr("x", function(d) { return self.xScale(1)-10 }) // centering on pt
-      .attr("y", -100)
-      .text(function(d, i) { return "Proportion of wells" })
+      .attr("x", function(d) { return self.xScale(1)-40 }) // centering on pt
+      .attr("y", -120)
+      .text(function(d, i) { return "Wells by groundwater level" })
 
 
       },
@@ -291,13 +287,14 @@ export default {
         const self = this;
 
         var line_height = 250;
+        var y_nudge = 20;
 
       // set up svg for timeline
       var svg = time_container
         .append("svg")
         .attr("width", "100%")
         .attr("preserveAspectRatio", "xMinYMin meet")
-        .attr("viewBox", "0 0 " + this.width + " " + line_height)
+        .attr("viewBox", "0 -20 " + this.width + " " + line_height)
         .attr("id", "x-line")
 
       // define axes
@@ -305,24 +302,39 @@ export default {
         .scale(this.xScale)
         .ticks(0).tickSize(0);
 
+      var yLine = this.d3.axisLeft().tickFormat(this.d3.format('~%'))
+        .scale(this.yScale)
+        .ticks(2).tickSize(6);
+
       // draw axes
-      var liney = svg.append("g")
+      var xliney = svg.append("g")
         .call(xLine)
-        .attr("transform", "translate(0," + 120 + ")")
+        .attr("transform", "translate(20," + 120 + ")")
+        .classed("liney", true)
+
+      var yliney = svg.append("g")
+        .call(yLine)
+        .attr("transform", "translate(47," +  y_nudge + ")")
         .classed("liney", true)
 
       // style axes
-      liney.select("path.domain")
+      xliney.select("path.domain")
         .attr("id", "timeline-x")
-        .attr("color", "lightgrey")
-        .attr("stroke-width", "3px")
+        .attr("color", "white")
+        .attr("stroke-width", "4px")
+
+      yliney.select("path.domain")
+        .attr("id", "timeline-y")
+        .attr("color", "white")
+        .attr("stroke-width", "4px")
+        .attr('font-size', '5rem')
 
       // add line chart
        // line chart showing proportion of gages in each category
          var line_chart = svg.append("g")
           .classed("time-chart", true)
           .attr("id", "time-legend")
-          .attr("transform", "translate(0," + 20 + ")")
+          .attr("transform", "translate(20," +  y_nudge + ")")
 
         var bar_color = this.d3.scaleOrdinal()
         .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
@@ -363,14 +375,15 @@ export default {
         .domain([-40, -25, 25, 40])
         .range(this.pal_roma_rev) 
 
+        // x axis of line chart
         this.xScale = this.d3.scaleLinear()
         .domain([0, this.n_days])
         .range([this.mar/2, this.width-2*this.mar])
 
+        // y axis of line chart
         this.yScale = this.d3.scaleLinear()
-        .domain([0, 0.6])
+        .domain([0, 0.6]) // this should come from the data - round up from highest proportion value
         .range([100, 0])
-
 
         this.line = this.d3.line()
           .defined(d => !isNaN(d))
@@ -744,5 +757,4 @@ text-container {
   stroke: none; 
   fill-opacity: 50%;
 }
-
 </style>
