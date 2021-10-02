@@ -5,14 +5,19 @@
 add_background_map <- function(svg, svg_width, outline_states) {
   map_data <- generate_usa_map_data(outline_states = outline_states)
   
-  bkgrd_grp <- xml_add_child(svg, 'g', id = "bkgrd-map-grp")
+  bkgrd_grp <- xml_add_child(svg, 'g', 
+                             id = "bkgrd-map-grp", 
+                             class='map-bkgrd', 
+                             style="stroke:white;stroke-width:0.2;fill:white")
   purrr::map(map_data$ID, function(polygon_id, map_data, svg_width) {
     d <- map_data %>% 
       filter(ID == polygon_id) %>% 
       convert_coords_to_svg(view_bbox = st_bbox(map_data), svg_width) %>% 
       build_path(connect = TRUE)
-    # "#e8d9c5" tan (what about slate grey #9fabb7)
-    xml_add_child(bkgrd_grp, 'path', d = d, class='map-bkgrd', style="stroke:#9fabb7;stroke-width:0.5;fill:none")
+    xml_add_child(bkgrd_grp, 'path', 
+                  d = d, 
+                  class='map-bkgrd', 
+                  style="stroke:white;stroke-width:0.2;fill:white")
   }, map_data, svg_width)
   
 }

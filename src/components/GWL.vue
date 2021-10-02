@@ -56,7 +56,6 @@ export default {
       quant_peaks: null,
       date_peaks: null,
       svg: null,
-      peaky: null,
       site_coords: null,
       site_count: null,
       time_labels: null,
@@ -106,26 +105,6 @@ export default {
       high: "#2E9EC6",
       veryhigh: "#28648A",
 
-
-
-       // TODO: derive from pipeline. inputs are months, day sequence nested w/ key
-      // timeline data
-      months: [
-        { 'name': 'Jan', 'day': '1' },
-        { 'name': 'Feb', 'day': '31' },
-        { 'name': 'Mar', 'day': '60' },
-        { 'name': 'Apr', 'day': '90' },
-        { 'name': 'May', 'day': '120' },
-        { 'name': 'Jun', 'day': '150' },
-        { 'name': 'Jul', 'day': '181' },
-        { 'name': 'Aug', 'day': '210' },
-        { 'name': 'Sept', 'day': '240' },
-        { 'name': 'Oct', 'day': '270' },
-        { 'name': 'Nov', 'day': '300' },
-        { 'name': 'Dec', 'day': '331' },
-        { 'name': 'Jan', 'day': '367' }
-      ],
-
     }
   },
   mounted(){
@@ -140,14 +119,6 @@ export default {
       
       // read in data
       this.loadData();   
-
-      // define style before page fully loads
-      this.svg = this.d3.select("svg.map")
-
-       this.svg.selectAll(".map-bkgrd")
-        .style("stroke", "white")
-        .style("stroke-width", "0.1px")
-        .style("fill", "white")
 
     },
     methods:{
@@ -173,58 +144,64 @@ export default {
         this.site_count = data[3]; // number of sites x quant_category x day_seq
         this.time_labels = data[4]; // timeline annotations - including months 
 
-        // water days
+        // days in sequence
         var day_seq = this.date_peaks.columns
-        day_seq.shift();
+        day_seq.shift(); // drop first col with site_no
 
-        // sites
+        // sites 
         this.sites_list = this.site_coords.map(function(d)  { return d.site_no })
         var n = this.sites_list.length // to create nested array for indexing in animation
 
         // site placement on map
-        this.sites_x = this.site_coords.map(function(d) { return d.x })
-        this.sites_y = this.site_coords.map(function(d) { return d.y })
+        var sites_x = this.site_coords.map(function(d) { return d.x })
+        var sites_y = this.site_coords.map(function(d) { return d.y })
 
         // reorganize - site is the key with gwl for each day of the wy
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
-         this.peaky = [];
+         var peaky = [];
           for (i = 1; i < n; i++) {
               var key = this.sites_list[i];
               var day_seq = this.date_peaks.map(function(d){  return d['day_seq']; });
               var gwl = this.date_peaks.map(function(d){  return d[key]; });
-              var site_x = this.sites_x[i];
-              var site_y = this.sites_y[i];
-              this.peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
+              var site_x = sites_x[i];
+              var site_y = sites_y[i];
+              peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
           };
 
-       // set color scale for path fill
-        this.quant_color = this.d3.scaleThreshold()
-        .domain([-40, -25, 25, 40])
-        .range(this.pal_roma_rev) 
-
-        //same for timeseries data
+        // same for timeseries data but indexed by percentile category
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
         var n_quant = quant_cat.length
-        this.percData = [];
+        var percData = [];
           for (i = 0; i < n_quant; i++) {
           var key_quant = quant_cat[i];
           var day_seq = this.site_count.map(function(d){ return d['day_seq']});
           var perc = this.site_count.map(function(d){ return d[key_quant]});
-          this.percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
+          percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
           };
 
       this.days = this.site_count.map(function(d) { return  d['day_seq']})
       this.n_days = this.days.length-1
      
-       // draw the chart
-       this.setScales();
-        this.makeLegend();
-        this.drawFrame1(this.peaky);
+       // set up scales
+       this.setScales(); // axes, color, and line drawing fnu
+       this.makeLegend();
 
-        this.playButton(this.svg, this.width*(2.5/7) , 300);
+       // draw the map
+      var map_svg = this.d3.select("svg.map")
+      /*  map_svg.selectAll(".map-bkgrd")
+        .style("stroke", "white")
+        .style("stroke-width", "0.1px")
+        .style("fill", "white") */
+       this.drawFrame1(map_svg, peaky);
 
       // animated time chart
-        this.drawLine(this.percData)
+      var time_container = this.d3.select("#line-container");
+      this.drawLine(time_container, percData);
+      this.addButtons(time_container);
+
+      // control animation
+       this.playButton(map_svg, this.width*(2.5/7) , 300);
+
 
       },
       createPanel(month) {
@@ -233,14 +210,14 @@ export default {
         // add rest of this
         return tl;
       },
-      addButtons(svg){
+      addButtons(time_container){
         const self = this;
        // timeline events/"buttons"
        // want these to be buttons that rewind the animation to the date
        // and also drive annotations to events
-       console.log(this.time_labels)
 
-      var button_month = svg.append("g")
+      var button_month = time_container.select('svg')
+      .append("g")
       .classed("#btn-month", true)
       .attr("transform", "translate(0," + 120 + ")")
       .attr("z-index", 100)
@@ -259,12 +236,12 @@ export default {
       //.on('click', function(d, i) {
         //self.moveTimeline(d); 
      // })
-      .on('mouseover', function(d, i) {
+      /* .on('mouseover', function(d, i) {
         self.buttonSelect(d);
       })
       .on('mouseout', function(d, i) {
         self.buttonDeSelect(d);
-      })
+      }) */
 
       // month labels
       button_month.selectAll(".button_name")
@@ -275,20 +252,25 @@ export default {
       .attr("x", function(d) { return self.xScale(d.day_seq)-12 }) // centering on pt
       .attr("y", 25)
       .text(function(d, i) { return d.month_label })
-      .attr("text-align", "middle")
+      .attr("text-align", "start")
       //.on('click', function(d, i) {
         //self.moveTimeline(d);
       //})
-      .on('mouseover', function(d, i) {
+      /* .on('mouseover', function(d, i) {
         self.buttonSelect(d);
       })
       .on('mouseout', function(d, i) {
         self.buttonDeSelect(d);
-      })
+      }) */
 
-      // year annotations
+      // filter to just year annotations
+      var year_labels = this.time_labels.filter(function(el) {
+        return el.year_label >= 2000;
+      });
+
+      // add year labels to timeline
       button_month.selectAll(".button_year")
-      .data(this.time_labels)
+      .data(year_labels)
       .enter()
       .append("text")
       .attr("class", function(d,i) { return "button_year button_" + d.year } ) 
@@ -305,13 +287,13 @@ export default {
 
 
       },
-      drawLine(prop_data) {
+      drawLine(time_container, prop_data) {
         const self = this;
 
         var line_height = 250;
 
       // set up svg for timeline
-      var svg = this.d3.select("#line-container")
+      var svg = time_container
         .append("svg")
         .attr("width", "100%")
         .attr("preserveAspectRatio", "xMinYMin meet")
@@ -334,8 +316,6 @@ export default {
         .attr("id", "timeline-x")
         .attr("color", "lightgrey")
         .attr("stroke-width", "3px")
-
-        self.addButtons(svg)
 
       // add line chart
        // line chart showing proportion of gages in each category
@@ -377,6 +357,11 @@ export default {
 
       },
       setScales(){
+
+        // set color scale for path fill
+        this.quant_color = this.d3.scaleThreshold()
+        .domain([-40, -25, 25, 40])
+        .range(this.pal_roma_rev) 
 
         this.xScale = this.d3.scaleLinear()
         .domain([0, this.n_days])
@@ -606,13 +591,13 @@ export default {
             .style("alignment-baseline", "middle")
 
       },
-      drawFrame1(data){         
+      drawFrame1(map_svg, data){         
         // draw the first frame of the animation
         const self = this;
 
           // select existing paths using class
           var start = this.start;
-            this.peak_grp = this.svg.selectAll("path.gwl_glyph")
+            this.peak_grp = map_svg.selectAll("path.gwl_glyph")
               .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
               .join("path") // match with selection
               .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
@@ -676,7 +661,7 @@ $dark: #323333;
   display: flex;
   justify-content: center;
   align-items: center;
-  .map {
+  svg.map {
     max-height: 650px;
   }
 }
@@ -716,7 +701,8 @@ $dark: #323333;
 #bkgrd-map-grp {
   filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.15));
   stroke-width: 0.2;
-  color: "white"
+  color: white;
+  fill: white;
 }
 // annotated timeline
 .liney {

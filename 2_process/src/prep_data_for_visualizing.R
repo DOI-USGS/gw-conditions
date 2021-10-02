@@ -49,5 +49,8 @@ generate_months <- function(file_out, data_in){
            year = lubridate::year(Date)) %>%
     group_by(month, month_label, year) %>% 
     filter(day_seq == min(day_seq)) %>% ## find the first day of each month to draw labels
+    ungroup() %>%
+    group_by(year) %>%
+    mutate(year_label = ifelse(day_seq == min(day_seq), year, NA)) %>%
     write_csv(file_out)
 }
