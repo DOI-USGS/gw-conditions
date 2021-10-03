@@ -125,14 +125,18 @@ export default {
        loadData() {
         const self = this;
         // read in data 
+        // providing multiple file paths for the data because need to be updated in AWS to reflect latest changes in pipeline
+        // can run from public folder if building targets locally
+
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        //self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
-         self.d3.csv(self.publicPath + "gw-conditions-wy20.csv",  this.d3.autotype), // needs to go to aws
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
+        //self.d3.csv(self.publicPath + "gw-conditions-wy20.csv",  this.d3.autotype), // needs to go to aws
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-sites.csv",  this.d3.autotype), 
-        //self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype),
-        self.d3.csv(self.publicPath + "gw-conditions-daily-count.csv",  this.d3.autotype), // needs to go to aws
-        self.d3.csv(self.publicPath + "gw-conditions-time-labels.csv",  this.d3.autotype)
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype),
+        //self.d3.csv(self.publicPath + "gw-conditions-daily-count.csv",  this.d3.autotype), // needs to go to aws
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels.csv",  this.d3.autotype),
+        //self.d3.csv(self.publicPath + "gw-conditions-time-labels.csv",  this.d3.autotype) // needs to go to aws
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
@@ -180,7 +184,8 @@ export default {
           };
 
       this.days = this.site_count.map(function(d) { return  d['day_seq']})
-      this.n_days = this.days.length-1
+      this.dates = this.site_count.map(function(d) { return  d['Date']})
+      this.n_days = this.days.length
      
        // set up scales
        this.setScales(); // axes, color, and line drawing fnu
@@ -196,7 +201,9 @@ export default {
       this.addButtons(time_container);
 
       // control animation
-       this.playButton(map_svg, this.width*(2.5/7) , 300);
+      this.animateLine(this.start);
+      this.animateGWL(this.start);
+      this.playButton(map_svg, this.width*(2.5/7) , 300);
 
 
       },
@@ -354,8 +361,6 @@ export default {
           .attr("opacity", 0.7);
 
       // animate line to time
-      var start = this.start;
-
        line_chart.append("rect")
           .data(this.days)
           .classed("hilite", true)
@@ -363,9 +368,16 @@ export default {
           .attr("height", "100")
           .attr("opacity", 0.5)
           .attr("fill", "grey")
-          .attr("x", self.xScale(this.days[start]))
-         
-        this.animateLine(start);
+          .attr("x", self.xScale(this.days[this.start]))
+
+    // add date ticker
+/*      line_chart
+      .append("text")
+      .attr("class", "ticker-date") 
+      .attr("x", self.xScale(365)) // centering on pt
+      .attr("y", -10)
+      .text( this.dates[this.start])
+      .attr("text-anchor", "end") */
 
       },
       setScales(){
@@ -377,7 +389,7 @@ export default {
 
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
-        .domain([0, this.n_days])
+        .domain([0, this.n_days-1])
         .range([this.mar/2, this.width-2*this.mar])
 
         // y axis of line chart
@@ -455,11 +467,19 @@ export default {
             .attr("x", self.xScale(this.days[start]))
           .end()
           .then(() => this.animateLine(start+1))
+
+         /*  this.d3.selectAll(".ticker-date")
+          .transition()
+            .duration(this.day_length) 
+            .text(this.dates[start])
+          .end()
+          .then(() => this.animateLine(start+1)) */
+
         } else {
           this.d3.selectAll(".hilite")
             .transition()
             .duration(this.day_length) 
-            .attr("x", self.xScale(this.days[this.n_days]))
+            .attr("x", self.xScale(this.days[this.n_days-1]))
         }
       },
       buttonSelect(d){
@@ -622,7 +642,7 @@ export default {
              .attr("opacity", ".5")
              .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
-          this.animateGWL(start); // once sites are drawn, trigger animation
+         // this.animateGWL(this.start); // once sites are drawn, trigger animation
       },
       animateGWL(start){
          const self = this;
