@@ -1,5 +1,5 @@
 
-build_peaks_svg <- function(out_file, data_in, sites_sf, svg_width, svg_height) {
+build_peaks_svg <- function(out_file, svg_width, svg_height) {
   
   svg_root <- init_svg(viewbox_dims = c(0, 0, svg_width=svg_width, svg_height=svg_height))
   
