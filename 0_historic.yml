@@ -12,6 +12,7 @@ sources:
   - 0_historic/src/fetch_nwis_historic.R
   - 0_historic/src/filter_historic_fetched_data.R
   - 0_historic/src/calculate_historic_quantiles.R
+  - 0_historic/src/do_historic_addl_param_fetch.R
 
 targets:
 
@@ -38,7 +39,7 @@ targets:
       task_makefile = I('0_historic_fetch_tasks.yml'),
       gw_site_nums = historic_gw_sites_dv,
       gw_site_nums_obj_nm = I('historic_gw_sites_dv'),
-      param_cd_obj_nm = I('gw_param_cd'),
+      param_cd = gw_param_cd,
       service_cd = I('dv'),
       request_limit = historic_dv_fetch_size_limit,
       '0_historic/src/do_historic_gw_fetch.R',
@@ -50,27 +51,23 @@ targets:
       task_makefile = I('0_historic_fetch_tasks.yml'),
       gw_site_nums = historic_gw_sites_uv,
       gw_site_nums_obj_nm = I('historic_gw_sites_uv'),
-      param_cd_obj_nm = I('gw_param_cd'),
+      param_cd = gw_param_cd,
       service_cd = I('uv'),
       request_limit = historic_uv_fetch_size_limit,
       '0_historic/src/do_historic_gw_fetch.R',
       '0_historic/src/fetch_nwis_historic.R')
   
-  # Special pull for just KS & just FL using `62610`.
+  # Special pull for just KS & just FL using `62610`. Plus, HI using `72150`.
   # Read all about why on GitHub: https://github.com/USGS-VIZLAB/gw-conditions/issues/9
-  addl_site_nums:
-    command: fetch_addl_uv_sites(addl_states, addl_gw_param_cd, historic_start_date, historic_end_date)
   0_historic/out/historic_gw_data_uv_addl.csv:
-    command: do_historic_gw_fetch(
-      final_target = target_name,
-      task_makefile = I('0_historic_fetch_tasks.yml'),
-      gw_site_nums = addl_site_nums,
-      gw_site_nums_obj_nm = I('addl_site_nums'),
-      param_cd_obj_nm = I('addl_gw_param_cd'),
-      service_cd = I('uv'),
-      request_limit = historic_uv_fetch_size_limit,
-      '0_historic/src/do_historic_gw_fetch.R',
-      '0_historic/src/fetch_nwis_historic.R')
+    command: do_historic_addl_param_fetch(
+      target_name,
+      addl_states, 
+      addl_gw_param_cds, 
+      historic_start_date, 
+      historic_end_date)
+  addl_site_nums:
+    command: pull_site_nums('0_historic/out/historic_gw_data_uv_addl.csv')
   
   0_historic/out/historic_gw_data.csv:
     command: combine_gw_fetches(
@@ -80,7 +77,7 @@ targets:
       '0_historic/out/historic_gw_data_uv_addl.csv')
   
   historic_gw_sites:
-    command: combine_gw_sites(historic_gw_sites_all, addl_site_nums, gw_param_cd, addl_gw_param_cd)
+    command: combine_gw_sites(historic_gw_sites_all, addl_site_nums, gw_param_cd, addl_gw_param_cds)
   historic_gw_site_info:
     command: fetch_gw_site_info('0_historic/out/historic_gw_data.csv')
   0_historic/out/historic_gw_site_info.rds:

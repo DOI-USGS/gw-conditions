@@ -60,11 +60,12 @@ targets:
   gw_param_cd:
     command: c(I('72019'))
   
-  # Additional fetch params for the states that don't report 72019 pcode
-  addl_gw_param_cd:
-    command: c(I('62610'))
+  # Additional fetch configs for the states that don't report 72019 pcode
+  # The values of the pcodes should match up with their corresponding states
+  addl_gw_param_cds:
+    command: c(I('62610'), I('62610'), I('72150'))
   addl_states:
-    command: c(I('FL'), I('KS'))
+    command: c(I('FL'), I('KS'), I('HI'))
 
 ##-- Process configs --##
 
