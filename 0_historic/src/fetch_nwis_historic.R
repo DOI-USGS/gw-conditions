@@ -108,9 +108,16 @@ combine_gw_fetches <- function(target_name, dv_fn, uv_fn, uv_addl_fn) {
     write_csv(target_name)
 }
 
-combine_gw_sites <- function(gw_site_df, uv_addl_sites, param_cd, addl_param_cd) {
+combine_gw_sites <- function(gw_site_df, uv_addl_sites, param_cd, addl_param_cd, addl_states) {
+  # First find out what state the additional sites are in
+  # Then you can figure out what parameter code they should have
+  addl_sites_df <- readNWISsite(uv_addl_sites) %>%
+    mutate(state_abbr = stateCdLookup(state_cd)) %>% 
+    left_join(tibble(state_abbr = addl_states, 
+                     param_cd = addl_param_cd)) %>% 
+    mutate(data_type_cd = "uv") %>% 
+    select(site_no, data_type_cd, param_cd)
+  
   mutate(gw_site_df, param_cd = param_cd) %>% 
-    bind_rows(tibble(site_no = uv_addl_sites, 
-                     data_type_cd = "uv", 
-                     param_cd = addl_param_cd))
+    bind_rows(addl_sites_df)
 }

@@ -77,7 +77,7 @@ targets:
       '0_historic/out/historic_gw_data_uv_addl.csv')
   
   historic_gw_sites:
-    command: combine_gw_sites(historic_gw_sites_all, addl_site_nums, gw_param_cd, addl_gw_param_cds)
+    command: combine_gw_sites(historic_gw_sites_all, addl_site_nums, gw_param_cd, addl_gw_param_cds, addl_states)
   historic_gw_site_info:
     command: fetch_gw_site_info('0_historic/out/historic_gw_data.csv')
   0_historic/out/historic_gw_site_info.rds:
