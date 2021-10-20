@@ -45,7 +45,7 @@ targets:
   viz_start_date:
     command: as.Date(I('2020-10-01'))
   viz_end_date:
-    command: as.Date(I('2020-09-30'))
+    command: as.Date(I('2021-09-30'))
   # Use bounding box in case we want to do this regionally someday
   # Start with CONUS only
   # I don't think this is being used any more ...
