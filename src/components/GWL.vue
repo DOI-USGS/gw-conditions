@@ -125,18 +125,12 @@ export default {
        loadData() {
         const self = this;
         // read in data 
-        // providing multiple file paths for the data because need to be updated in AWS to reflect latest changes in pipeline
-        // can run from public folder if building targets locally
-
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
-        //self.d3.csv(self.publicPath + "gw-conditions-wy20.csv",  this.d3.autotype), // needs to go to aws
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-sites.csv",  this.d3.autotype), 
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-count.csv",  this.d3.autotype),
-        //self.d3.csv(self.publicPath + "gw-conditions-daily-count.csv",  this.d3.autotype), // needs to go to aws
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy2020.csv",  this.d3.autotype),
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords.csv",  this.d3.autotype), 
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportion.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels.csv",  this.d3.autotype),
-        //self.d3.csv(self.publicPath + "gw-conditions-time-labels.csv",  this.d3.autotype) // needs to go to aws
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
@@ -147,6 +141,7 @@ export default {
         this.site_coords = data[2]; // site positioning on svg - not needed with svg fix?
         this.site_count = data[3]; // number of sites x quant_category x day_seq
         this.time_labels = data[4]; // timeline annotations - including months 
+        console.log(this.site_coords)
 
         // days in sequence
         var day_seq = this.date_peaks.columns
