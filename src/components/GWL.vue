@@ -136,12 +136,31 @@ export default {
       },
       callback(data) {
         // assign data
-        this.quant_peaks = data[0]; // peak shapes for legend
-        this.date_peaks = data[1]; // gwl site level timeseries data
-        this.site_coords = data[2]; // site positioning on svg - not needed with svg fix?
+
+        // builds legend, has row for each category (2 for normal)
+        this.quant_peaks = data[0]; 
+
+        // gwl site level timeseries data to make peak animation
+        // row for each day/frame, col for each site
+        // first column is the day, subsequent are named "gwl_" + site_no
+        // site values are svg scaled svg positions for the animation
+        this.date_peaks = data[1]; 
+
+        // site coordinates for map
+        // TODO: pre-draw on map and pick up with d3
+        // requires duplicating map style in R so looks consistent on load
+        // need to consider how to handle sites with no data on the first date 
+        // variables: x, y, site_no, aqfr_type
+        this.site_coords = data[2]; 
+
+        // proportion of sites by each category over time
+        // variables: Date, day_seq (an integer from 1 to the last day), n_sites, and a column for each gwl category
         this.site_count = data[3]; // number of sites x quant_category x day_seq
-        this.time_labels = data[4]; // timeline annotations - including months 
-        console.log(this.site_coords)
+
+        // annotations for the timeline
+        // R pipeline pulls out each month and the year for time labels
+        // TODO: incorporate additional event annotations 
+        this.time_labels = data[4]; 
 
         // days in sequence
         var day_seq = this.date_peaks.columns
@@ -157,15 +176,15 @@ export default {
 
         // reorganize - site is the key with gwl for each day of the wy
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
-         var peaky = [];
-          for (i = 1; i < n; i++) {
-              var key = this.sites_list[i];
-              var day_seq = this.date_peaks.map(function(d){  return d['day_seq']; });
-              var gwl = this.date_peaks.map(function(d){  return d[key]; });
-              var site_x = sites_x[i];
-              var site_y = sites_y[i];
-              peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
-          };
+        var peaky = [];
+        for (i = 1; i < n; i++) {
+            var key = this.sites_list[i];
+            var day_seq = this.date_peaks.map(function(d){  return d['day_seq']; });
+            var gwl = this.date_peaks.map(function(d){  return d[key]; });
+            var site_x = sites_x[i];
+            var site_y = sites_y[i];
+            peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
+        };
 
         // same for timeseries data but indexed by percentile category
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
@@ -178,28 +197,27 @@ export default {
           percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
           };
 
-      this.days = this.site_count.map(function(d) { return  d['day_seq']})
-      this.dates = this.site_count.map(function(d) { return  d['Date']})
-      this.n_days = this.days.length
+        this.days = this.site_count.map(function(d) { return  d['day_seq']})
+        this.dates = this.site_count.map(function(d) { return  d['Date']})
+        this.n_days = this.days.length
      
-       // set up scales
-       this.setScales(); // axes, color, and line drawing fnu
-       this.makeLegend();
+        // set up scales
+        this.setScales(); // axes, color, and line drawing fnu
+        this.makeLegend();
 
-       // draw the map
-      var map_svg = this.d3.select("svg.map")
-       this.drawFrame1(map_svg, peaky);
+        // draw the map
+        var map_svg = this.d3.select("svg.map")
+        this.drawFrame1(map_svg, peaky);
 
-      // animated time chart
-      var time_container = this.d3.select("#line-container");
-      this.drawLine(time_container, percData);
-      this.addButtons(time_container);
+        // animated time chart
+        var time_container = this.d3.select("#line-container");
+        this.drawLine(time_container, percData);
+        this.addButtons(time_container);
 
-      // control animation
-      this.animateLine(this.start);
-      this.animateGWL(this.start);
-      this.playButton(map_svg, this.width*(2.5/7) , 300);
-
+        // control animation
+        this.animateLine(this.start);
+        this.animateGWL(this.start);
+        this.playButton(map_svg, this.width*(2.5/7) , 300);
 
       },
       createPanel(month) {
@@ -214,74 +232,74 @@ export default {
        // want these to be buttons that rewind the animation to the date
        // and also drive annotations to events
 
-      var button_month = time_container.select('svg')
-      .append("g")
-      .attr("transform", "translate(20," + 120 + ")")
-      .attr("z-index", 100)
+        var button_month = time_container.select('svg')
+          .append("g")
+          .attr("transform", "translate(20," + 120 + ")")
+          .attr("z-index", 100)
 
-    // month points on timeline
-      button_month.selectAll(".button_inner")
-      .data(this.time_labels).enter()
-      .append("circle")
-      .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
-      .attr("r", 5)
-      .attr("cx", function(d) { return self.xScale(d.day_seq) })
-      .attr("cy", 0)
-      .attr("stroke", "white")
-      .attr("stroke-width", "2px")
-      .attr("fill", this.button_color)
-      //.on('click', function(d, i) {
-        //self.moveTimeline(d); 
-     // })
-      /* .on('mouseover', function(d, i) {
-        self.buttonSelect(d);
-      })
-      .on('mouseout', function(d, i) {
-        self.buttonDeSelect(d);
-      }) */
+        // month points on timeline
+        button_month.selectAll(".button_inner")
+          .data(this.time_labels).enter()
+          .append("circle")
+          .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
+          .attr("r", 5)
+          .attr("cx", function(d) { return self.xScale(d.day_seq) })
+          .attr("cy", 0)
+          .attr("stroke", "white")
+          .attr("stroke-width", "2px")
+          .attr("fill", this.button_color)
+          //.on('click', function(d, i) {
+            //self.moveTimeline(d); 
+        // })
+          /* .on('mouseover', function(d, i) {
+            self.buttonSelect(d);
+          })
+          .on('mouseout', function(d, i) {
+            self.buttonDeSelect(d);
+          }) */
 
-      // month labels
-      button_month.selectAll(".button_name")
-      .data(this.time_labels)
-      .enter()
-      .append("text")
-      .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
-      .attr("x", function(d) { return self.xScale(d.day_seq)-10 }) // centering on pt
-      .attr("y", 25)
-      .text(function(d, i) { return d.month_label })
-      .attr("text-align", "start")
-      //.on('click', function(d, i) {
-        //self.moveTimeline(d);
-      //})
-      /* .on('mouseover', function(d, i) {
-        self.buttonSelect(d);
-      })
-      .on('mouseout', function(d, i) {
-        self.buttonDeSelect(d);
-      }) */
+        // month labels
+        button_month.selectAll(".button_name")
+          .data(this.time_labels)
+          .enter()
+          .append("text")
+          .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
+          .attr("x", function(d) { return self.xScale(d.day_seq)-10 }) // centering on pt
+          .attr("y", 25)
+          .text(function(d, i) { return d.month_label })
+          .attr("text-align", "start")
+          //.on('click', function(d, i) {
+            //self.moveTimeline(d);
+          //})
+          /* .on('mouseover', function(d, i) {
+            self.buttonSelect(d);
+          })
+          .on('mouseout', function(d, i) {
+            self.buttonDeSelect(d);
+          }) */
 
-      // filter to just year annotations for first month they appear
-      var year_labels = this.time_labels.filter(function(el) {
-        return el.year_label >= 2000;
-      });
+        // filter to just year annotations for first month they appear
+        var year_labels = this.time_labels.filter(function(el) {
+          return el.year_label >= 2000;
+        });
 
-      // add year labels to timeline
-      button_month.selectAll(".button_year")
-      .data(year_labels)
-      .enter()
-      .append("text")
-      .attr("class", function(d,i) { return "button_year button_" + d.year } ) 
-      .attr("x", function(d) { return self.xScale(d.day_seq)-10 }) // centering on pt
-      .attr("y", 45)
-      .text(function(d, i) { return d.year })
+        // add year labels to timeline
+        button_month.selectAll(".button_year")
+          .data(year_labels)
+          .enter()
+          .append("text")
+          .attr("class", function(d,i) { return "button_year button_" + d.year } ) 
+          .attr("x", function(d) { return self.xScale(d.day_seq)-10 }) // centering on pt
+          .attr("y", 45)
+          .text(function(d, i) { return d.year })
 
-      // chart title
-      button_month
-      .append("text")
-      .attr("class", function(d,i) { return "axis_label" } ) 
-      .attr("x", function(d) { return self.xScale(1)-40 }) // centering on pt
-      .attr("y", -120)
-      .text(function(d, i) { return "Wells by groundwater level" })
+        // chart title
+        button_month
+          .append("text")
+          .attr("class", function(d,i) { return "axis_label" } ) 
+          .attr("x", function(d) { return self.xScale(1)-40 }) // centering on pt
+          .attr("y", -120)
+          .text(function(d, i) { return "Wells by groundwater level" })
 
 
       },
@@ -291,62 +309,62 @@ export default {
         var line_height = 250;
         var y_nudge = 20;
 
-      // set up svg for timeline
-      var svg = time_container
-        .append("svg")
-        .attr("width", "100%")
-        .attr("preserveAspectRatio", "xMinYMin meet")
-        .attr("viewBox", "0 -20 " + this.width + " " + line_height)
-        .attr("id", "x-line")
+        // set up svg for timeline
+        var svg = time_container
+          .append("svg")
+          .attr("width", "100%")
+          .attr("preserveAspectRatio", "xMinYMin meet")
+          .attr("viewBox", "0 -20 " + this.width + " " + line_height)
+          .attr("id", "x-line")
 
-      // define axes
-      var xLine = this.d3.axisBottom()
-        .scale(this.xScale)
-        .ticks(0).tickSize(0);
+        // define axes
+        var xLine = this.d3.axisBottom()
+          .scale(this.xScale)
+          .ticks(0).tickSize(0);
 
-      var yLine = this.d3.axisLeft().tickFormat(this.d3.format('~%'))
-        .scale(this.yScale)
-        .ticks(2).tickSize(6);
+        var yLine = this.d3.axisLeft().tickFormat(this.d3.format('~%'))
+          .scale(this.yScale)
+          .ticks(2).tickSize(6);
 
-      // draw axes
-      var xliney = svg.append("g")
-        .call(xLine)
-        .attr("transform", "translate(20," + 120 + ")")
-        .classed("liney", true)
+        // draw axes
+        var xliney = svg.append("g")
+          .call(xLine)
+          .attr("transform", "translate(20," + 120 + ")")
+          .classed("liney", true)
 
-      var yliney = svg.append("g")
-        .call(yLine)
-        .attr("transform", "translate(47," +  y_nudge + ")")
-        .classed("liney", true)
+        var yliney = svg.append("g")
+          .call(yLine)
+          .attr("transform", "translate(47," +  y_nudge + ")")
+          .classed("liney", true)
 
-      // style axes
-      xliney.select("path.domain")
-        .attr("id", "timeline-x")
-        .attr("color", "white")
-        .attr("stroke-width", "4px")
+        // style axes
+        xliney.select("path.domain")
+          .attr("id", "timeline-x")
+          .attr("color", "white")
+          .attr("stroke-width", "4px")
 
-      yliney.select("path.domain")
-        .attr("id", "timeline-y")
-        .attr("color", "white")
-        .attr("stroke-width", "4px")
-        .attr('font-size', '5rem')
+        yliney.select("path.domain")
+          .attr("id", "timeline-y")
+          .attr("color", "white")
+          .attr("stroke-width", "4px")
+          .attr('font-size', '5rem')
 
-      // add line chart
-       // line chart showing proportion of gages in each category
-         var line_chart = svg.append("g")
+        // add line chart
+        // line chart showing proportion of gages in each category
+        var line_chart = svg.append("g")
           .classed("time-chart", true)
           .attr("id", "time-legend")
           .attr("transform", "translate(20," +  y_nudge + ")")
 
         var bar_color = this.d3.scaleOrdinal()
-        .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
-        .range(this.pal_roma_rev)
+          .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
+          .range(this.pal_roma_rev)
 
         // add line chart
         line_chart.append("g")
-            .attr("fill", "none")
-            .attr("stroke-linejoin", "round")
-            .attr("stroke-linecap", "round")
+          .attr("fill", "none")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-linecap", "round")
           .selectAll("path")
           .data(prop_data)
           .join("path")
@@ -355,8 +373,8 @@ export default {
           .attr("stroke-width", "3px")
           .attr("opacity", 0.7);
 
-      // animate line to time
-       line_chart.append("rect")
+        // animate line to time
+        line_chart.append("rect")
           .data(this.days)
           .classed("hilite", true)
           .attr("width", "5")
@@ -365,32 +383,32 @@ export default {
           .attr("fill", "grey")
           .attr("x", self.xScale(this.days[this.start]))
 
-    // add date ticker
-/*      line_chart
-      .append("text")
-      .attr("class", "ticker-date") 
-      .attr("x", self.xScale(365)) // centering on pt
-      .attr("y", -10)
-      .text( this.dates[this.start])
-      .attr("text-anchor", "end") */
+        // add date ticker
+  /*      line_chart
+        .append("text")
+        .attr("class", "ticker-date") 
+        .attr("x", self.xScale(365)) // centering on pt
+        .attr("y", -10)
+        .text( this.dates[this.start])
+        .attr("text-anchor", "end") */
 
       },
       setScales(){
 
         // set color scale for path fill
         this.quant_color = this.d3.scaleThreshold()
-        .domain([-40, -25, 25, 40])
-        .range(this.pal_roma_rev) 
+          .domain([-40, -25, 25, 40])
+          .range(this.pal_roma_rev) 
 
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
-        .domain([0, this.n_days-1])
-        .range([this.mar/2, this.width-2*this.mar])
+          .domain([0, this.n_days-1])
+          .range([this.mar/2, this.width-2*this.mar])
 
         // y axis of line chart
         this.yScale = this.d3.scaleLinear()
-        .domain([0, 0.6]) // this should come from the data - round up from highest proportion value
-        .range([100, 0])
+          .domain([0, 0.6]) // this should come from the data - round up from highest proportion value
+          .range([100, 0])
 
         this.line = this.d3.line()
           .defined(d => !isNaN(d))
@@ -402,51 +420,52 @@ export default {
         const self = this;
         
         var button = svg.append("g")
-            .attr("transform", "translate("+ x +","+ y +")")
-            .attr("class", "play_button");
+        button
+          .attr("transform", "translate("+ x +","+ y +")")
+          .attr("class", "play_button");
 
         button
           .append("rect")
-            .attr("width", 50)
-            .attr("height", 50)
-            .attr("rx", 4)
-            .style("fill", "steelblue");
+          .attr("width", 50)
+          .attr("height", 50)
+          .attr("rx", 4)
+          .style("fill", "steelblue");
 
         // append hover title
-          button
-            .append("title")
-              .text("replay animation")
+        button
+          .append("title")
+          .text("replay animation")
 
         button
           .append("path")
-            .attr("d", "M15 10 L15 40 L35 25 Z")
-            .style("fill", "white");
+          .attr("d", "M15 10 L15 40 L35 25 Z")
+          .style("fill", "white");
             
         button
-            .on("mousedown", function() {
-            self.animateLine(0);
-              self.animateGWL(0);
-            });
+          .on("mousedown", function() {
+          self.animateLine(0);
+            self.animateGWL(0);
+          });
       },
       pressButton(playing) {
-          const self = this;
+        const self = this;
 
-          // trigger animation if animation is not already playing
-          if (playing == false) {
-            self.animateChart_Map()
-          }
-        },
-        resetPlayButton() {
-          const self = this;
+        // trigger animation if animation is not already playing
+        if (playing == false) {
+          self.animateChart_Map()
+        }
+      },
+      resetPlayButton() {
+        const self = this;
 
-          // reset global playing variable to false now that animation is complete
-          self.isPlaying = false;
+        // reset global playing variable to false now that animation is complete
+        self.isPlaying = false;
 
-          // undim button
-          let button_rect = this.d3.selectAll(".play_button").selectAll("rect")
-            .style("fill", 'rgb(250,109,49)')
+        // undim button
+        let button_rect = this.d3.selectAll(".play_button").selectAll("rect")
+          .style("fill", 'rgb(250,109,49)')
 
-        },
+      },
       animateLine(start){
         // animates grey line on timeseries chart to represent current timepoint
         const self = this;
