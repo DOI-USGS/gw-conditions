@@ -25,7 +25,7 @@
       <div id="line-container" />
       <div id="text-container">
         <p>
-          Seitan 8-bit in, veniam pickled pitchfork hammock sustainable aliqua edison bulb. Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
+          Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
         </p>
       </div>
     </div>
@@ -66,7 +66,7 @@ export default {
       day_length: 10, // frame duration in milliseconds
       current_time: 0,
       start: 0,
-      n_days: 365,
+      n_days: null,
       sites_list: null,
       //t2: null,
       isPlaying: null,
@@ -572,7 +572,6 @@ export default {
         var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
         var perc_label = ["0.00 - 0.10", "0.10 - 0.25" ,"0.25 - 0.75", "0.75 - 0.90", "0.90 - 1.00"] // percentile ranges
 
-
         // draw path shapes and labels
         var legend_title_x = 0;
         var legend_label_x = 56;
@@ -648,7 +647,9 @@ export default {
         // draw the first frame of the animation
         const self = this;
 
-          // select existing paths using class
+          // select existing paths using class - currently all drawn with D3
+          // to grab existing paths, needs to look exact same as first frame 
+          // requries dealing with sites with no data on day 1
           var start = this.start;
             this.peak_grp = map_svg.selectAll("path.gwl_glyph")
               .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
@@ -658,7 +659,7 @@ export default {
             // draws a path for each site, using the first date
             this.peak_grp 
              .attr("class", function(d) { return d.key })
-             .attr("fill", function(d) { return self.quant_color(d.gwl[0]) }) 
+             .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
              .attr("opacity", ".5")
              .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
@@ -743,11 +744,11 @@ $dark: #323333;
   height: auto;
   grid-area: title;
   h1, h2, h3 {
-   // width: 95vw;
     color:$dark;
     height: auto;
     padding: 4px;
     padding-bottom: 0;
+    padding-left: 0;
   }
 }
 
@@ -786,8 +787,12 @@ $dark: #323333;
   #line-container {
   grid-area: line;
 }
-.map {
+#map-container{
   margin-top: 50px;
+  margin-right: 20px;
+  svg.map {
+    max-height: 1100px;
+  }
 }
 text-container {
   padding-left: 50px;
