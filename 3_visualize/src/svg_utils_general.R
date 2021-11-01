@@ -13,3 +13,4 @@ add_grp <- function(svg_root, grp_nm, trans_x, trans_y) {
   xml_add_child(svg_root, 'g', id = grp_nm, 
                 transform = sprintf("translate(%s %s) scale(0.35, 0.35)", trans_x, trans_y))
 }
+
