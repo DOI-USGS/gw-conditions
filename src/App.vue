@@ -65,16 +65,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url("https://use.typekit.net/yww2frw.css");
+@import url('https://fonts.googleapis.com/css2?family=Copse&display=swap'); // sort of old timey
+@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 
 $Cairo: 'Cairo', sans-serif;
 $Assistant: 'Assistant', sans-serif;
 $Noto: 'Noto Serif', serif;
 $acu_bold: 'acumin-pro', sans-serif;
+$copse: 'Copse', serif;
+$titillium: 'Titillium Wed', sans-serif;
+$open_sans: 'Open Sans', sans-serif;
 
 html,
 body {
       height:100%;
-      background-color: rgb(237, 237, 237);
+      background-color: rgb(227, 227, 227);
       margin: 0;
       padding: 0;
       line-height: 1.2;
@@ -97,7 +103,6 @@ h1{
   font-family: $Assistant;
   line-height: 1;
   text-align: left;
-  text-shadow: 1px 1px 100px rgba(0,0,0,.8);
   @media screen and (max-width: 600px) {
     font-size: 2.5em;
   }
@@ -109,7 +114,6 @@ h2{
   font-size: 3em;
   margin-top: 5px;
   line-height: 1;
-  text-shadow: 10px 10px 100px rgba(20, 20, 20, 0.8);
   @media screen and (max-width: 600px) {
     font-size: 2em;
   }
@@ -126,8 +130,9 @@ h3{
 }
 p, text {
   padding: 1em 0 0 0; 
-  font-family: $acu_bold;
-  line-height: 1.5;
+  font-family: $open_sans;
+  font-weight: 400;
+  line-height: 1.3;
 }
 
 </style>

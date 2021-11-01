@@ -22,7 +22,7 @@ targets:
       - src/assets/anomaly_peaks.svg 
       - public/gw-conditions-site-coords.csv ## this is in aws as gw-conditions-sites.csv
       - public/gw-conditions-wy20.csv ## in aws as gw-conditions-wy20.csv
-      - public/gw-conditions-daily-proportion.csv ## in aws as gw-conditions-daily-count.csv
+      - public/gw-conditions-daily-proportions.csv ## in aws as gw-conditions-daily-count.csv
 
   # exports that are leveraged by vue
   # TODO: send to s3
@@ -42,7 +42,7 @@ targets:
       target_name,
       sites_sf = gw_sites_sf)
   
-  public/gw-conditions-daily-proportion.csv:
+  public/gw-conditions-daily-proportions.csv:
     command: site_prop_timeseries(target_name, 
       gw_anomaly_data_w_colors)
 

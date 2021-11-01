@@ -424,7 +424,8 @@ export default {
           .attr("rx", 4)
           .style("color", "black")
           .style("fill","transparent")
-          .attr("stroke-width", "1px");
+          .attr("stroke-width", "1px")
+          .classed("pressMe", true);
 
         svg_play
           .append("text")
@@ -446,7 +447,7 @@ export default {
           .style("stroke", "black")
           .attr("stroke-width", "2px");
             
-        button
+        button.select("rect")
           .on("mousedown", function() {
             self.pressButton(self.isPlaying)
           });
@@ -468,7 +469,7 @@ export default {
 
         // undim button
         let button_rect = this.d3.selectAll(".play_button").selectAll("rect")
-          .style("fill", 'rgb(250,109,49)')
+          .style("fill", '#9b6adb8e')
 
       },
       animateLine(start){
@@ -505,6 +506,13 @@ export default {
             .transition()
             .duration(this.day_length) 
             .attr("x", self.xScale(this.days[this.n_days-1]))
+
+          // once animation has completed, reset color of play button
+          // and set isPlaying to false
+          button_rect
+              .transition()
+              .delay(this.day_length*(this.n_days-1))
+              .on("end", self.resetPlayButton);
         }
       },
       buttonSelect(d){
@@ -847,6 +855,7 @@ $dark: #323333;
   }
   #line-container {
   grid-area: line;
+  padding-left: 20px;
 }
 #map-container{
   margin-top: 50px;
@@ -863,5 +872,15 @@ $dark: #323333;
 .gwl_glyph {
   stroke: none; 
   fill-opacity: 50%;
+}
+.pressMe:active {
+  background-color: #9b6adb8e;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
+}
+.pressMe:hover {
+  background-color: #b996e78e;
+  box-shadow: 0 1px #666;
+  transform: translateY(1px);
 }
 </style>
