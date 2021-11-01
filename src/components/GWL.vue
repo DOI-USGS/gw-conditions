@@ -23,11 +23,12 @@
       </div>
       <div id="legend-container" />
       <div id="line-container" />
-      <div id="text-container">
+      <!-- <div id="text-container">
         <p>
           Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
         </p>
-      </div>
+      </div> -->
+      <div id="play-container" />
     </div>
   </section>
 </template>
@@ -112,7 +113,7 @@ export default {
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy2020.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords.csv",  this.d3.autotype), 
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportion.csv",  this.d3.autotype),
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels.csv",  this.d3.autotype),
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
@@ -143,7 +144,7 @@ export default {
         // annotations for the timeline
         // R pipeline pulls out each month and the year for time labels
         // TODO: incorporate additional event annotations 
-        this.time_labels = data[4]; 
+        var time_labels = data[4]; 
 
         // days in sequence
         var day_seq = this.date_peaks.columns
@@ -195,13 +196,15 @@ export default {
         // animated time chart
         var time_container = this.d3.select("#line-container");
         this.drawLine(time_container, percData);
-        this.addButtons(time_container);
+        this.addButtons(time_container, time_labels);
 
         // control animation
         this.animateLine(this.start);
         this.animateGWL(this.start);
-        this.playButton(map_svg, this.width*(2.5/7) , 300);
+        var play_container = this.d3.select("#play-container");
+        this.playButton(play_container, "200","50");
 
+        
       },
       createPanel(month) {
         var tl = new TimelineMax();
@@ -209,7 +212,7 @@ export default {
         // add rest of this
         return tl;
       },
-      addButtons(time_container){
+      addButtons(time_container, time_labels){
         const self = this;
        // timeline events/"buttons"
        // want these to be buttons that rewind the animation to the date
@@ -222,7 +225,7 @@ export default {
 
         // month points on timeline
         button_month.selectAll(".button_inner")
-          .data(this.time_labels).enter()
+          .data(time_labels).enter()
           .append("circle")
           .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
           .attr("r", 5)
@@ -243,7 +246,7 @@ export default {
 
         // month labels
         button_month.selectAll(".button_name")
-          .data(this.time_labels)
+          .data(time_labels)
           .enter()
           .append("text")
           .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
@@ -262,7 +265,7 @@ export default {
           }) */
 
         // filter to just year annotations for first month they appear
-        var year_labels = this.time_labels.filter(function(el) {
+        var year_labels = time_labels.filter(function(el) {
           return el.year_label >= 2000;
         });
 
@@ -403,33 +406,49 @@ export default {
       },
       playButton(svg, x, y) {
         const self = this;
-        
-        var button = svg.append("g")
-        button
-          .attr("transform", "translate("+ x +","+ y +")")
+         var svg_play = svg
+          .append("svg")
+          .attr("width", x)
+          .attr("height", y)
+          .attr("preserveAspectRatio", "xMinYMin meet")
+          .attr("viewbox", "0 0 " + x + " " + y)
+
+        var button = svg_play.append("g")
+          .attr("transform", "translate("+ 0 +","+ 0 +")")
           .attr("class", "play_button");
 
         button
           .append("rect")
-          .attr("width", 50)
-          .attr("height", 50)
+          .attr("width", 100)
+          .attr("height", 40)
           .attr("rx", 4)
-          .style("fill", "steelblue");
+          .style("color", "black")
+          .style("fill","transparent")
+          .attr("stroke-width", "1px");
+
+        svg_play
+          .append("text")
+          .text("Play")
+          .attr("x", 42)
+          .attr("y", 30)
+          .attr("font-size", "1.5rem")
+          .attr("font-weight", "600")
 
         // append hover title
         button
           .append("title")
-          .text("replay animation")
+          .text("replay")
 
         button
           .append("path")
-          .attr("d", "M15 10 L15 40 L35 25 Z")
-          .style("fill", "white");
+          .attr("d", "M7.5 7.5 L7.5 35 L32.5 20 Z")
+          .style("fill", "white")
+          .style("stroke", "black")
+          .attr("stroke-width", "2px");
             
         button
           .on("mousedown", function() {
-          self.animateLine(0);
-            self.animateGWL(0);
+            self.pressButton(self.isPlaying)
           });
       },
       pressButton(playing) {
@@ -437,7 +456,8 @@ export default {
 
         // trigger animation if animation is not already playing
         if (playing == false) {
-          self.animateChart_Map()
+          self.animateLine(0);
+          self.animateGWL(0);
         }
       },
       resetPlayButton() {
@@ -458,6 +478,12 @@ export default {
         
         // set indicator for play button
         self.isPlaying = true
+
+        // dim play button rectangle
+        let button_rect = this.d3.selectAll(".play_button").selectAll("rect")
+        button_rect
+            .style("fill", "#d6d6d6")
+
 
         if (start < this.n_days){
           this.d3.selectAll(".hilite")
@@ -732,6 +758,9 @@ $dark: #323333;
   grid-area: line;
   margin-bottom: 10px;
 }
+#play-container {
+  grid-area: play;
+}
 #legend-container {
   grid-area: legend;
   display: flex;
@@ -765,14 +794,14 @@ $dark: #323333;
 }
 
 // desktop
-@media (min-width:1024px) {
+@media (min-width:700px) {
   #grid-container {
     margin: 50px;
     grid-template-columns: 2fr 5fr;
     grid-template-areas:
     "title map"
     "legend map"
-    "text map"
+    "play map"
     "line line"
   }
   .title {
@@ -791,11 +820,43 @@ $dark: #323333;
   margin-top: 50px;
   margin-right: 20px;
   svg.map {
+    max-height: 900px;
+  }
+}
+}
+@media (min-width:1024px) {
+  #grid-container {
+    margin: 50px;
+    grid-template-columns: 2fr 5fr;
+    grid-template-areas:
+    "title map"
+    "legend map"
+    "play map"
+    "line line"
+  }
+  .title {
+  text-align: left;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  }
+  #legend-container {
+    display: flex;
+    justify-content: flex-start;
+    padding-left: 20px;
+    align-items: center;
+  }
+  #line-container {
+  grid-area: line;
+}
+#map-container{
+  margin-top: 50px;
+  margin-right: 20px;
+  svg.map {
     max-height: 1100px;
   }
 }
-text-container {
-  padding-left: 50px;
+#play-container {
+  padding-left: 20px;
 }
 }
 // glyph paths
