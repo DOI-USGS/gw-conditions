@@ -80,23 +80,7 @@ export default {
       xScale: null,
       yScale: null,
       line: null,
-      pal_roma: null,
-      pal_roma_rev: null,
-
-      // roma color scale
-   /*    verylow: "#7E1900",
-      low: "#C1A53A",
-      normal: "#8fce83",
-      high: "#479BC5",
-      veryhigh: "#1A3399", */
-
-      // color scale alternatives
-/*       // Green-Brown
-      verylow: "#a6611a",
-      low: "#dfc27d",
-      normal: "#f5f5f5",
-      high: "#80cdc1",
-      veryhigh: "#018571", */
+      //gwl_color: null,
 
      // Blue-Brown
       verylow: "#BF6200",
@@ -104,6 +88,7 @@ export default {
       normal: "#B3B3B3",
       high: "#2E9EC6",
       veryhigh: "#28648A",
+      pal_BuBr: null,
 
     }
   },
@@ -113,9 +98,7 @@ export default {
       // resize
       this.width = window.innerWidth - this.margin.left - this.margin.right;
       this.height = window.innerHeight*.5 - this.margin.top - this.margin.bottom;
-
-      this.pal_roma = [this.verylow, this.low, this.normal, this.high, this.veryhigh];
-      this.pal_roma_rev = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
+      this.pal_BuBr = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
       
       // read in data
       this.loadData();   
@@ -356,10 +339,6 @@ export default {
           .attr("id", "time-legend")
           .attr("transform", "translate(20," +  y_nudge + ")")
 
-        var bar_color = this.d3.scaleOrdinal()
-          .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
-          .range(this.pal_roma_rev)
-
         // add line chart
         line_chart.append("g")
           .attr("fill", "none")
@@ -369,7 +348,7 @@ export default {
           .data(prop_data)
           .join("path")
           .attr("d", d => self.line(d.perc))
-          .attr("stroke", function(d) { return bar_color(d.key_quant) })
+          .attr("stroke", function(d) { return self.gwl_color(d.key_quant) })
           .attr("stroke-width", "3px")
           .attr("opacity", 0.7);
 
@@ -398,7 +377,7 @@ export default {
         // set color scale for path fill
         this.quant_color = this.d3.scaleThreshold()
           .domain([-40, -25, 25, 40])
-          .range(this.pal_roma_rev) 
+          .range(this.pal_BuBr) 
 
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
@@ -410,10 +389,16 @@ export default {
           .domain([0, 0.6]) // this should come from the data - round up from highest proportion value
           .range([100, 0])
 
+        // line drawing 
         this.line = this.d3.line()
           .defined(d => !isNaN(d))
           .x((d, i) => this.xScale(this.days[i]))
           .y(d => this.yScale(d))
+
+        // categorical color scale
+        this.gwl_color = this.d3.scaleOrdinal()
+          .domain(["Veryhigh", "High", "Normal", "Low","Verylow"])
+          .range(this.pal_BuBr)
 
       },
       playButton(svg, x, y) {
@@ -567,8 +552,9 @@ export default {
 
       },
       makeLegend(){
+        const self = this;
 
-        var legend_height = 160;
+        var legend_height = 200;
         var legend_width = 240;
 
         // make a legend 
@@ -580,62 +566,82 @@ export default {
           .attr("preserveAspectRatio", "xMinYMin meet")
           .attr("viewbox", "0 0 " + legend_width + " " + legend_height)
           .append("g").classed("legend", true)
-          .attr("transform", "translate(90, 0)")
-                  
+          .attr("transform", "translate(0, 0)")
+        
+        // legend elements
         var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
-        var legend_color = [this.verylow, this.low, this.normal,this.normal, this.high, this.veryhigh];
-        var shape_dist = [5,25,42,42,60,83,103]; // y positioning (normal has 2 shapes butted together)
-        var perc_label = ["0 - 0.1", "0.1 - 0.25" ,"0.25 - 0.75", "0.75 - 0.9", "0.9 +"]
+        var perc_label = ["0.00 - 0.10", "0.10 - 0.25" ,"0.25 - 0.75", "0.75 - 0.90", "0.90 - 1.00"] // percentile ranges
+
 
         // draw path shapes and labels
+        var legend_title_x = 0;
+        var legend_label_x = 56;
         legend_peak
           .append("text")
-          .text("GWL")
-          .attr("x", -20)
-          .attr("y", "30")
+          .text("Groundwater levels")
+          .attr("x", legend_title_x)
+          .attr("y", "20")
           .style("font-size", "20")
-          .style("font-weight", 700)
-          .attr("text-anchor", "end")
+          .style("font-weight", 600) // matching css of .axis_labels
+          .attr("text-anchor", "start")
 
         legend_peak
           .append("text")
-          .text("Percentile")
-          .attr("x", 105)
-          .attr("y", "30")
-          .style("font-size", "20")
-          .style("font-weight", 700)
-          .attr("text-anchor", "end")
+          .text("Percentile based on historic")
+          .attr("x", legend_title_x)
+          .attr("y", "40")
+          .style("font-size", "16px")
+          .style("font-weight", 400)
+          .attr("text-anchor", "start")
+
+          legend_peak
+          .append("text")
+          .text("daily record at each site")
+          .attr("x", legend_title_x)
+          .attr("y", "60")
+          .style("font-size", "16px")
+          .style("font-weight", 400)
+          .attr("text-anchor", "start")
+
+      
+        var label_end = 180; // moves legend keys and labels up and down
+        var label_space = 23; // spacing between legend elements
         
+        // add glyphs
         legend_peak.selectAll("peak_symbol")
           .data(this.quant_peaks)
           .enter()
           .append("path")
-            .attr("fill", function(d, i){return legend_color[i]})
+            .attr("fill", function(d){return self.gwl_color(d.quant)})
             .attr("d", function(d){return d["path_quant"]})
-            .attr("transform", function(d, i){return "translate(0, " + (140-shape_dist[i]) + ") scale(.8)"})
+            .attr("transform", function(d, i){return "translate(" + 95 + ", " + ((label_end-8)-20*i) + ") scale(.85)"})
             .attr("id", function(d){return d["quant"]})
             .attr("class", "peak_symbol")
 
-        // add categorical labels very low - very high
+        // add categorical labels ranked from very low to very high
         legend_peak.selectAll("mylabels")
           .data(legend_keys)
           .enter()
           .append("text")
-            .attr("x", -20)
-            .attr("y", function(d,i){ return 140 - (i*22)}) 
+            .attr("x", legend_label_x+20)
+            .attr("y", function(d,i){ return label_end - (i*label_space)}) 
             .text(function(d){ return d})
             .attr("text-anchor", "end")
             .style("alignment-baseline", "middle")
+            .style("font-weight", "600")
+            .attr("font-size", "16px")
 
+        // label percentile ranges in each category
          legend_peak.selectAll("percLabels")
           .data(perc_label)
           .enter()
           .append("text")
-            .attr("x", 20)
-            .attr("y", function(d,i){ return 145 - (i*23)}) 
+            .attr("x", legend_label_x+60)
+            .attr("y", function(d,i){ return label_end - (i*label_space)}) 
             .text(function(d){ return d})
             .attr("text-anchor", "start")
             .style("alignment-baseline", "middle")
+            .attr("font-size", "16px")
 
       },
       drawFrame1(map_svg, data){         
@@ -692,7 +698,7 @@ $dark: #323333;
   padding-right: 2rem;
   margin: 1rem;
   width: 100%;
-  height: 98vh;
+  height: auto;
   vertical-align: middle;
   overflow: hidden;
   grid-template-areas:
@@ -741,6 +747,7 @@ $dark: #323333;
     color:$dark;
     height: auto;
     padding: 4px;
+    padding-bottom: 0;
   }
 }
 
@@ -773,7 +780,7 @@ $dark: #323333;
   #legend-container {
     display: flex;
     justify-content: flex-start;
-    padding-left: 50px;
+    padding-left: 20px;
     align-items: center;
   }
   #line-container {
