@@ -614,7 +614,7 @@ export default {
           .text("Groundwater levels")
           .attr("x", legend_title_x)
           .attr("y", "20")
-          .style("font-size", "20")
+          .style("font-size", "1.5rem")
           .style("font-weight", 600) // matching css of .axis_labels
           .attr("text-anchor", "start")
 
@@ -623,7 +623,7 @@ export default {
           .text("Percentile based on historic")
           .attr("x", legend_title_x)
           .attr("y", "40")
-          .style("font-size", "16px")
+          .style("font-size", "1rem")
           .style("font-weight", 400)
           .attr("text-anchor", "start")
 
@@ -632,7 +632,7 @@ export default {
           .text("daily record at each site")
           .attr("x", legend_title_x)
           .attr("y", "60")
-          .style("font-size", "16px")
+          .style("font-size", "1rem")
           .style("font-weight", 400)
           .attr("text-anchor", "start")
 
@@ -858,10 +858,11 @@ $dark: #323333;
   padding-left: 20px;
 }
 #map-container{
-  margin-top: 50px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   margin-right: 20px;
   svg.map {
-    max-height: 1100px;
+    max-height: 75vh;
   }
 }
 #play-container {
@@ -882,5 +883,9 @@ $dark: #323333;
   background-color: #b996e78e;
   box-shadow: 0 1px #666;
   transform: translateY(1px);
+}
+text.tick {
+  font-size: 1rem;
+
 }
 </style>
