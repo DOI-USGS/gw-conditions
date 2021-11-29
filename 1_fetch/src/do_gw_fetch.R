@@ -1,5 +1,5 @@
 do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, gw_site_nums_obj_nm, 
-                        param_cd_obj_nm, service_cd, request_limit, ...) {
+                        param_cd, service_cd, request_limit, ..., include_ymls = NULL) {
   
   # Number indicating how many sites to include per dataRetrieval request to prevent
   # errors from requesting too much at once. More relevant for surface water requests.
@@ -43,7 +43,7 @@ do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, gw_site_nums_
                "gw_sites = %s," = steps[["subset_sites"]]$target_name,
                "start_date = viz_start_date,",
                "end_date = viz_end_date,",
-               "param_cd = %s)" = param_cd_obj_nm)
+               "param_cd = I('%s'))" = param_cd)
     }
   )
   
@@ -72,10 +72,11 @@ do_gw_fetch <- function(final_target, task_makefile, gw_site_nums, gw_site_nums_
     add_complete = FALSE)
   
   # Create the task remakefile
+  if(is.null(include_ymls)) include_ymls <- c('0_config.yml', '1_fetch.yml') # include_ymls is NULL by default
   create_task_makefile(
     task_plan = task_plan,
     makefile = task_makefile,
-    include = c('0_config.yml', '1_fetch.yml'),
+    include = include_ymls,
     sources = c(...),
     packages = c('tidyverse', 'dataRetrieval', 'scipiper', 'feather', 'purrr'),
     final_targets = final_target,

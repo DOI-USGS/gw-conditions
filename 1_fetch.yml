@@ -9,6 +9,7 @@ sources:
   - 1_fetch/src/fetch_s3.R
   - 1_fetch/src/fetch_nwis.R
   - 1_fetch/src/do_gw_fetch.R
+  - 1_fetch/src/do_addl_gw_fetch.R
 
 targets:
 
@@ -20,22 +21,25 @@ targets:
 
 ##-- Historic GW sites and data --##
 
+  last_updated:
+    command: c(I('2021-10-20'))
+
   # All sites (including those with years < min_years)
   1_fetch/out/historic_gw_site_info_unfiltered.rds:
-    command: fetch_s3(target_name, historic_unfiltered_site_info_s3_fn)
+    command: fetch_s3(target_name, historic_unfiltered_site_info_s3_fn, last_updated)
   # All data (including those with years < min_years)
   1_fetch/out/historic_gw_data_unfiltered.csv:
-    command: fetch_s3(target_name, historic_unfiltered_data_s3_fn)
+    command: fetch_s3(target_name, historic_unfiltered_data_s3_fn, last_updated)
   # This data and the quantiles are just for sites with > min_years
   1_fetch/out/historic_gw_data_filtered.csv:
-    command: fetch_s3(target_name, historic_filtered_data_s3_fn)
+    command: fetch_s3(target_name, historic_filtered_data_s3_fn, last_updated)
   
   # Only these are absolutely necessary to run the pipeline in its current 
   # state. The others will not build unless you manually build the targets.
   1_fetch/out/historic_gw_site_info_filtered.rds:
-    command: fetch_s3(target_name, historic_filtered_site_info_s3_fn)
+    command: fetch_s3(target_name, historic_filtered_site_info_s3_fn, last_updated)
   1_fetch/out/historic_gw_quantiles.csv:
-    command: fetch_s3(target_name, historic_quantiles_s3_fn)
+    command: fetch_s3(target_name, historic_quantiles_s3_fn, last_updated)
 
 ##-- GW sites and data for current viz time period --##
   
@@ -48,19 +52,24 @@ targets:
   gw_sites_uv:
     command: pull_sites_by_query(gw_quantile_site_info, I("uv"), gw_param_cd)
   gw_sites_uv_addl:
-    command: pull_sites_by_query(gw_quantile_site_info, I("uv"), addl_gw_param_cd)
+    command: pull_sites_by_query(gw_quantile_site_info, I("uv"), addl_gw_param_cds)
   
+  # Task table for `dv` pulls
   1_fetch/out/gw_data_dv.csv:
     command: do_gw_fetch(
       final_target = target_name,
       task_makefile = I('1_fetch_tasks.yml'),
       gw_site_nums = gw_sites_dv,
       gw_site_nums_obj_nm = I('gw_sites_dv'),
-      param_cd_obj_nm = I('gw_param_cd'),
+      param_cd = gw_param_cd,
       service_cd = I('dv'),
       request_limit = dv_fetch_size_limit,
       '1_fetch/src/do_gw_fetch.R',
       '1_fetch/src/fetch_nwis.R')
+    depends:
+      - viz_start_date
+      - viz_end_date
+  
   # Task table for `uv` includes a step to average the data to daily values.
   1_fetch/out/gw_data_uv.csv:
     command: do_gw_fetch(
@@ -68,25 +77,24 @@ targets:
       task_makefile = I('1_fetch_tasks.yml'),
       gw_site_nums = gw_sites_uv,
       gw_site_nums_obj_nm = I('gw_sites_uv'),
-      param_cd_obj_nm = I('gw_param_cd'),
+      param_cd = gw_param_cd,
       service_cd = I('uv'),
       request_limit = uv_fetch_size_limit,
       '1_fetch/src/do_gw_fetch.R',
       '1_fetch/src/fetch_nwis.R')
+    depends:
+      - viz_start_date
+      - viz_end_date
       
-  # Special pull for just KS & just FL using `62610`.
+  # Special pull for just KS & just FL using `62610`. Plus, HI using `72150`.
   # Read all about why on GitHub: https://github.com/USGS-VIZLAB/gw-conditions/issues/9
   1_fetch/out/gw_data_uv_addl.csv:
-    command: do_gw_fetch(
+    command: do_addl_gw_fetch(
       final_target = target_name,
-      task_makefile = I('1_fetch_tasks.yml'),
-      gw_site_nums = gw_sites_uv_addl,
-      gw_site_nums_obj_nm = I('gw_sites_uv_addl'),
-      param_cd_obj_nm = I('addl_gw_param_cd'),
-      service_cd = I('uv'),
-      request_limit = uv_fetch_size_limit,
-      '1_fetch/src/do_gw_fetch.R',
-      '1_fetch/src/fetch_nwis.R')
+      addl_param_cds = addl_gw_param_cds)
+    depends:
+      - viz_start_date
+      - viz_end_date
 
   # Combine all data
   1_fetch/out/gw_data.csv:
