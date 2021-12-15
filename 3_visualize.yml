@@ -14,6 +14,7 @@ sources:
   - 3_visualize/src/svg_utils_mapping.R
   - 3_visualize/src/svg_utils_paths.R
   - 3_visualize/src/svg_utils_vue.R
+  - 3_visualize/src/sf_utils_shift.R
 
 targets:
 
