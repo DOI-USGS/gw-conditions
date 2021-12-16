@@ -20,6 +20,7 @@ get_shift <- function(region_abbr){
     VI = list(scale = 3.15, shift = c(-80,77), rotation_deg=20),
     GU = list(scale = 10, shift = c(1070, -625), rotation_deg=-90),
     AS = list(scale = 10, shift = c(1050, 0), rotation_deg=-90),
+    MP = list(scale = 1, shift = c(1120, -640), rotation_deg=-45),
     # If there is no match, default to doing nothing to the object
     list(scale = 1, shift = c(0,0), rotation_deg=0)
   )
@@ -71,7 +72,8 @@ generate_single_oconus_sf <- function(region_abbrs, proj_str) {
 #' @desciption generate an sf object for regions outside of CONUS that 
 #' will be visible in a map view where CONUS is the focus. Currently
 #' functions for Alaska (`AK`), Hawaii (`HI`), Puerto Rico (`PR`), the
-#' U.S. Virgin Islands (`VI`), Guam (`GU`), and American Samoa (`AS`).
+#' U.S. Virgin Islands (`VI`), Guam (`GU`), American Samoa (`AS`), and
+#' the Northern Marianas (`MP`).
 #' @param proj_str character string representing the projection
 #' @value a single `sf` object a polygon per region shifted and scaled 
 #' to be visible on a CONUS map of the same projection.
@@ -84,7 +86,8 @@ build_oconus_sf <- function(proj_str) {
     "PR", 
     "VI", 
     "GU", 
-    "AS"
+    "AS",
+    "MP"
   )
   
   oconus_sf_noshift <- generate_single_oconus_sf(unlist(region_abbr_list), proj_str)
