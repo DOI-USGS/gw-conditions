@@ -40,7 +40,6 @@ generate_single_oconus_sf <- function(region_abbrs, proj_str) {
     ak_sf <- maps::map("world", "USA:Alaska", fill=TRUE, plot=FALSE) %>%
       sf::st_as_sf() %>% 
       st_transform(proj_str) %>% 
-      rename(geometry = geom) %>% 
       mutate(ID = "AK")
     
     # Scrub AK out of the list now
@@ -55,6 +54,7 @@ generate_single_oconus_sf <- function(region_abbrs, proj_str) {
     regions_sf <- st_read('2_process/out/nws_states.shp') %>% 
       select(ID = STATE) %>% 
       filter(ID %in% region_abbrs) %>% 
+      rename(geom = geometry) %>% 
       st_transform(proj_str)
   }
   
@@ -107,6 +107,7 @@ build_oconus_sf <- function(proj_str) {
       return(obj_sf_shifted)
     }
   ) %>% bind_rows()
+  return(oconus_sf)
 }
 
 #' @title shift, scale, and rotate an `sf` object
