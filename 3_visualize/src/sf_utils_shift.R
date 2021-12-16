@@ -11,16 +11,13 @@
 get_shift <- function(region_abbr){
   switch(
     region_abbr,
-    AK = list(scale = 0.47, shift = c(90,-465), rotation_deg = -50),
-    HI = list(scale = 1.5, shift = c(520, -110), rotation_deg = -35),
-    # TODO: Shift & scale PR & VI together - currently making 
-    # assumptions about how closer together they are. Should treat
-    # them as one sf to shift and scale.
-    PR = list(scale = 3.15, shift = c(-120,90), rotation_deg=20),
-    VI = list(scale = 3.15, shift = c(-80,77), rotation_deg=20),
-    GU = list(scale = 10, shift = c(1070, -625), rotation_deg=-90),
-    AS = list(scale = 10, shift = c(1050, 0), rotation_deg=-90),
-    MP = list(scale = 1, shift = c(1120, -640), rotation_deg=-45),
+    AK = list(scale = 0.75, shift = c(-30,-200), rotation_deg = -40),
+    HI = list(scale = 1.75, shift = c(300, 0), rotation_deg = -35),
+    PR = list(scale = 3.15, shift = c(-95,75), rotation_deg=20),
+    VI = list(scale = 4, shift = c(-115,110), rotation_deg=20),
+    GU = list(scale = 5, shift = c(725, -575), rotation_deg=-90),
+    AS = list(scale = 5, shift = c(675, -30), rotation_deg=-45),
+    MP = list(scale = 1.5, shift = c(815,-600), rotation_deg=0),
     # If there is no match, default to doing nothing to the object
     list(scale = 1, shift = c(0,0), rotation_deg=0)
   )
@@ -85,7 +82,7 @@ build_oconus_sf <- function(proj_str) {
     "HI",
     "PR", 
     "VI", 
-    "GU", 
+    "GU",
     "AS",
     "MP"
   )
