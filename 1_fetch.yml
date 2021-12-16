@@ -103,3 +103,8 @@ targets:
       '1_fetch/out/gw_data_dv.csv', 
       '1_fetch/out/gw_data_uv.csv',
       '1_fetch/out/gw_data_uv_addl.csv')
+  
+##-- Download higher resolution spatial data for SVG mapping --##
+  # Data from the National Weather Service https://www.weather.gov/gis/USStates
+  1_fetch/out/nws_states.zip:
+    command: download.file(destfile = target_name, I("https://www.weather.gov/source/gis/Shapefiles/County/s_11au16.zip"))

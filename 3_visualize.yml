@@ -32,6 +32,8 @@ targets:
       target_name, 
       svg_width = svg_width, 
       svg_height = svg_height)
+    depends:
+     - '2_process/out/nws_states.shp'
       
   public/gw-conditions-wy20.csv:
     command: gwl_to_peak(

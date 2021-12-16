@@ -34,22 +34,37 @@ get_shift <- function(region_abbr){
 #' @value a single `sf` object with one or more polygons for the 
 #' current list of abbreviations
 generate_single_oconus_sf <- function(region_abbrs, proj_str) {
-  abbr_xwalk <- tibble(
-    abbr = c("AK", "HI", "PR", "VI", "GU", "AS"),
-    map_name = c("USA:Alaska", "USA:Hawaii", "Puerto Rico", 
-                 "Virgin Islands, US", "Guam", "American Samoa")
-  )
   
-  map_name <- abbr_xwalk %>% 
-    filter(abbr %in% region_abbrs) %>% 
-    pull(map_name)
+  if("AK" %in% region_abbrs) {
+    # If we are plotting AK, use the low-res version (and by 
+    # function simplicity, do any regions grouped with AK as 
+    # the low-res version, too)
+    ak_sf <- maps::map("world", "USA:Alaska", fill=TRUE, plot=FALSE) %>%
+      sf::st_as_sf() %>% 
+      st_transform(proj_str) %>% 
+      rename(geometry = geom) %>% 
+      mutate(ID = "AK")
+    
+    # Scrub AK out of the list now
+    region_abbrs <- region_abbrs[!grepl("AK", region_abbrs)]
+  } 
   
-  # We need more detail than what `maps::map()` can offer, especially
-  # for Guam, Virgin Islands, and American Samoa
-  obj_sf <- maps::map("world", map_name, fill=TRUE, plot=FALSE) %>%
-    sf::st_as_sf() %>% 
-    st_transform(proj_str) %>% 
-    st_buffer(0)
+  # If there were more `region_abbrs` passed in beyond just AK
+  # then use the high-res spatial data for those
+  if(length(region_abbrs) > 0) {
+    # Note that every time you call this function, it will load the
+    # high-resolution spatial shapefile.
+    regions_sf <- st_read('2_process/out/nws_states.shp') %>% 
+      select(ID = STATE) %>% 
+      filter(ID %in% region_abbrs) %>% 
+      st_transform(proj_str)
+  }
+  
+  if(exists("ak_sf")) {
+    return(bind_rows(ak_sf, regions_sf))
+  } else {
+    return(regions_sf)
+  }
 }
 
 #' @title create a single, shifted sf object for regions outside of CONUS
@@ -72,11 +87,13 @@ build_oconus_sf <- function(proj_str) {
     "AS"
   )
   
+  oconus_sf_noshift <- generate_single_oconus_sf(unlist(region_abbr_list), proj_str)
+  
   oconus_sf <- purrr::map(
     region_abbr_list,
     function(region) {
       # Generate the sf object for the current region(s)
-      obj_sf <- generate_single_oconus_sf(region, proj_str)
+      obj_sf <- filter(oconus_sf_noshift, ID %in% region)
       
       # Get the appropriately matched shifting criteria 
       # Use region[1] so that the `PR` & `VI` shifting criteria only

@@ -58,3 +58,10 @@ targets:
     command: add_paths_to_data(gw_anomaly_data)
   gw_anomaly_data_w_colors:
     command: add_colors_to_data(gw_anomaly_data_w_paths, scico_palette, gw_time)
+
+  # Unzip and prepare higher resolution spatial data for territories outside of CONUS
+  2_process/out/nws_states.shp:
+    command: open_highres_spatial_zip(
+      out_file = target_name,
+      in_zip = '1_fetch/out/nws_states.zip',
+      tmp_dir = I('2_process/tmp'))
