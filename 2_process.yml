@@ -12,6 +12,7 @@ sources:
   - 2_process/src/categorize_quantiles.R
   - 2_process/src/process_spatial.R
   - 2_process/src/prep_data_for_visualizing.R
+  - 3_visualize/src/sf_utils_shift.R
 
 targets:
 
@@ -46,6 +47,12 @@ targets:
   # Create spatial objects to use in mapping
   gw_sites_sf:
     command: convert_to_spatial_obj(gw_quantile_site_info, proj_str)
+  # Apply shifting to the sites 
+  gw_sites_sf_shifted:
+    command: apply_shifts_to_sites(
+      sites_sf = gw_sites_sf,
+      sites_info = gw_quantile_site_info,
+      proj_str = proj_str)
 
   # Prepare data for peaks SVG
   gw_anomaly_data:

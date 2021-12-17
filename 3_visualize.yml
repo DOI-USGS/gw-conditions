@@ -43,7 +43,7 @@ targets:
   public/gw-conditions-site-coords.csv:
     command: get_site_coords(
       target_name,
-      sites_sf = gw_sites_sf)
+      sites_sf = gw_sites_sf_shifted)
   
   public/gw-conditions-daily-proportions.csv:
     command: site_prop_timeseries(target_name, 
