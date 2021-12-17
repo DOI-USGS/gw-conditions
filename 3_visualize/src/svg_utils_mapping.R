@@ -60,12 +60,16 @@ generate_usa_map_data <- function(proj_str = NULL, outline_states = FALSE) {
     proj_str <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
   }
   
-  usa_sf <- maps::map("usa", fill = TRUE, plot=FALSE) %>%
+  conus_sf <- maps::map("usa", fill = TRUE, plot=FALSE) %>%
     sf::st_as_sf() %>% 
     st_transform(proj_str) %>% 
     st_buffer(0) 
   
-  if(outline_states) usa_sf <- use_state_outlines(usa_sf, proj_str)
+  if(outline_states) conus_sf <- use_state_outlines(conus_sf, proj_str)
+  
+  # Now add oconus ("outside" conus)
+  oconus_sf <- build_oconus_sf(proj_str)
+  usa_sf <- bind_rows(conus_sf, oconus_sf)
   
   return(usa_sf)
 }
