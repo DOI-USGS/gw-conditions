@@ -55,7 +55,28 @@ generate_single_oconus_sf <- function(region_abbrs, proj_str) {
       select(ID = STATE) %>% 
       filter(ID %in% region_abbrs) %>% 
       rename(geom = geometry) %>% 
-      st_transform(proj_str)
+      st_transform(proj_str) %>% 
+      # Downscale & simplify these polygons - they are REALLY high-res
+      # Only keep 5% of the points.
+      rmapshaper::ms_simplify(0.05)
+    
+    # HI, PR, and VI need even more simplification to get rid of some weird 
+    # points that are being connected weirdly in the SVG drawing.
+    if("HI" %in% region_abbrs) {
+      # Only keep 25% of the remaining points
+      hi_i <- which(regions_sf$ID == "HI")
+      regions_sf[hi_i,] <- rmapshaper::ms_simplify(regions_sf[hi_i,], 0.25)
+    }
+    if("PR" %in% region_abbrs) {
+      # Only keep 19% of the remaining points
+      pr_i <- which(regions_sf$ID == "PR")
+      regions_sf[pr_i,] <- rmapshaper::ms_simplify(regions_sf[pr_i,], 0.19)
+    }
+    if("VI" %in% region_abbrs) {
+      # Only keep 35% of the remaining points
+      vi_i <- which(regions_sf$ID == "VI")
+      regions_sf[vi_i,] <- rmapshaper::ms_simplify(regions_sf[vi_i,], 0.35)
+    }
   }
   
   if(exists("ak_sf") & exists("regions_sf")) {
