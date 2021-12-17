@@ -106,7 +106,13 @@ build_oconus_sf <- function(proj_str) {
       obj_sf_shifted <- do.call(shift_sf, c(obj_sf = list(obj_sf), 
                                             shift_criteria, 
                                             proj_str = proj_str))
-      return(obj_sf_shifted)
+      
+      # For drawing SVGs, we need POLYGONs not MULTIPOLYGONs returned
+      obj_sf_shifted_poly <- obj_sf_shifted %>% 
+        st_cast("POLYGON") %>% 
+        mutate(ID = sprintf("%s_%s", ID, row_number()))
+      
+      return(obj_sf_shifted_poly)
     }
   ) %>% bind_rows()
   return(oconus_sf)
