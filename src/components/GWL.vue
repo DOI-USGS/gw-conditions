@@ -112,7 +112,7 @@ export default {
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy2020.csv",  this.d3.autotype),
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords.csv",  this.d3.autotype), 
+        self.d3.csv(self.publicPath + "gw-conditions-site-coords.csv", this.d3.autotype), 
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels.csv",  this.d3.autotype),
         ];
@@ -201,8 +201,8 @@ export default {
         // control animation
         this.animateLine(this.start);
         this.animateGWL(this.start);
-        var play_container = this.d3.select("#play-container");
-        this.playButton(play_container, "200","50");
+        var play_container = this.d3.select("#x-line");
+        this.playButton(play_container, "330","-20");
 
         
       },
@@ -228,10 +228,10 @@ export default {
           .data(time_labels).enter()
           .append("circle")
           .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
-          .attr("r", 5)
+          .attr("r", 4)
           .attr("cx", function(d) { return self.xScale(d.day_seq) })
           .attr("cy", 0)
-          .attr("stroke", "white")
+          .attr("stroke", "black")
           .attr("stroke-width", "2px")
           .attr("fill", this.button_color)
           //.on('click', function(d, i) {
@@ -326,14 +326,13 @@ export default {
         // style axes
         xliney.select("path.domain")
           .attr("id", "timeline-x")
-          .attr("color", "white")
-          .attr("stroke-width", "4px")
+          .attr("color", "black")
+          .attr("stroke-width", "2px")
 
         yliney.select("path.domain")
           .attr("id", "timeline-y")
-          .attr("color", "white")
-          .attr("stroke-width", "4px")
-          .attr('font-size', '5rem')
+          .attr("color", "black")
+          .attr("stroke-width", "2px")
 
         // add line chart
         // line chart showing proportion of gages in each category
@@ -407,14 +406,14 @@ export default {
       playButton(svg, x, y) {
         const self = this;
          var svg_play = svg
-          .append("svg")
+        /*   .append("svg")
           .attr("width", x)
           .attr("height", y)
           .attr("preserveAspectRatio", "xMinYMin meet")
           .attr("viewbox", "0 0 " + x + " " + y)
-
+ */
         var button = svg_play.append("g")
-          .attr("transform", "translate("+ 0 +","+ 0 +")")
+          .attr("transform", "translate("+ x +","+ y +")")
           .attr("class", "play_button");
 
         button
@@ -427,10 +426,10 @@ export default {
           .attr("stroke-width", "1px")
           .classed("pressMe", true);
 
-        svg_play
+        button
           .append("text")
           .text("Play")
-          .attr("x", 42)
+          .attr("x", 40)
           .attr("y", 30)
           .attr("font-size", "1.5rem")
           .attr("font-weight", "600")
@@ -614,7 +613,7 @@ export default {
           .text("Groundwater levels")
           .attr("x", legend_title_x)
           .attr("y", "20")
-          .style("font-size", "1.5rem")
+          .style("font-size", "1rem")
           .style("font-weight", 600) // matching css of .axis_labels
           .attr("text-anchor", "start")
 
@@ -694,7 +693,7 @@ export default {
             this.peak_grp 
              .attr("class", function(d) { return d.key })
              .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
-             .attr("opacity", ".5")
+             .attr("opacity", ".7")
              .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
          // this.animateGWL(this.start); // once sites are drawn, trigger animation
@@ -736,11 +735,12 @@ $dark: #323333;
   height: auto;
   vertical-align: middle;
   overflow: hidden;
+  grid-template-columns: 3fr 1fr;
   grid-template-areas:
   "title title"
-  "text legend"
   "map map"
   "line line"
+  "legend play"
 }
 #map-container{
   grid-area: map;
@@ -753,7 +753,7 @@ $dark: #323333;
     max-height: 650px;
   }
 }
-#text-container {
+/* #text-container {
   grid-area: text;
   padding:20px;
   padding-top: 0px;
@@ -761,18 +761,18 @@ $dark: #323333;
   display: flex;
   justify-content: center;
   align-items: top;
-}
+} */
 #line-container {
   grid-area: line;
   margin-bottom: 10px;
 }
-#play-container {
+/* #play-container {
   grid-area: play;
-}
+} */
 #legend-container {
   grid-area: legend;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: flex-start;
 }
 #title-container {
@@ -791,7 +791,7 @@ $dark: #323333;
 
 // drop shadow on map outline
 #bkgrd-map-grp {
-  filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.15));
+  filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.35));
   stroke-width: 0.2;
   color: white;
   fill: white;
@@ -887,5 +887,8 @@ $dark: #323333;
 text.tick {
   font-size: 1rem;
 
+}
+text.button_name {
+  font-size: 3rem;
 }
 </style>
