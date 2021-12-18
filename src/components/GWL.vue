@@ -6,13 +6,13 @@
           id="title-main"
           class="title"
         >
-          U.S. Groundwater Conditions
+          U.S. Groundwater Levels <br/>[DATE] to [DATE]
         </h2>
         <h3
           id="title-sub"
           class="title"
         >
-          The low down on flow down low
+ Daily groundwater levels at USGS wells. Water levels are shown relative to the daily historic record (percentile). 
         </h3>
       </div>
       <div id="map-container">
@@ -21,14 +21,21 @@
           class="map"
         />
       </div>
-      <div id="legend-container" />
+      <div id="legend-container">
+        <svg 
+          id="legend"
+          preserveAspectRatio="xMinYMin meet"
+          viewBox="0 0 500 100"
+          >
+        </svg>
+        </div>
       <div id="line-container" />
       <!-- <div id="text-container">
         <p>
           Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
         </p>
       </div> -->
-      <div id="play-container" />
+    <!--   <div id="play-container" /> -->
     </div>
   </section>
 </template>
@@ -202,7 +209,7 @@ export default {
         this.animateLine(this.start);
         this.animateGWL(this.start);
         var play_container = this.d3.select("#x-line");
-        this.playButton(play_container, "330","-20");
+        this.playButton(play_container, "340","-25");
 
         
       },
@@ -228,12 +235,12 @@ export default {
           .data(time_labels).enter()
           .append("circle")
           .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
-          .attr("r", 4)
+          .attr("r", 3)
           .attr("cx", function(d) { return self.xScale(d.day_seq) })
           .attr("cy", 0)
           .attr("stroke", "black")
-          .attr("stroke-width", "2px")
-          .attr("fill", this.button_color)
+          .attr("stroke-width", "1px")
+          .attr("fill", "black")
           //.on('click', function(d, i) {
             //self.moveTimeline(d); 
         // })
@@ -430,8 +437,8 @@ export default {
           .append("text")
           .text("Play")
           .attr("x", 40)
-          .attr("y", 30)
-          .attr("font-size", "1.5rem")
+          .attr("y", 25)
+          .attr("font-size", "1.2rem")
           .attr("font-weight", "600")
 
         // append hover title
@@ -547,77 +554,37 @@ export default {
         .attr("r", 3)
         .attr("fill", this.button_color)
       },
-      initTime(){
-        // nested timelines for playback control
-        // broken up by month and tagged for user control
-        var tl_jan = new TimelineMax(); // TimelineMax permits repeating animation
-        var tl_feb = new TimelineMax();
-        var tl_mar = new TimelineMax();
-        var tl_apr = new TimelineMax();
-        var tl_may = new TimelineMax();
-        var tl_jun = new TimelineMax();
-        var tl_jul = new TimelineMax();
-        var tl_aug = new TimelineMax();
-        var tl_sep = new TimelineMax()
-        var tl_oct = new TimelineMax()
-        var tl_nov = new TimelineMax()
-        var tl_dec = new TimelineMax()
-
-        // add to parent timeline
-        // this timeline is used to set timing, duration, speed, stop/start, and keep everythign synchronized
-        var master = new TimelineMax();
-        master.add(tl_jan)
-        .add(tl_feb)
-        .add(tl_mar)
-        .add(tl_apr)
-        .add(tl_may)
-        .add(tl_jun)
-        .add(tl_jul)
-        .add(tl_aug)
-        .add(tl_sep)
-        .add(tl_oct)
-        .add(tl_nov)
-        .add(tl_dec) 
-
-      },
-      animateCharts(){
-        // link animation functions to same day
-
-      },
       makeLegend(){
         const self = this;
 
-        var legend_height = 200;
+        var legend_height = 140;
         var legend_width = 240;
 
         // make a legend 
-        var legend_peak = this.d3.select("#legend-container")
+        var legend_peak = this.d3.select("#legend")
           .append("svg")
-          .attr("width", legend_width)
-          .attr("height", legend_height)
-          .attr("id", "map-legend") 
-          .attr("preserveAspectRatio", "xMinYMin meet")
-          .attr("viewbox", "0 0 " + legend_width + " " + legend_height)
-          .append("g").classed("legend", true)
-          .attr("transform", "translate(0, 0)")
+          //.attr("width", legend_width)
+          //.attr("height", legend_height)
+          .append("g")
         
         // legend elements
         var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
-        var perc_label = ["0.00 - 0.10", "0.10 - 0.25" ,"0.25 - 0.75", "0.75 - 0.90", "0.90 - 1.00"] // percentile ranges
+        //var perc_label = ["0.00 - 0.10", "0.10 - 0.25" ,"0.25 - 0.75", "0.75 - 0.90", "0.90 - 1.00"] // percentile ranges
+        var perc_label = ["(0 - 0.1)", "(0.1 - 0.25)" ,"(0.25 - 0.75)", "(0.75 - 0.9)", "(0.9 - 1.0)"]
 
         // draw path shapes and labels
         var legend_title_x = 0;
-        var legend_label_x = 56;
-        legend_peak
+        var legend_label_x = 30;
+     /*    legend_peak
           .append("text")
           .text("Groundwater levels")
           .attr("x", legend_title_x)
           .attr("y", "20")
           .style("font-size", "1rem")
           .style("font-weight", 600) // matching css of .axis_labels
-          .attr("text-anchor", "start")
+          .attr("text-anchor", "start") */
 
-        legend_peak
+    /*     legend_peak
           .append("text")
           .text("Percentile based on historic")
           .attr("x", legend_title_x)
@@ -633,14 +600,15 @@ export default {
           .attr("y", "60")
           .style("font-size", "1rem")
           .style("font-weight", 400)
-          .attr("text-anchor", "start")
+          .attr("text-anchor", "start") */
 
       
-        var label_end = 180; // moves legend keys and labels up and down
-        var label_space = 23; // spacing between legend elements
+        var label_end = 120; // moves legend keys and labels up and down //180
+        var label_space = 20; // spacing between legend elements
         
         // add glyphs
-        legend_peak.selectAll("peak_symbol")
+        // this is the original legend with the label stacked - the modified below makes linear for easier viewing on mobile
+/*         legend_peak.selectAll("peak_symbol")
           .data(this.quant_peaks)
           .enter()
           .append("path")
@@ -673,7 +641,56 @@ export default {
             .text(function(d){ return d})
             .attr("text-anchor", "start")
             .style("alignment-baseline", "middle")
-            .attr("font-size", "16px")
+            .attr("font-size", "16px") */
+
+        // add glyphs - horizontal version
+        legend_peak.selectAll("peak_symbol")
+          .data(this.quant_peaks)
+          .enter()
+          .append("path")
+            .attr("fill", function(d){return self.gwl_color(d.quant)})
+            .attr("d", function(d){return d["path_quant"]})
+            .attr("transform", function(d, i){return "translate(" + (400-((380)-92*i)) + ", " + (25) + ")"})
+            .attr("id", function(d){return d["quant"]})
+            .attr("class", "peak_symbol")
+
+        legend_peak
+          .append("line")
+            .attr("stroke", "grey")
+            .attr("x1", 0)
+            .attr("x2", 470)
+            .attr("y1", 25)
+            .attr("y2", 25)
+          .append("text")
+            .text("0")
+            .attr("x", 480)
+            .attr("y", 25)
+
+        // add categorical labels ranked from very low to very high
+        legend_peak.selectAll("mylabels")
+          .data(legend_keys)
+          .enter()
+          .append("text")
+            .attr("y", legend_label_x+35)
+            .attr("x", function(d,i){ return 400-((390)-92*i)}) 
+            .text(function(d){ return d})
+            .attr("text-anchor", "start")
+            .style("alignment-baseline", "middle")
+            .style("font-weight", "600")
+            .attr("font-size", "1rem")
+
+        // label percentile ranges in each category
+
+         legend_peak.selectAll("percLabels")
+          .data(perc_label)
+          .enter()
+          .append("text")
+            .attr("y", legend_label_x+55)
+            .attr("x", function(d,i){ return 400-((390)-92*i)}) 
+            .text(function(d){ return d})
+            .attr("text-anchor", "start")
+            .style("alignment-baseline", "middle")
+            .attr("font-size", "0.8rem")
 
       },
       drawFrame1(map_svg, data){         
@@ -735,16 +752,16 @@ $dark: #323333;
   height: auto;
   vertical-align: middle;
   overflow: hidden;
-  grid-template-columns: 3fr 1fr;
+  grid-template-columns: 1fr;
   grid-template-areas:
-  "title title"
-  "map map"
-  "line line"
-  "legend play"
+  "title"
+  "legend"
+  "map"
+  "line"
 }
 #map-container{
   grid-area: map;
-  padding: 1rem;
+  padding: 0rem;
   padding-bottom: 0px;
   display: flex;
   justify-content: center;
@@ -766,14 +783,13 @@ $dark: #323333;
   grid-area: line;
   margin-bottom: 10px;
 }
-/* #play-container {
-  grid-area: play;
-} */
+
 #legend-container {
   grid-area: legend;
+  margin-left: 20px;
   display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
+  justify-content: center;
+  align-items: start;
 }
 #title-container {
   padding:20px;
@@ -809,7 +825,6 @@ $dark: #323333;
     grid-template-areas:
     "title map"
     "legend map"
-    "play map"
     "line line"
   }
   .title {
@@ -839,7 +854,6 @@ $dark: #323333;
     grid-template-areas:
     "title map"
     "legend map"
-    "play map"
     "line line"
   }
   .title {
@@ -865,9 +879,9 @@ $dark: #323333;
     max-height: 75vh;
   }
 }
-#play-container {
+/* #play-container {
   padding-left: 20px;
-}
+} */
 }
 // glyph paths
 .gwl_glyph {
