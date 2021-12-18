@@ -2,7 +2,7 @@
 
 # Borrowed from https://github.com/usgs-makerspace/wbeep-viz/blob/master/wu_pipeline/6_visualize/src/build_svg_map.R
 
-add_background_map <- function(svg, svg_width, outline_states) {
+add_background_map <- function(svg, svg_width, outline_states, digits) {
   map_data <- generate_usa_map_data(outline_states = outline_states)
   
   bkgrd_grp <- xml_add_child(svg, 'g', 
@@ -12,7 +12,7 @@ add_background_map <- function(svg, svg_width, outline_states) {
   purrr::map(map_data$ID, function(polygon_id, map_data, svg_width) {
     d <- map_data %>% 
       filter(ID == polygon_id) %>% 
-      convert_coords_to_svg(view_bbox = st_bbox(map_data), svg_width) %>% 
+      convert_coords_to_svg(view_bbox = st_bbox(map_data), svg_width, digits) %>% 
       build_path(connect = TRUE)
     xml_add_child(bkgrd_grp, 'path', 
                   d = d, 
@@ -22,7 +22,7 @@ add_background_map <- function(svg, svg_width, outline_states) {
   
 }
 
-convert_coords_to_svg <- function(sf_obj, svg_width, view_bbox = NULL) {
+convert_coords_to_svg <- function(sf_obj, svg_width, view_bbox = NULL, digits = 6) {
   
   coords <- st_coordinates(sf_obj)
   x_dec <- coords[,1]
@@ -49,8 +49,8 @@ convert_coords_to_svg <- function(sf_obj, svg_width, view_bbox = NULL) {
   y_pixels <- y_dec - view_bbox$ymin # Make it so that the maximum latitude = 0
   
   data.frame(
-    x = round(approx(x_extent_pixels, c(0, svg_width), x_pixels)$y, 6),
-    y = round(approx(y_extent_pixels, c(svg_height, 0), y_pixels)$y, 6)
+    x = round(approx(x_extent_pixels, c(0, svg_width), x_pixels)$y, digits),
+    y = round(approx(y_extent_pixels, c(svg_height, 0), y_pixels)$y, digits)
   )
 }
 
