@@ -9,15 +9,16 @@
 #' @param region_abbr a single character string for which
 #' region to pull out shifting information for.
 get_shift <- function(region_abbr){
+  albers <- "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=37.5 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
   switch(
     region_abbr,
-    AK = list(scale = 0.75, shift = c(-30,-200), rotation_deg = -40),
-    HI = list(scale = 1.75, shift = c(300, 0), rotation_deg = -35),
-    PR = list(scale = 3.15, shift = c(-95,75), rotation_deg=20),
-    VI = list(scale = 4, shift = c(-115,110), rotation_deg=20),
-    GU = list(scale = 5, shift = c(725, -575), rotation_deg=-90),
-    AS = list(scale = 5, shift = c(675, -30), rotation_deg=-45),
-    MP = list(scale = 1.5, shift = c(815,-600), rotation_deg=0),
+    AK = list(scale = 0.40, shift = c(-175,-260), rotation_deg = 0, proj_str = "EPSG:3338"),
+    HI = list(scale = 1.25, shift = c(-140, -120), rotation_deg = 5, proj_str = "EPSG:2784"),
+    PR = list(scale = 3, shift = c(190,-115), rotation_deg=0, proj_str = "EPSG:2866"),
+    VI = list(scale = 3, shift = c(180,-75), rotation_deg=0, proj_str = "EPSG:2866"),
+    GU = list(scale = 2, shift = c(465, -220), rotation_deg=0, proj_str = "+proj=poly +lat_0=13.47246635277778 +lon_0=-144.7487507055556 +x_0=50000 +y_0=50000 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"),
+    AS = list(scale = 1.5, shift = c(660, -15), rotation_deg=-45, proj_str = albers),
+    MP = list(scale = 1.5, shift = c(750,-550), rotation_deg=-60, proj_str = albers),
     # If there is no match, default to doing nothing to the object
     list(scale = 1, shift = c(0,0), rotation_deg=0)
   )
@@ -103,7 +104,7 @@ build_oconus_sf <- function(proj_str) {
   region_abbr_list <- list(
     "AK",
     "HI",
-    "PR", 
+    "PR",
     "VI", 
     "GU",
     "AS",
@@ -125,8 +126,7 @@ build_oconus_sf <- function(proj_str) {
       
       # Apply the shifting criteria to the current `obj_sf`
       obj_sf_shifted <- do.call(shift_sf, c(obj_sf = list(obj_sf), 
-                                            shift_criteria, 
-                                            proj_str = proj_str))
+                                            shift_criteria))
       
       # For drawing SVGs, we need POLYGONs not MULTIPOLYGONs returned
       obj_sf_shifted_poly <- obj_sf_shifted %>% 
@@ -159,7 +159,7 @@ shift_sf <- function(obj_sf, rotation_deg, scale, shift, proj_str) {
   stopifnot(!is.na(st_crs(obj_sf)))
   
   obj_sf_transf <- st_transform(obj_sf, proj_str)
-  obj_sfg <- st_geometry(obj_sf)
+  obj_sfg <- st_geometry(obj_sf_transf)
   obj_sfg_centroid <- st_centroid(obj_sfg)
   
   # Rotate and scale obj_sf
@@ -177,7 +177,7 @@ shift_sf <- function(obj_sf, rotation_deg, scale, shift, proj_str) {
   # Not features were filtered, the values were just updated, so
   # we can make a copy of `obj_sf` and then insert the updated
   # geometry + add the appropriate projection info
-  obj_sf_shifted <- obj_sf # Make a copy
+  obj_sf_shifted <- obj_sf_transf # Make a copy
   st_geometry(obj_sf_shifted) <- obj_sfg_shifted
   st_crs(obj_sf_shifted) <- proj_str
   
@@ -233,7 +233,6 @@ apply_shifts_to_sites <- function(sites_sf, sites_info, proj_str) {
       # Apply the shifting criteria to the current `obj_sf`
       obj_sf_shifted <- do.call(shift_points_sf, c(pts_sf = list(pts_sf), 
                                                    shift_criteria, 
-                                                   proj_str = proj_str,
                                                    ref_sf = list(ref_sf)))
       return(obj_sf_shifted)
     }
@@ -267,11 +266,12 @@ shift_points_sf <- function(pts_sf, rotation_deg, scale, shift, proj_str, ref_sf
   stopifnot(!is.na(st_crs(pts_sf)))
   
   pts_sf_transf <- st_transform(pts_sf, proj_str)
-  pts_sfg <- st_geometry(pts_sf)
+  pts_sfg <- st_geometry(pts_sf_transf)
   
   # Apply rotation & scaling
   if(!is.null(ref_sf)) {
-    scaling_center <- st_coordinates(st_centroid(ref_sf))
+    ref_sf_transf <- st_transform(ref_sf, proj_str)
+    scaling_center <- st_coordinates(st_centroid(ref_sf_transf))
   } else {
     scaling_center <- find_pts_centroid(pts_sfg_rot)
   }
