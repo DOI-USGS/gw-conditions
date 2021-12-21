@@ -21,7 +21,7 @@ targets:
       - 2_process/out/gw_daily_quantiles.csv
       - 2_process/out/gw_data_anomalies.csv
       - gw_sites_sf
-      - public/gw-conditions-time-labels.csv
+      - visualizations/data/gw-conditions-time-labels.csv.ind
   
   # Sites that use "depth below" as their gw level need to be inversed. In the 
   # current implementation, this means any site that used pcode == '72019'
@@ -59,7 +59,7 @@ targets:
     command: read_csv("2_process/out/gw_data_anomalies.csv", col_types = I('cDnnc'))
   gw_time:
     command: generate_time(gw_anomaly_data)
-  public/gw-conditions-time-labels.csv:
+  2_process/out/gw-conditions-time-labels.csv:
     command: generate_months(target_name, gw_time)
   gw_anomaly_data_w_paths:
     command: add_paths_to_data(gw_anomaly_data)
@@ -72,3 +72,8 @@ targets:
       out_file = target_name,
       in_zip = '1_fetch/out/nws_states.zip',
       tmp_dir = I('2_process/tmp'))
+
+  ##-- Now push the data needed by Vue to S3 --##
+
+  visualizations/data/gw-conditions-time-labels.csv.ind:
+    command: s3_put(target_name, '2_process/out/gw-conditions-time-labels.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
