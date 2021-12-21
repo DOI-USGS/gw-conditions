@@ -57,9 +57,6 @@ export default {
       quant_peaks: null,
       date_peaks: null,
       svg: null,
-      site_coords: null,
-      site_count: null,
-      time_labels: null,
       percData: null,
       days: null,
 
@@ -135,11 +132,11 @@ export default {
         // requires duplicating map style in R so looks consistent on load
         // need to consider how to handle sites with no data on the first date 
         // variables: x, y, site_no, aqfr_type
-        this.site_coords = data[2]; 
+        var site_coords = data[2]; 
 
         // proportion of sites by each category over time
         // variables: Date, day_seq (an integer from 1 to the last day), n_sites, and a column for each gwl category
-        this.site_count = data[3]; // number of sites x quant_category x day_seq
+        var site_count = data[3]; // number of sites x quant_category x day_seq
 
         // annotations for the timeline
         // R pipeline pulls out each month and the year for time labels
@@ -151,12 +148,12 @@ export default {
         day_seq.shift(); // drop first col with site_no
 
         // sites 
-        this.sites_list = this.site_coords.map(function(d)  { return d.site_no })
+        this.sites_list = site_coords.map(function(d)  { return d.site_no })
         var n = this.sites_list.length // to create nested array for indexing in animation
 
         // site placement on map
-        var sites_x = this.site_coords.map(function(d) { return d.x })
-        var sites_y = this.site_coords.map(function(d) { return d.y })
+        var sites_x = site_coords.map(function(d) { return d.x })
+        var sites_y = site_coords.map(function(d) { return d.y })
 
         // reorganize - site is the key with gwl for each day of the wy
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
@@ -176,13 +173,13 @@ export default {
         var percData = [];
           for (i = 0; i < n_quant; i++) {
           var key_quant = quant_cat[i];
-          var day_seq = this.site_count.map(function(d){ return d['day_seq']});
-          var perc = this.site_count.map(function(d){ return d[key_quant]});
+          var day_seq = site_count.map(function(d){ return d['day_seq']});
+          var perc = site_count.map(function(d){ return d[key_quant]});
           percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
           };
 
-        this.days = this.site_count.map(function(d) { return  d['day_seq']})
-        this.dates = this.site_count.map(function(d) { return  d['Date']})
+        this.days = site_count.map(function(d) { return  d['day_seq']})
+        //this.dates = site_count.map(function(d) { return  d['Date']}) // was used for date ticker
         this.n_days = this.days.length
      
         // set up scales
