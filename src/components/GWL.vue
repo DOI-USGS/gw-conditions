@@ -34,7 +34,7 @@
 </template>
 <script>
 import * as d3Base from 'd3';
-import GWLmap from "@/assets/anomaly_peaks.svg";
+import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { TimelineMax } from "gsap/all"; 
 
 export default {
