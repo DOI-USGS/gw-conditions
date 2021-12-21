@@ -1,8 +1,6 @@
 # gw-conditions
 
-Show groundwater conditions as little peaks above or below their normal values. Current code will produce:
-
-
+Show groundwater conditions as little peaks above or below their normal values. 
 
 ## Generate the data behind the visualization and push to S3
 
