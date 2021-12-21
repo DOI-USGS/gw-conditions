@@ -65,7 +65,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url("https://use.typekit.net/yww2frw.css");
-@import url('https://fonts.googleapis.com/css2?family=Copse&display=swap'); // sort of old timey
 @import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 
@@ -73,27 +72,26 @@ $Cairo: 'Cairo', sans-serif;
 $Assistant: 'Assistant', sans-serif;
 $Noto: 'Noto Serif', serif;
 $acu_bold: 'acumin-pro', sans-serif;
-$copse: 'Copse', serif;
 $titillium: 'Titillium Wed', sans-serif;
 $open_sans: 'Open Sans', sans-serif;
 
 html,
 body {
       height:100%;
-      background-color: rgb(227, 227, 227);
+      background-color: rgb(223, 223, 223);
       margin: 0;
       padding: 0;
       line-height: 1.2;
-      font-size: 16px;
+      font-size: clamp(100%, 1rem + 2rem, 24px);
       font-weight: 400;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       width: 100%;
       @media screen and (max-width: 600px) {
-        font-size: 16px;
+        //font-size: 16px;
       }
       .axis_label {
-        font-size: 20px;
+        font-size: clamp(100%, 1rem + 2rem, 24px);
         font-weight: 600;
       }
   }
@@ -120,7 +118,7 @@ h2{
   padding-left: 1rem;
 }
 h3{
-  font-size: 1.5em;
+  font-size: 1em;
   padding-top: 0em;
   font-family: $Assistant;
   font-weight: 300;
