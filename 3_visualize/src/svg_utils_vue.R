@@ -5,8 +5,14 @@ gwl_to_peak <- function(file_out, gw_anomaly_data_w_colors){
            path_y = round(50-daily_quant, digits = 0)) %>%
     #filter(!is.na(quant)) %>%
     mutate(site_no = paste0('gwl_', site_no)) %>%
-    select(site_no, day_seq, daily_quant, path_y) %>%
+    select(site_no, day_seq, daily_quant, path_y) %>% 
+    
+    # Convert to `data.table` for fast reshaping, then back 
+    # to tibble. Note that `reshape2::dcast()` is deprecated.
+    setDT() %>% 
     dcast(day_seq~site_no, value.var = 'path_y') %>%
+    as_tibble() %>% 
+    
     arrange(day_seq) %>%
     write_csv(file_out)
 }
