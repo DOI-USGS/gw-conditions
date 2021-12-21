@@ -6,13 +6,13 @@
           id="title-main"
           class="title"
         >
-          U.S. Groundwater Levels <br/>[DATE] to [DATE]
+          U.S. Groundwater<br/>[DATE] to [DATE]
         </h2>
         <h3
           id="title-sub"
           class="title"
         >
- Daily groundwater levels at USGS wells. Water levels are shown relative to the daily historic record (percentile). 
+ Daily groundwater levels at USGS wells shown relative to the daily historic record (percentile). 
         </h3>
       </div>
       <div id="map-container">
@@ -27,15 +27,16 @@
           preserveAspectRatio="xMinYMin meet"
           viewBox="0 0 500 100"
           >
+          <line x1="0" x2="470" y1="25" y2="25" class="legend-line" ></line>
         </svg>
         </div>
       <div id="line-container" />
-      <!-- <div id="text-container">
+       <div id="text-container">
         <p>
-          Four dollar toast man bun affogato crucifix locavore ut, labore quinoa gastropub qui reprehenderit adipisicing chicharrones asymmetrical. Live-edge squid banjo bespoke prism migas post-ironic tousled kitsch aute banh mi veniam ut kogi. Literally woke sriracha taxidermy freegan +1 voluptate church-key tempor cornhole humblebrag small batch fanny pack. 
+          Are groundwater levels higher or lower than usual? 
         </p>
-      </div> -->
-    <!--   <div id="play-container" /> -->
+      </div>
+ <div id="play-container" />
     </div>
   </section>
 </template>
@@ -562,9 +563,6 @@ export default {
 
         // make a legend 
         var legend_peak = this.d3.select("#legend")
-          .append("svg")
-          //.attr("width", legend_width)
-          //.attr("height", legend_height)
           .append("g")
         
         // legend elements
@@ -653,18 +651,18 @@ export default {
             .attr("transform", function(d, i){return "translate(" + (400-((380)-92*i)) + ", " + (25) + ")"})
             .attr("id", function(d){return d["quant"]})
             .attr("class", "peak_symbol")
-
+/* 
         legend_peak
           .append("line")
-            .attr("stroke", "grey")
             .attr("x1", 0)
             .attr("x2", 470)
             .attr("y1", 25)
             .attr("y2", 25)
-          .append("text")
-            .text("0")
-            .attr("x", 480)
-            .attr("y", 25)
+            .classed("legend-line", true)
+            .attr("stroke", "grey")
+ */
+26556355
+
 
         // add categorical labels ranked from very low to very high
         legend_peak.selectAll("mylabels")
@@ -746,6 +744,8 @@ $dark: #323333;
 // mobile first
 #grid-container {
   display: grid;
+  max-width: 1920px;
+  margin: auto;
   padding-right: 2rem;
   margin: 1rem;
   width: 100%;
@@ -770,15 +770,7 @@ $dark: #323333;
     max-height: 650px;
   }
 }
-/* #text-container {
-  grid-area: text;
-  padding:20px;
-  padding-top: 0px;
-  // controlling positioning within div as page scales
-  display: flex;
-  justify-content: center;
-  align-items: top;
-} */
+
 #line-container {
   grid-area: line;
   margin-bottom: 10px;
@@ -818,7 +810,7 @@ $dark: #323333;
 }
 
 // desktop
-@media (min-width:700px) {
+/* @media (min-width:700px) {
   #grid-container {
     margin: 50px;
     grid-template-columns: 2fr 5fr;
@@ -834,7 +826,7 @@ $dark: #323333;
     display: flex;
     justify-content: flex-start;
     padding-left: 20px;
-    align-items: center;
+    align-items: start;
   }
   #line-container {
   grid-area: line;
@@ -845,9 +837,9 @@ $dark: #323333;
   svg.map {
     max-height: 900px;
   }
-}
-}
-@media (min-width:1024px) {
+} 
+}*/
+/* @media (min-width:1024px) {
   #grid-container {
     margin: 50px;
     grid-template-columns: 2fr 5fr;
@@ -865,7 +857,7 @@ $dark: #323333;
     display: flex;
     justify-content: flex-start;
     padding-left: 20px;
-    align-items: center;
+    align-items: start;
   }
   #line-container {
   grid-area: line;
@@ -879,10 +871,7 @@ $dark: #323333;
     max-height: 75vh;
   }
 }
-/* #play-container {
-  padding-left: 20px;
 } */
-}
 // glyph paths
 .gwl_glyph {
   stroke: none; 
@@ -904,5 +893,10 @@ text.tick {
 }
 text.button_name {
   font-size: 3rem;
+}
+line.legend-line {
+  stroke-dasharray: 3;
+  stroke-width: 2;
+  stroke: grey;
 }
 </style>
