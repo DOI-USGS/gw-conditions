@@ -20,14 +20,12 @@ targets:
 
   3_visualize:
     depends:
-      - src/assets/anomaly_peaks.svg 
-      - public/gw-conditions-site-coords.csv ## this is in aws as gw-conditions-sites.csv
-      - public/gw-conditions-wy20.csv ## in aws as gw-conditions-wy20.csv
-      - public/gw-conditions-daily-proportions.csv ## in aws as gw-conditions-daily-count.csv
+      - visualizations/data/gw-conditions-peaks-map.svg.ind
+      - visualizations/data/gw-conditions-site-coords.csv.ind
+      - visualizations/data/gw-conditions-wy20.csv.ind
+      - visualizations/data/gw-conditions-daily-proportions.csv.ind
 
-  # exports that are leveraged by vue
-  # TODO: send to s3
-  src/assets/anomaly_peaks.svg:
+  3_visualize/out/gw-conditions-peaks-map.svg:
     command: build_peaks_svg(
       target_name, 
       svg_width = svg_width, 
@@ -35,19 +33,30 @@ targets:
     depends:
      - '2_process/out/nws_states.shp'
       
-  public/gw-conditions-wy20.csv:
+  3_visualize/out/gw-conditions-wy20.csv:
     command: gwl_to_peak(
       target_name, 
       gw_anomaly_data_w_colors)
     
-  public/gw-conditions-site-coords.csv:
+  3_visualize/out/gw-conditions-site-coords.csv:
     command: get_site_coords(
       target_name,
       sites_sf = gw_sites_sf_shifted)
   
-  public/gw-conditions-daily-proportions.csv:
+  3_visualize/out/gw-conditions-daily-proportions.csv:
     command: site_prop_timeseries(target_name, 
       gw_anomaly_data_w_colors)
+  
+  ##-- Now push the data needed by Vue to S3 --##
 
-      
+  visualizations/data/gw-conditions-peaks-map.svg.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-peaks-map.svg', config_file = I('lib/cfg/s3_config_viz.yml'))
+    
+  visualizations/data/gw-conditions-wy20.csv.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-wy20.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
 
+  visualizations/data/gw-conditions-site-coords.csv.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-site-coords.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
+  
+  visualizations/data/gw-conditions-daily-proportions.csv.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-daily-proportions.csv', config_file = I('lib/cfg/s3_config_viz.yml'))

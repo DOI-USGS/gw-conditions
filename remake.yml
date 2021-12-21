@@ -1,4 +1,4 @@
-target_default: 3_visualize
+target_default: build_gw_viz_data
 
 include:
   - 0_config.yml
@@ -8,7 +8,7 @@ include:
   #- 4_animate.yml
 
 targets:
-  build_viz:
+  build_gw_viz_data:
     depends: 
       - 1_fetch
       - 2_process
