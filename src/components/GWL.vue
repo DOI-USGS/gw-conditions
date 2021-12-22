@@ -59,6 +59,7 @@ export default {
       svg: null,
       percData: null,
       days: null,
+      quant_path_gylph: null,
 
       peak_grp: null,
       day_length: 10, // frame duration in milliseconds
@@ -118,7 +119,7 @@ export default {
       callback(data) {
         // assign data
 
-        // builds legend, has row for each category (2 for normal)
+        // builds legend, has row for each category
         this.quant_peaks = data[0]; 
 
         // gwl site level timeseries data to make peak animation
@@ -169,6 +170,7 @@ export default {
 
         // same for timeseries data but indexed by percentile category
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
+        
         var n_quant = quant_cat.length
         var percData = [];
           for (i = 0; i < n_quant; i++) {
@@ -183,7 +185,7 @@ export default {
         this.n_days = this.days.length
      
         // set up scales
-        this.setScales(); // axes, color, and line drawing fnu
+        this.setScales(); // axes, color, and line drawing fun
         this.makeLegend();
 
         // draw the map
@@ -201,13 +203,6 @@ export default {
         var play_container = this.d3.select("#play-container");
         this.playButton(play_container, "200","50");
 
-        
-      },
-      createPanel(month) {
-        var tl = new TimelineMax();
-        tl.to("tl_" + month)
-        // add rest of this
-        return tl;
       },
       addButtons(time_container, time_labels){
         const self = this;
@@ -231,15 +226,6 @@ export default {
           .attr("stroke", "white")
           .attr("stroke-width", "2px")
           .attr("fill", this.button_color)
-          //.on('click', function(d, i) {
-            //self.moveTimeline(d); 
-        // })
-          /* .on('mouseover', function(d, i) {
-            self.buttonSelect(d);
-          })
-          .on('mouseout', function(d, i) {
-            self.buttonDeSelect(d);
-          }) */
 
         // month labels
         button_month.selectAll(".button_name")
@@ -251,15 +237,6 @@ export default {
           .attr("y", 25)
           .text(function(d, i) { return d.month_label })
           .attr("text-align", "start")
-          //.on('click', function(d, i) {
-            //self.moveTimeline(d);
-          //})
-          /* .on('mouseover', function(d, i) {
-            self.buttonSelect(d);
-          })
-          .on('mouseout', function(d, i) {
-            self.buttonDeSelect(d);
-          }) */
 
         // filter to just year annotations for first month they appear
         var year_labels = time_labels.filter(function(el) {
@@ -378,6 +355,13 @@ export default {
         this.quant_color = this.d3.scaleThreshold()
           .domain([-40, -25, 25, 40])
           .range(this.pal_BuBr) 
+
+        // set scale for path shape
+        var quant_path = [...new Set(this.quant_peaks.map(function(d) { return d.path_quant}))];
+        
+        this.quant_path_gylph = this.d3.scaleThreshold()
+          .domain([-40, -25, 25, 40])
+          .range(quant_path) 
 
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
@@ -545,43 +529,6 @@ export default {
         .attr("r", 3)
         .attr("fill", this.button_color)
       },
-      initTime(){
-        // nested timelines for playback control
-        // broken up by month and tagged for user control
-        var tl_jan = new TimelineMax(); // TimelineMax permits repeating animation
-        var tl_feb = new TimelineMax();
-        var tl_mar = new TimelineMax();
-        var tl_apr = new TimelineMax();
-        var tl_may = new TimelineMax();
-        var tl_jun = new TimelineMax();
-        var tl_jul = new TimelineMax();
-        var tl_aug = new TimelineMax();
-        var tl_sep = new TimelineMax()
-        var tl_oct = new TimelineMax()
-        var tl_nov = new TimelineMax()
-        var tl_dec = new TimelineMax()
-
-        // add to parent timeline
-        // this timeline is used to set timing, duration, speed, stop/start, and keep everythign synchronized
-        var master = new TimelineMax();
-        master.add(tl_jan)
-        .add(tl_feb)
-        .add(tl_mar)
-        .add(tl_apr)
-        .add(tl_may)
-        .add(tl_jun)
-        .add(tl_jul)
-        .add(tl_aug)
-        .add(tl_sep)
-        .add(tl_oct)
-        .add(tl_nov)
-        .add(tl_dec) 
-
-      },
-      animateCharts(){
-        // link animation functions to same day
-
-      },
       makeLegend(){
         const self = this;
 
@@ -677,10 +624,9 @@ export default {
       drawFrame1(map_svg, data){         
         // draw the first frame of the animation
         const self = this;
+        console.log(data)
 
-          // select existing paths using class - currently all drawn with D3
-          // to grab existing paths, needs to look exact same as first frame 
-          // requries dealing with sites with no data on day 1
+          // draw sites with D3
           var start = this.start;
             this.peak_grp = map_svg.selectAll("path.gwl_glyph")
               .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
@@ -692,19 +638,22 @@ export default {
              .attr("class", function(d) { return d.key })
              .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
              .attr("opacity", ".5")
-             .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
+             .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) //{ return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
          // this.animateGWL(this.start); // once sites are drawn, trigger animation
       },
       animateGWL(start){
          const self = this;
       // animate path d and fill by wy day    
-
-        if (start < 365 ){
+    
+        if (start < this.n_days-1){
         this.peak_grp
         .transition()
         .duration(this.day_length)  // duration of each day
-        .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" })
+        .attr("d", function(d) { 
+          //self.findGWL(d)
+          return self.quant_path_gylph(d.gwl[start])
+          })
         .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
         .end()
         .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day_seq
@@ -714,9 +663,19 @@ export default {
        this.peak_grp
           .transition()
           .duration(this.day_length)  // duration of each day
-          .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[365] + " 10 0 Z" })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[365]) })
+          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
+          .attr("fill", function(d) { return self.quant_color(d.gwl[start-1]) })
         }
+      },
+      findGWL(day){
+        console.log(day)
+
+      },
+      comparePaths(today){
+        // if paths for today and yesterday are the same
+        // no animation
+        // if different, run transition
+
       }
     }
 }
