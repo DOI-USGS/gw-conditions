@@ -35,7 +35,6 @@
 <script>
 import * as d3Base from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
-import { TimelineMax } from "gsap/all"; 
 
 export default {
   name: "GWLsvg",
@@ -62,7 +61,7 @@ export default {
       quant_path_gylph: null,
 
       peak_grp: null,
-      day_length: 10, // frame duration in milliseconds
+      day_length: 1, // frame duration in milliseconds
       current_time: 0,
       start: 0,
       n_days: null,
@@ -361,7 +360,7 @@ export default {
         
         this.quant_path_gylph = this.d3.scaleThreshold()
           .domain([-40, -25, 25, 40])
-          .range(quant_path) 
+          .range(quant_path.reverse()) 
 
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
@@ -624,7 +623,6 @@ export default {
       drawFrame1(map_svg, data){         
         // draw the first frame of the animation
         const self = this;
-        console.log(data)
 
           // draw sites with D3
           var start = this.start;
@@ -640,13 +638,12 @@ export default {
              .attr("opacity", ".5")
              .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) //{ return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
-         // this.animateGWL(this.start); // once sites are drawn, trigger animation
       },
-      animateGWL(start){
+  /*     animateGWL(start){
          const self = this;
       // animate path d and fill by wy day    
     
-        if (start < this.n_days-1){
+        if (start < this.n_days-2){
         this.peak_grp
         .transition()
         .duration(this.day_length)  // duration of each day
@@ -663,18 +660,60 @@ export default {
        this.peak_grp
           .transition()
           .duration(this.day_length)  // duration of each day
-          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[start-1]) })
+          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[this.n_days-2]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
+          .attr("fill", function(d) { return self.quant_color(d.gwl[this.n_days-2]) })
+        }
+      }, */
+      animateGWL(start){
+         const self = this;
+      // animate path d and fill by wy day    
+    
+        if (start < this.n_days-2){
+        
+        this.d3.transition()
+        .duration(this.day_length)
+        .each(function(d,i) {
+
+           //var today = self.quant_path_gylph(d.gwl[start])
+           //var yesterday = self.quant_path_gylph(d.gwl[start-1])
+
+           //if(!(today == yesterday)){
+             self.animatePathD(start)
+           //} else {
+
+          // }
+        })
+        .end() // end is important because it waits for EVERY element to finish the transition before callback, keeps things in sync
+        .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day
+
+        } else {
+      // if it's the last day of the water year, stop animation 
+       this.peak_grp
+          .transition('daily_gwl')
+          .duration(this.day_length)  // duration of each day
+          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[this.n_days-1]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
+          .attr("fill", function(d) { return self.quant_color(d.gwl[this.n_days-1]) })
         }
       },
-      findGWL(day){
-        console.log(day)
+      animatePathD(start){
+        const self = this;
 
-      },
-      comparePaths(today){
-        // if paths for today and yesterday are the same
-        // no animation
-        // if different, run transition
+        //var today = self.quant_path_gylph(d.gwl[start])
+       // var yesterday = self.quant_path_gylph(d.gwl[start-1])
+
+        //if(!(today == yesterday)){
+          this.peak_grp
+            .transition('daily_gwl')
+            //.duration(this.day_length)  // duration of each day
+            .attr("d", function(d) { 
+              return self.quant_path_gylph(d.gwl[start])
+              })
+            .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
+
+        //} else {
+        //  return("samesies")
+        //}
+
 
       }
     }
