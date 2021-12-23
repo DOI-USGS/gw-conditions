@@ -33,8 +33,9 @@
   </section>
 </template>
 <script>
-import * as d3Base from 'd3';
+import * as d3 from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
+// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis,
 
 export default {
   name: "GWLsvg",
@@ -91,7 +92,7 @@ export default {
     }
   },
   mounted(){
-      this.d3 = Object.assign(d3Base);
+      this.d3 = Object.assign(d3);
 
       // resize
       this.width = window.innerWidth - this.margin.left - this.margin.right;
@@ -665,56 +666,42 @@ export default {
         }
       }, */
       animateGWL(start){
-         const self = this;
+        const self = this;
       // animate path d and fill by wy day    
     
         if (start < this.n_days-2){
         
-        this.d3.transition()
-        .duration(this.day_length)
-        .each(function(d,i) {
-
-           //var today = self.quant_path_gylph(d.gwl[start])
-           //var yesterday = self.quant_path_gylph(d.gwl[start-1])
-
-           //if(!(today == yesterday)){
-             self.animatePathD(start)
-           //} else {
-
-          // }
-        })
-        .end() // end is important because it waits for EVERY element to finish the transition before callback, keeps things in sync
-        .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day
-
+          this.peak_grp
+            .transition()
+            .duration(this.day_length)
+            .each(function(d,i) {
+              let current_path = self.d3.select(this)
+              var today = self.quant_path_gylph(d.gwl[start])
+              var yesterday = self.quant_path_gylph(d.gwl[start-1])
+              if(today != yesterday){
+                self.animatePathD(start, current_path)
+              }
+            })
+            .end() // end is important because it waits for EVERY element to finish the transition before callback, keeps things in sync
+            .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day
         } else {
       // if it's the last day of the water year, stop animation 
-       this.peak_grp
-          .transition('daily_gwl')
-          .duration(this.day_length)  // duration of each day
-          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[this.n_days-1]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[this.n_days-1]) })
-        }
-      },
-      animatePathD(start){
-        const self = this;
-
-        //var today = self.quant_path_gylph(d.gwl[start])
-       // var yesterday = self.quant_path_gylph(d.gwl[start-1])
-
-        //if(!(today == yesterday)){
           this.peak_grp
             .transition('daily_gwl')
-            //.duration(this.day_length)  // duration of each day
-            .attr("d", function(d) { 
-              return self.quant_path_gylph(d.gwl[start])
-              })
-            .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
-
-        //} else {
-        //  return("samesies")
-        //}
-
-
+            .duration(this.day_length)  // duration of each day
+            .attr("d", function(d) { return self.quant_path_gylph(d.gwl[this.n_days-1]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
+            .attr("fill", function(d) { return self.quant_color(d.gwl[this.n_days-1]) })
+        }
+      },
+      animatePathD(start, current_path){
+        const self = this;
+        current_path
+          .transition('daily_gwl')
+          //.duration(this.day_length)  // duration of each day
+          .attr("d", function(d) { 
+            return self.quant_path_gylph(d.gwl[start])
+            })
+          .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
       }
     }
 }
