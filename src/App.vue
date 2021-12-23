@@ -72,55 +72,52 @@ body {
       margin: 0;
       padding: 0;
       line-height: 1.2;
-      font-size: clamp(100%, 1rem + 2rem, 24px);
+      //font-size: clamp(100%, 1rem + 2rem, 24px);
+      font-size: 24px;
       font-weight: 400;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       width: 100%;
       @media screen and (max-width: 600px) {
-        //font-size: 16px;
+        font-size: 18px;
       }
       .axis_label {
         font-size: clamp(100%, 1rem + 2rem, 24px);
         font-weight: 600;
       }
   }
+  h1, h2, h3 {
+    line-height: 1;
+    text-align: left;
+    font-family: $Assistant;
+    font-weight: 600;
+    margin: 0 0;
+  }
 h1{
   font-size: 3.5em;
-  font-weight: 600;
-  font-family: $Assistant;
-  line-height: 1;
-  text-align: left;
   @media screen and (max-width: 600px) {
     font-size: 2.5em;
   }
 }
 h2{
-  font-weight: 600;
-  text-align: left;
-  font-family:$Assistant;
   font-size: 3em;
-  margin-top: 5px;
-  line-height: 1;
   @media screen and (max-width: 600px) {
-    font-size: 2em;
+    font-size: 1.5em;
   }
-  padding-left: 1rem;
 }
 h3{
-  font-size: 1em;
+  font-size: 1.5em;
   padding-top: 0em;
-  font-family: $Assistant;
-  font-weight: 300;
   @media screen and (max-width: 600px) {
-      font-size: 1em;
+      font-size: 1.5em;
   }  
 }
 p, text {
-  padding: 1em 0 0 0; 
+  padding: 0.5em 0 0 0; 
   font-family: $open_sans;
   font-weight: 400;
   line-height: 1.3;
+  margin: 0px 0px;
 }
 
 </style>

@@ -6,14 +6,17 @@
           id="title-main"
           class="title"
         >
-          U.S. Groundwater<br/>[DATE] to [DATE]
+          U.S. Groundwater Conditions
         </h2>
-        <h3
+        <h3>
+          Jan 1 - Dec 31, 2021
+        </h3>
+        <p
           id="title-sub"
           class="title"
         >
- Daily groundwater levels at USGS wells shown relative to the daily historic record (percentile). 
-        </h3>
+        Daily groundwater levels are shown relative to the daily historic record (percentile) at each site.  
+        </p>
       </div>
       <div id="map-container">
         <GWLmap
@@ -30,14 +33,17 @@
           <line x1="0" x2="470" y1="25" y2="25" class="legend-line" ></line>
         </svg>
         </div>
-      <div id="line-container" />
+      <div id="line-container" >
+        <p>
+          Water levels through time
+        </p>
+        </div>
        <div id="text-container">
         <p>
           Are groundwater levels higher or lower than usual? 
         </p>
       </div>
- <div id="play-container" />
-    </div>
+      </div>
   </section>
 </template>
 <script>
@@ -262,13 +268,12 @@ export default {
           .text(function(d, i) { return d.year })
 
         // chart title
-        button_month
+  /*       button_month
           .append("text")
           .attr("class", function(d,i) { return "axis_label" } ) 
           .attr("x", function(d) { return self.xScale(1)-40 }) // centering on pt
           .attr("y", -120)
-          .text(function(d, i) { return "Wells by groundwater level" })
-
+          .text(function(d, i) { return "Wells by groundwater level" }) */
 
       },
       drawLine(time_container, prop_data) {
@@ -395,12 +400,7 @@ export default {
       playButton(svg, x, y) {
         const self = this;
          var svg_play = svg
-        /*   .append("svg")
-          .attr("width", x)
-          .attr("height", y)
-          .attr("preserveAspectRatio", "xMinYMin meet")
-          .attr("viewbox", "0 0 " + x + " " + y)
- */
+
         var button = svg_play.append("g")
           .attr("transform", "translate("+ x +","+ y +")")
           .attr("class", "play_button");
@@ -642,7 +642,6 @@ export default {
             .classed("legend-line", true)
             .attr("stroke", "grey")
  */
-26556355
 
 
         // add categorical labels ranked from very low to very high
@@ -735,13 +734,14 @@ export default {
 $dark: #323333;
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
+section {
+  width: 92vw;
+  margin: 0 4vw;
+}
 #grid-container {
   display: grid;
   max-width: 1920px;
-  margin: auto;
-  padding-right: 2rem;
-  margin: 1rem;
-  width: 100%;
+  width: 92vw;
   height: auto;
   vertical-align: middle;
   overflow: hidden;
@@ -756,9 +756,10 @@ $dark: #323333;
   grid-area: map;
   padding: 0rem;
   padding-bottom: 0px;
+  margin-top: 0.5rem;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: left;
+  align-items: left;
   svg.map {
     max-height: 650px;
   }
@@ -771,22 +772,19 @@ $dark: #323333;
 
 #legend-container {
   grid-area: legend;
-  margin-left: 20px;
   display: flex;
   justify-content: center;
-  align-items: start;
+  align-items: flex-start;
 }
 #title-container {
-  padding:20px;
-  padding-bottom: 0px;
   height: auto;
   grid-area: title;
-  h1, h2, h3 {
-    color:$dark;
-    height: auto;
-    padding: 4px;
-    padding-bottom: 0;
-    padding-left: 0;
+  h1, h2{
+    margin-top: 1rem;
+  }
+  h3 {
+    margin-top: 0.5rem;
+
   }
 }
 
