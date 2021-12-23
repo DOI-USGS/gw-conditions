@@ -640,31 +640,6 @@ export default {
              .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) //{ return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
       },
-  /*     animateGWL(start){
-         const self = this;
-      // animate path d and fill by wy day    
-    
-        if (start < this.n_days-2){
-        this.peak_grp
-        .transition()
-        .duration(this.day_length)  // duration of each day
-        .attr("d", function(d) { 
-          //self.findGWL(d)
-          return self.quant_path_gylph(d.gwl[start])
-          })
-        .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
-        .end()
-        .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day_seq
-
-        } else {
-      // if it's the last day of the water year, stop animation 
-       this.peak_grp
-          .transition()
-          .duration(this.day_length)  // duration of each day
-          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[this.n_days-2]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[this.n_days-2]) })
-        }
-      }, */
       animateGWL(start){
         const self = this;
       // animate path d and fill by wy day    
@@ -697,7 +672,6 @@ export default {
         const self = this;
         current_path
           .transition('daily_gwl')
-          //.duration(this.day_length)  // duration of each day
           .attr("d", function(d) { 
             return self.quant_path_gylph(d.gwl[start])
             })
