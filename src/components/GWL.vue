@@ -41,9 +41,9 @@
   </section>
 </template>
 <script>
-import * as d3Base from 'd3';
-import GWLmap from "@/assets/anomaly_peaks.svg";
-import { TimelineMax } from "gsap/all"; 
+import * as d3 from 'd3';
+import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
+// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis,
 
 export default {
   name: "GWLsvg",
@@ -65,14 +65,12 @@ export default {
       quant_peaks: null,
       date_peaks: null,
       svg: null,
-      site_coords: null,
-      site_count: null,
-      time_labels: null,
       percData: null,
       days: null,
+      quant_path_gylph: null,
 
       peak_grp: null,
-      day_length: 10, // frame duration in milliseconds
+      day_length: 1, // frame duration in milliseconds
       current_time: 0,
       start: 0,
       n_days: null,
@@ -102,7 +100,7 @@ export default {
     }
   },
   mounted(){
-      this.d3 = Object.assign(d3Base);
+      this.d3 = Object.assign(d3);
 
       // resize
       this.width = window.innerWidth - this.margin.left - this.margin.right;
@@ -119,8 +117,8 @@ export default {
         // read in data 
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy2020.csv",  this.d3.autotype),
-        self.d3.csv(self.publicPath + "gw-conditions-site-coords.csv", this.d3.autotype), 
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords.csv",  this.d3.autotype), 
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels.csv",  this.d3.autotype),
         ];
@@ -129,7 +127,7 @@ export default {
       callback(data) {
         // assign data
 
-        // builds legend, has row for each category (2 for normal)
+        // builds legend, has row for each category
         this.quant_peaks = data[0]; 
 
         // gwl site level timeseries data to make peak animation
@@ -143,11 +141,11 @@ export default {
         // requires duplicating map style in R so looks consistent on load
         // need to consider how to handle sites with no data on the first date 
         // variables: x, y, site_no, aqfr_type
-        this.site_coords = data[2]; 
+        var site_coords = data[2]; 
 
         // proportion of sites by each category over time
         // variables: Date, day_seq (an integer from 1 to the last day), n_sites, and a column for each gwl category
-        this.site_count = data[3]; // number of sites x quant_category x day_seq
+        var site_count = data[3]; // number of sites x quant_category x day_seq
 
         // annotations for the timeline
         // R pipeline pulls out each month and the year for time labels
@@ -159,12 +157,12 @@ export default {
         day_seq.shift(); // drop first col with site_no
 
         // sites 
-        this.sites_list = this.site_coords.map(function(d)  { return d.site_no })
+        this.sites_list = site_coords.map(function(d)  { return d.site_no })
         var n = this.sites_list.length // to create nested array for indexing in animation
 
         // site placement on map
-        var sites_x = this.site_coords.map(function(d) { return d.x })
-        var sites_y = this.site_coords.map(function(d) { return d.y })
+        var sites_x = site_coords.map(function(d) { return d.x })
+        var sites_y = site_coords.map(function(d) { return d.y })
 
         // reorganize - site is the key with gwl for each day of the wy
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
@@ -180,21 +178,22 @@ export default {
 
         // same for timeseries data but indexed by percentile category
         var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
+        
         var n_quant = quant_cat.length
         var percData = [];
           for (i = 0; i < n_quant; i++) {
           var key_quant = quant_cat[i];
-          var day_seq = this.site_count.map(function(d){ return d['day_seq']});
-          var perc = this.site_count.map(function(d){ return d[key_quant]});
+          var day_seq = site_count.map(function(d){ return d['day_seq']});
+          var perc = site_count.map(function(d){ return d[key_quant]});
           percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
           };
 
-        this.days = this.site_count.map(function(d) { return  d['day_seq']})
-        this.dates = this.site_count.map(function(d) { return  d['Date']})
+        this.days = site_count.map(function(d) { return  d['day_seq']})
+        //this.dates = site_count.map(function(d) { return  d['Date']}) // was used for date ticker
         this.n_days = this.days.length
      
         // set up scales
-        this.setScales(); // axes, color, and line drawing fnu
+        this.setScales(); // axes, color, and line drawing fun
         this.makeLegend();
 
         // draw the map
@@ -212,13 +211,6 @@ export default {
         var play_container = this.d3.select("#x-line");
         this.playButton(play_container, "340","-25");
 
-        
-      },
-      createPanel(month) {
-        var tl = new TimelineMax();
-        tl.to("tl_" + month)
-        // add rest of this
-        return tl;
       },
       addButtons(time_container, time_labels){
         const self = this;
@@ -239,18 +231,9 @@ export default {
           .attr("r", 3)
           .attr("cx", function(d) { return self.xScale(d.day_seq) })
           .attr("cy", 0)
-          .attr("stroke", "black")
-          .attr("stroke-width", "1px")
-          .attr("fill", "black")
-          //.on('click', function(d, i) {
-            //self.moveTimeline(d); 
-        // })
-          /* .on('mouseover', function(d, i) {
-            self.buttonSelect(d);
-          })
-          .on('mouseout', function(d, i) {
-            self.buttonDeSelect(d);
-          }) */
+          .attr("stroke", "white")
+          .attr("stroke-width", "2px")
+          .attr("fill", this.button_color)
 
         // month labels
         button_month.selectAll(".button_name")
@@ -262,15 +245,6 @@ export default {
           .attr("y", 25)
           .text(function(d, i) { return d.month_label })
           .attr("text-align", "start")
-          //.on('click', function(d, i) {
-            //self.moveTimeline(d);
-          //})
-          /* .on('mouseover', function(d, i) {
-            self.buttonSelect(d);
-          })
-          .on('mouseout', function(d, i) {
-            self.buttonDeSelect(d);
-          }) */
 
         // filter to just year annotations for first month they appear
         var year_labels = time_labels.filter(function(el) {
@@ -388,6 +362,13 @@ export default {
         this.quant_color = this.d3.scaleThreshold()
           .domain([-40, -25, 25, 40])
           .range(this.pal_BuBr) 
+
+        // set scale for path shape
+        var quant_path = [...new Set(this.quant_peaks.map(function(d) { return d.path_quant}))];
+        
+        this.quant_path_gylph = this.d3.scaleThreshold()
+          .domain([-40, -25, 25, 40])
+          .range(quant_path.reverse()) 
 
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
@@ -695,9 +676,7 @@ export default {
         // draw the first frame of the animation
         const self = this;
 
-          // select existing paths using class - currently all drawn with D3
-          // to grab existing paths, needs to look exact same as first frame 
-          // requries dealing with sites with no data on day 1
+          // draw sites with D3
           var start = this.start;
             this.peak_grp = map_svg.selectAll("path.gwl_glyph")
               .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
@@ -709,31 +688,45 @@ export default {
              .attr("class", function(d) { return d.key })
              .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
              .attr("opacity", ".7")
-             .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
+             .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) //{ return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
 
-         // this.animateGWL(this.start); // once sites are drawn, trigger animation
       },
       animateGWL(start){
-         const self = this;
+        const self = this;
       // animate path d and fill by wy day    
-
-        if (start < 365 ){
-        this.peak_grp
-        .transition()
-        .duration(this.day_length)  // duration of each day
-        .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" })
-        .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
-        .end()
-        .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day_seq
-
+    
+        if (start < this.n_days-2){
+        
+          this.peak_grp
+            .transition()
+            .duration(this.day_length)
+            .each(function(d,i) {
+              let current_path = self.d3.select(this)
+              var today = self.quant_path_gylph(d.gwl[start])
+              var yesterday = self.quant_path_gylph(d.gwl[start-1])
+              if(today != yesterday){
+                self.animatePathD(start, current_path)
+              }
+            })
+            .end() // end is important because it waits for EVERY element to finish the transition before callback, keeps things in sync
+            .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day
         } else {
       // if it's the last day of the water year, stop animation 
-       this.peak_grp
-          .transition()
-          .duration(this.day_length)  // duration of each day
-          .attr("d", function(d) { return "M-10 0 C -10 0 0 " + d.gwl[365] + " 10 0 Z" })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[365]) })
+          this.peak_grp
+            .transition('daily_gwl')
+            .duration(this.day_length)  // duration of each day
+            .attr("d", function(d) { return self.quant_path_gylph(d.gwl[this.n_days-1]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
+            .attr("fill", function(d) { return self.quant_color(d.gwl[this.n_days-1]) })
         }
+      },
+      animatePathD(start, current_path){
+        const self = this;
+        current_path
+          .transition('daily_gwl')
+          .attr("d", function(d) { 
+            return self.quant_path_gylph(d.gwl[start])
+            })
+          .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
       }
     }
 }

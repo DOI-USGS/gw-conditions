@@ -46,6 +46,12 @@ vignettes/*.pdf
 .remake
 build/
 
+# Track indicator files for what files are one S3
+gw-conditions/*
+!gw-conditions/*.ind
+visualizations/data/*
+!visualizations/data/*.ind
+
 .DS_Store
 node_modules
 /dist
