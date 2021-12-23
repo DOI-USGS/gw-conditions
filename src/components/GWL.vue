@@ -33,8 +33,9 @@
   </section>
 </template>
 <script>
-import * as d3Base from 'd3';
+import * as d3 from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
+// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis, d3-shape, 
 
 export default {
   name: "GWLsvg",
@@ -91,7 +92,7 @@ export default {
     }
   },
   mounted(){
-      this.d3 = Object.assign(d3Base);
+      this.d3 = Object.assign(d3);
 
       // resize
       this.width = window.innerWidth - this.margin.left - this.margin.right;
