@@ -15,7 +15,7 @@
           id="title-sub"
           class="title"
         >
-        Daily groundwater levels are shown relative to the daily historic record (percentile) at each site.  
+          Groundwater levels are shown relative to the daily historic record at each site.  
         </p>
       </div>
       <div id="map-container">
@@ -29,21 +29,62 @@
           id="legend"
           preserveAspectRatio="xMinYMin meet"
           viewBox="0 0 500 100"
-          >
-          <line x1="0" x2="470" y1="25" y2="25" class="legend-line" ></line>
+        >
+          <line
+            x1="0"
+            x2="470"
+            y1="25"
+            y2="25"
+            class="legend-line"
+          />
         </svg>
-        </div>
-      <div id="line-container" >
+      </div>
+      <div id="line-container">
         <p>
           Water levels through time
         </p>
-        </div>
-       <div id="text-container">
-        <p>
-          Are groundwater levels higher or lower than usual? 
+      </div>
+      <div id="text-container">
+        <h3>
+          Changing groundwater levels 
+        </h3> 
+        <p
+          class="text"
+        >
+          Groundwater is an important natural resource that <a
+            href="https://www.usgs.gov/special-topics/water-science-school/science/public-supply-water-use"
+            target="_blank"
+          > accounts for around 33% of public water supply to homes and businesses</a>. Groundwater levels change due to both natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
+        </p>
+        <p
+          class="text"
+        >
+          The map above illustrates changes in groundwater at 3,600 wells across the U.S.. Each site shows groundwater levels relative to the daily historic record (<a
+            href="https://waterwatch.usgs.gov/ptile.html"
+            target="_blank"
+          >percentile</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. 
+        </p>
+        <p
+          class="text"
+        >
+          This animation uses groundwater data available through <a
+            href="https://waterdata.usgs.gov/nwis"
+            target="_blank"
+          >USGS</a> and the <a
+            href="https://github.com/USGS-R/dataRetrieval"
+            target="_blank"
+          >dataRetrieval package for R</a>.  
+        </p>
+        <p
+          class="text"
+        >
+          <a
+            href=""
+            target="_blank"
+          >See the latest U.S. River Conditions</a>  
         </p>
       </div>
-      </div>
+    </div>
   </section>
 </template>
 <script>
@@ -787,7 +828,12 @@ section {
 
   }
 }
-
+.text {
+  margin-top: 0.5rem;
+}
+.text:last-child {
+  margin-bottom: 0.5rem;
+}
 // drop shadow on map outline
 #bkgrd-map-grp {
   filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.35));

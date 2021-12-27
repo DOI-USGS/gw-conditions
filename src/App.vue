@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-   <!--  <HeaderUSWDSBanner /> -->
+    <!--  <HeaderUSWDSBanner /> -->
     <HeaderUSGS />
     <InternetExplorerPage v-if="isInternetExplorer" />
     <!-- an empty string in this case means the 'prod' version of the application   -->
@@ -79,11 +79,11 @@ body {
       -moz-osx-font-smoothing: grayscale;
       width: 100%;
       @media screen and (max-width: 600px) {
-        font-size: 18px;
+        font-size: 16px;
       }
       .axis_label {
         font-size: clamp(100%, 1rem + 2rem, 24px);
-        font-weight: 600;
+        font-weight: 400;
       }
   }
   h1, h2, h3 {
@@ -102,14 +102,14 @@ h1{
 h2{
   font-size: 3em;
   @media screen and (max-width: 600px) {
-    font-size: 1.5em;
+    font-size: 1.4em;
   }
 }
 h3{
   font-size: 1.5em;
   padding-top: 0em;
   @media screen and (max-width: 600px) {
-      font-size: 1.5em;
+      font-size: 1.2em;
   }  
 }
 p, text {
