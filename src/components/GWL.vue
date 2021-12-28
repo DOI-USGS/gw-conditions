@@ -37,23 +37,51 @@
             y2="25"
             class="legend-line"
           />
-          <path fill="#BF6200" d="M-10 0 C -10 0 0 45 10 0 Z" transform="translate(20, 25)" id="Verylow" class="peak_symbol"></path>
-          <path fill="#FEB100" d="M-10 0 C -10 0 0 32 10 0 Z" transform="translate(120, 25)" id="Low" class="peak_symbol"></path>
-          <path fill="#B3B3B3" d="M-10 0 C -10 0 0 15 10 0 C 10 0 0 -15 -10 0 Z" transform="translate(220, 25)" id="Normal" class="peak_symbol"></path>
-          <path fill="#2E9EC6" d="M-10 0 C -10 0 0 -32 10 0 Z" transform="translate(320, 25)" id="High" class="peak_symbol"></path>
-          <path fill="#28648A" d="M-10 0 C -10 0 0 -45 10 0 Z" transform="translate(420, 25)" id="Veryhigh" class="peak_symbol"></path>
+          <path
+            id="Verylow"
+            fill="#BF6200"
+            d="M-10 0 C -10 0 0 45 10 0 Z"
+            transform="translate(20, 25)"
+            class="peak_symbol"
+          />
+          <path
+            id="Low"
+            fill="#FEB100"
+            d="M-10 0 C -10 0 0 32 10 0 Z"
+            transform="translate(120, 25)"
+            class="peak_symbol"
+          />
+          <path
+            id="Normal"
+            fill="#B3B3B3"
+            d="M-10 0 C -10 0 0 15 10 0 C 10 0 0 -15 -10 0 Z"
+            transform="translate(220, 25)"
+            class="peak_symbol"
+          />
+          <path
+            id="High"
+            fill="#2E9EC6"
+            d="M-10 0 C -10 0 0 -32 10 0 Z"
+            transform="translate(320, 25)"
+            class="peak_symbol"
+          />
+          <path
+            id="Veryhigh"
+            fill="#28648A"
+            d="M-10 0 C -10 0 0 -45 10 0 Z"
+            transform="translate(420, 25)"
+            class="peak_symbol"
+          />
         </svg>
       </div>
       <div id="line-container">
-        
         <p>
           Groundwater sites by water level (% of sites)
         </p>
         <svg
-        id="line-chart"
-        preserveAspectRatio="xMinYMin meet"
-        >
-        </svg>
+          id="line-chart"
+          preserveAspectRatio="xMinYMin meet"
+        />
       </div>
       <div id="text-container">
         <h3>
@@ -66,7 +94,8 @@
         </p>
         <p
           class="text-content"
-        >This map animates groundwater levels at {{this.n_sites}} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
+        >
+          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
           >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The percent of sites in each water-level category is shown in the corresponding time series chart. 
@@ -88,8 +117,9 @@
           <a
             href=""
             target="_blank"
-          >See the latest U.S. River Conditions</a> and other <a href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
-          target="_blank"
+          >See the latest U.S. River Conditions</a> and other <a
+            href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
+            target="_blank"
           >data visualizations from the USGS Vizlab
           </a>.
         </p>
@@ -135,9 +165,8 @@ export default {
       n_sites: null,
       sites_list: null,
       line_height: null,
-      magin_x: 40,
+      margin_x: 40,
       isPlaying: null,
-      margin_x: null,
       font_size: '16px',
 
       // style for timeline
@@ -164,7 +193,8 @@ export default {
       this.d3 = Object.assign(d3);
 
       // resize
-      this.width = window.innerWidth*0.92;// based on margins defined in css
+      var window_line = document.getElementById('line-container')
+      this.width = window_line.clientWidth;
       this.height = window.innerHeight*.5;
       this.pal_BuBr = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
       
@@ -261,17 +291,14 @@ export default {
         this.n_days = this.days.length
 
         if (this.mobileView){
-          this.margin_x = 40;
           this.line_height = 100;
           this.font_size = '16px';
           this.label_y = 10;
         } else {
-          this.margin_x = 55;
           this.line_height = 150;
-          this.font_size = '24px';
+          this.font_size = '20px';
           this.label_y = 20;
         }
-     console.log(this.line_height)
         // set up scales
         this.setScales(); // axes, color, and line drawing fun
         this.makeLegend();
@@ -703,10 +730,9 @@ section {
 }
 #grid-container {
   display: grid;
-  max-width: 1700px;
-  width: 92vw;
+  max-width: 1600px;
+  margin: auto;
   height: auto;
-  margin-right: 0;
   vertical-align: middle;
   overflow: hidden;
   grid-template-columns: 1fr;
@@ -747,10 +773,7 @@ section {
   width: 100%;
   max-width: 700px;
   margin: auto;
-  //justify-content: center;
-  //align-items: start;
   svg{
-    //max-width: 500px;
     margin: auto;
   }
 }
@@ -778,7 +801,7 @@ section {
   margin: 0.5rem auto;
   max-width: 700px;
 }
-.text:last-child {
+.text-content:last-child {
   margin-bottom: 1rem;
 }
 // drop shadow on map outline

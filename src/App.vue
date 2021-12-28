@@ -121,15 +121,15 @@ p, text {
       }
 }
 // make svg text smaller than main text at small viewport sizes so it fits on the screen
-/* text {
-  font-size: 20px;
+text {
+  //font-size: 20px;
   @media screen and (max-width: 800px) {
         font-size: 16px;
       }
   @media screen and (max-width: 550px) {
         font-size: 13px;
       }
-   } */
+   }
    // legend text is scaled differently because the svg has a max-width property set 
 .legend-text {
   font-size: 14px;

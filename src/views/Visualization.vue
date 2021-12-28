@@ -1,7 +1,8 @@
 <template>
   <div id="visualization">
     <GWL
-    id="content" />
+      id="content"
+    />
   </div>
 </template>
 
