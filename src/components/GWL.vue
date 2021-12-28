@@ -76,7 +76,7 @@
       </div>
       <div id="line-container">
         <p>
-          Groundwater sites by water level (% of sites)
+          Groundwater sites by water level (% of sites; total = {{this.n_sites}})
         </p>
         <svg
           id="line-chart"
