@@ -290,8 +290,6 @@ export default {
         //this.dates = site_count.map(function(d) { return  d['Date']}) // was used for date ticker
         this.n_days = this.days.length
 
-        console.log(this.mobileView)
-
         if (this.mobileView){
           this.line_height = 100;
           this.font_size = '16px';
@@ -750,11 +748,16 @@ section {
   padding: 0rem;
   padding-bottom: 0px;
   margin-top: 0.5rem;
-  display: flex;
+  //display: flex;
+  //width: 100%;
+  //max-width: 1200px;
+  //margin: auto;
+  //height: auto;
   justify-content: center;
   align-items: center;
   svg.map {
     max-height: 68vh;
+    //max-width: 100vw;
   }
 }
 
