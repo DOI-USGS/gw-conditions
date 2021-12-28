@@ -30,7 +30,8 @@ targets:
     command: build_peaks_svg(
       target_name, 
       svg_width = svg_width, 
-      svg_height = svg_height)
+      svg_height = svg_height,
+      digits = 3)
     depends:
      - '2_process/out/nws_states.shp'
       

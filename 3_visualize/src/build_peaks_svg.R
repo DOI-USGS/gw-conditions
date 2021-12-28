@@ -1,9 +1,9 @@
 
-build_peaks_svg <- function(out_file, svg_width, svg_height) {
+build_peaks_svg <- function(out_file, svg_width, svg_height, digits = 6) {
   
   svg_root <- init_svg(viewbox_dims = c(0, 0, svg_width=svg_width, svg_height=svg_height))
   
-  add_background_map(svg_root, svg_width = svg_width, outline_states = FALSE)
+  add_background_map(svg_root, svg_width = svg_width, outline_states = FALSE, digits)
   
   xml2::write_xml(svg_root, file = out_file)
 }
