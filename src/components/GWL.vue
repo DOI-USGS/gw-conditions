@@ -748,16 +748,11 @@ section {
   padding: 0rem;
   padding-bottom: 0px;
   margin-top: 0.5rem;
-  //display: flex;
-  //width: 100%;
-  //max-width: 1200px;
-  //margin: auto;
-  //height: auto;
+  display: flex;
   justify-content: center;
   align-items: center;
   svg.map {
     max-height: 68vh;
-    //max-width: 100vw;
   }
 }
 
