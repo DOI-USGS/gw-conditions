@@ -7,8 +7,7 @@ add_background_map <- function(svg, svg_width, outline_states, digits) {
   
   bkgrd_grp <- xml_add_child(svg, 'g', 
                              id = "bkgrd-map-grp", 
-                             class='map-bkgrd', 
-                             style="stroke:white;stroke-width:0.2;fill:white")
+                             class='map-bkgrd')
   purrr::map(map_data$ID, function(polygon_id, map_data, svg_width) {
     d <- map_data %>% 
       filter(ID == polygon_id) %>% 
@@ -16,8 +15,7 @@ add_background_map <- function(svg, svg_width, outline_states, digits) {
       build_path(connect = TRUE)
     xml_add_child(bkgrd_grp, 'path', 
                   d = d, 
-                  class='map-bkgrd', 
-                  style="stroke:white;stroke-width:0.2;fill:white")
+                  class='map-bkgrd')
   }, map_data, svg_width)
   
 }

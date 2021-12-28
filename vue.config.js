@@ -1,6 +1,5 @@
 module.exports = {
     publicPath: '.',
-    transpileDependencies: ['vue-mapbox'],
     chainWebpack: (config) => {
         const svgRule = config.module.rule('svg');
         svgRule.uses.clear();
@@ -16,6 +15,12 @@ module.exports = {
                     { cleanupIDs: false },
                     { collapseGroups: false },
                     { removeEmptyContainers: false },
+                    { removeDoctype: false },
+                    { removeXMLProcInst: false },
+                    { removeXMLNS: false },
+                    { removeTitle: false },
+                    { removeDesc: false },
+                    { removeDimensions: false },
                   ],
                 },
               });
