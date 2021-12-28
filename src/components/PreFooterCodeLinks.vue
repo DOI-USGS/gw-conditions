@@ -5,7 +5,7 @@
       target="_blank"
       aria-label="github link"
     >See the code behind this visualization
-      <font-awesome-icon :icon="{ prefix: 'fab', iconName: 'github' }" />
+      <font-awesome-icon :icon="{ prefix: 'fab', iconName: 'github' }" /> 
     </a>
   </div>
 </template>
@@ -28,10 +28,10 @@
   #code-repository-link-container {
     display: flex;
     justify-content: right;
-    width: 96%;
+    width: 100%;
     background-color:#323333;
     margin: 0 auto;
-    padding: 0.4rem;
+    padding: 0.4rem 0rem;
     border-bottom: 2px solid #323333;
     a {
       color: white;

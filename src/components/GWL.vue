@@ -11,11 +11,6 @@
         <h3>
           Jan 1 - Dec 31, 2021
         </h3>
-<!--         <p
-          class="text"
-        >
-          Groundwater is an important natural resource held in aquifers beneath the Earth's surface. Groundwater levels change due to  natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
-        </p> -->
         <p
           id="title-sub"
           class="title"
@@ -33,20 +28,20 @@
         <svg 
           id="legend"
           preserveAspectRatio="xMinYMin meet"
-          viewBox="0 0 500 100"
+          viewBox="0 0 500 80"
         >
           <line
             x1="0"
-            x2="470"
+            x2="500"
             y1="25"
             y2="25"
             class="legend-line"
           />
           <path fill="#BF6200" d="M-10 0 C -10 0 0 45 10 0 Z" transform="translate(20, 25)" id="Verylow" class="peak_symbol"></path>
-          <path fill="#FEB100" d="M-10 0 C -10 0 0 32 10 0 Z" transform="translate(112, 25)" id="Low" class="peak_symbol"></path>
-          <path fill="#B3B3B3" d="M-10 0 C -10 0 0 15 10 0 C 10 0 0 -15 -10 0 Z" transform="translate(204, 25)" id="Normal" class="peak_symbol"></path>
-          <path fill="#2E9EC6" d="M-10 0 C -10 0 0 -32 10 0 Z" transform="translate(296, 25)" id="High" class="peak_symbol"></path>
-          <path fill="#28648A" d="M-10 0 C -10 0 0 -45 10 0 Z" transform="translate(388, 25)" id="Veryhigh" class="peak_symbol"></path>
+          <path fill="#FEB100" d="M-10 0 C -10 0 0 32 10 0 Z" transform="translate(120, 25)" id="Low" class="peak_symbol"></path>
+          <path fill="#B3B3B3" d="M-10 0 C -10 0 0 15 10 0 C 10 0 0 -15 -10 0 Z" transform="translate(220, 25)" id="Normal" class="peak_symbol"></path>
+          <path fill="#2E9EC6" d="M-10 0 C -10 0 0 -32 10 0 Z" transform="translate(320, 25)" id="High" class="peak_symbol"></path>
+          <path fill="#28648A" d="M-10 0 C -10 0 0 -45 10 0 Z" transform="translate(420, 25)" id="Veryhigh" class="peak_symbol"></path>
         </svg>
       </div>
       <div id="line-container">
@@ -65,19 +60,19 @@
           Changing groundwater levels 
         </h3> 
         <p
-          class="text"
+          class="text-content"
         >
           Groundwater is an important natural resource held in aquifers beneath the Earth's surface. Groundwater levels change due to  natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
         </p>
         <p
-          class="text"
-        >This map animates groundwater levels at {{this.n_sites}} well sites across the U.S. Groundwater levels are shown relative to the daily historic record (<a
+          class="text-content"
+        >This map animates groundwater levels at {{this.n_sites}} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
           >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The percent of sites in each water-level category is shown in the corresponding time series chart. 
         </p>
         <p
-          class="text"
+          class="text-content"
         >
           This animation uses groundwater data available through <a
             href="https://waterdata.usgs.gov/nwis"
@@ -88,7 +83,7 @@
           >dataRetrieval package for R</a>.  
         </p>
         <p
-          class="text"
+          class="text-content"
         >
           <a
             href=""
@@ -105,6 +100,7 @@
 <script>
 import * as d3 from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
+import { isMobile } from 'mobile-device-detect';
 // modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis,
 
 export default {
@@ -116,6 +112,7 @@ export default {
     return {
       publicPath: process.env.BASE_URL, // this is need for the data files in the public folder, this allows the application to find the files when on different deployment roots
       d3: null,
+      mobileVew: isMobile, // test for mobile
 
       // dimensions
       width: null,
@@ -137,9 +134,11 @@ export default {
       n_days: null,
       n_sites: null,
       sites_list: null,
-      line_height: 100,
-      x_nudge: 40,
+      line_height: null,
+      magin_x: 40,
       isPlaying: null,
+      margin_x: null,
+      font_size: '16px',
 
       // style for timeline
       button_color: "grey",
@@ -174,6 +173,13 @@ export default {
 
     },
     methods:{
+      isMobile() {
+              if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                  return true
+              } else {
+                  return false
+              }
+          },
        loadData() {
         const self = this;
         // read in data 
@@ -253,7 +259,19 @@ export default {
         this.days = site_count.map(function(d) { return  d['day_seq']})
         //this.dates = site_count.map(function(d) { return  d['Date']}) // was used for date ticker
         this.n_days = this.days.length
-     
+
+        if (this.mobileView){
+          this.margin_x = 40;
+          this.line_height = 100;
+          this.font_size = '16px';
+          this.label_y = 10;
+        } else {
+          this.margin_x = 55;
+          this.line_height = 150;
+          this.font_size = '24px';
+          this.label_y = 20;
+        }
+     console.log(this.line_height)
         // set up scales
         this.setScales(); // axes, color, and line drawing fun
         this.makeLegend();
@@ -264,6 +282,7 @@ export default {
 
         // animated time chart
         var time_container = this.d3.select("#line-container");
+
         this.drawLineChart(time_container, percData);
         this.addButtons(time_container, time_labels);
 
@@ -282,7 +301,7 @@ export default {
 
         var button_month = time_container.select('#line-chart')
           .append("g")
-          .attr("transform", "translate(" + this.x_nudge + "," + (this.line_height+this.mar/2) + ")")
+          .attr("transform", "translate(" + this.margin_x + "," + (this.line_height+this.mar/2) + ")")
 
         // month lines on timeline
         button_month.selectAll(".month_tick")
@@ -302,10 +321,14 @@ export default {
           .append("text")
           .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
           .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
-          .attr("y", 23)
+          .attr("y", (this.label_y+10))
           .text(function(d) { return d.month_label })
           .attr("text-anchor", "middle")
           .style("alignment-baseline", "top")
+          .attr("font-size", this.font_size)
+
+          this.d3.selectAll(".tick text")
+            .attr("font-size", this.font_size)
 
 
         // filter to just year annotations for first month they appear
@@ -320,10 +343,11 @@ export default {
           .append("text")
           .attr("class", function(d,i) { return "button_year button_" + d.year } ) 
           .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
-          .attr("y", 40)
+          .attr("y", (this.label_y*2+15))
           .text(function(d, i) { return d.year })
           .attr("text-anchor", "middle")
           .style("alignment-baseline", "top")
+          .attr("font-size", this.font_size)
 
       },
       drawLineChart(time_container, prop_data) {
@@ -334,7 +358,7 @@ export default {
           .attr("viewBox", "0 0 " + this.width + " " + (this.line_height+this.mar+this.mar))
           .append("g")
           .attr("id", "time-chart")
-          .attr("transform", "translate(" + this.x_nudge + "," + this.mar/2 + ")")
+          .attr("transform", "translate(" + this.margin_x + "," + this.mar/2 + ")")
 
 
         // define axes
@@ -378,9 +402,9 @@ export default {
           .data(this.days)
           .classed("hilite", true)
           .attr("width", "5")
-          .attr("height", "100")
-          .attr("opacity", 0.5)
-          .attr("fill", "grey")
+          .attr("height", this.line_height)
+          .attr("opacity", 0.9)
+          .attr("fill", "#9b6adb8e")
           .attr("x", self.xScale(this.days[this.start]))
 
         // add date ticker
@@ -410,7 +434,7 @@ export default {
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
           .domain([1, this.n_days])
-          .range([0, this.width-this.mar-20])
+          .range([0, this.width-this.margin_x])
 
         // y axis of line chart
         this.yScale = this.d3.scaleLinear()
@@ -584,12 +608,12 @@ export default {
         var legend_label_x = 30;
         
         // add categorical labels ranked from very low to very high
-        legend_peak.selectAll("mylabels")
+        legend_peak.selectAll("labels")
           .data(legend_keys)
           .enter()
           .append("text")
             .attr("y", legend_label_x+35)
-            .attr("x", function(d,i){ return 400-((390)-92*i)}) 
+            .attr("x", function(d,i){ return 400-((390)-100*i)}) 
             .text(function(d){ return d})
             .attr("text-anchor", "start")
             .style("alignment-baseline", "middle")
@@ -691,6 +715,7 @@ section {
   "legend"
   "map"
   "line"
+  "text"
 }
 #map-container{
   grid-area: map;
@@ -707,25 +732,35 @@ section {
 
 #line-container {
   grid-area: line;
+  width: 100%;
+  max-width: 700px;
+  margin: auto;
   margin-bottom: 10px;
+
+  svg{
+    overflow: visible;
+  }
 }
 
 #legend-container {
   grid-area: legend;
-  display: flex;
-  justify-content: left;
-  align-items: flex-start;
   width: 100%;
-  max-width: 500px;
-    .legend-text {
-    @media screen and (max-width: 450px) {
-        font-size: 32px;
-      }
+  max-width: 700px;
+  margin: auto;
+  //justify-content: center;
+  //align-items: start;
+  svg{
+    //max-width: 500px;
+    margin: auto;
   }
 }
 #title-container {
-  height: auto;
   grid-area: title;
+  width: 100%;
+  max-width: 700px;
+  height: auto;
+  margin: auto;
+  align-items: start;
   h1, h2{
     margin-top: 1rem;
   }
@@ -734,15 +769,21 @@ section {
 
   }
 }
-.text {
-  margin-top: 0.5rem;
+#text-container {
+  grid-area: text;
+  max-width: 700px;
+  margin: 1rem auto;
+}
+.text-content {
+  margin: 0.5rem auto;
+  max-width: 700px;
 }
 .text:last-child {
   margin-bottom: 1rem;
 }
 // drop shadow on map outline
 #bkgrd-map-grp {
-  filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.35));
+  filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.45));
   stroke-width: 0.2;
   color: white;
   fill: white;
@@ -751,63 +792,46 @@ section {
 // desktop
 /* @media (min-width:700px) {
   #grid-container {
-    margin: 50px;
     grid-template-columns: 2fr 5fr;
     grid-template-areas:
     "title map"
     "legend map"
     "line line"
   }
-  .title {
-  text-align: left;
-  }
+
   #legend-container {
     display: flex;
     justify-content: flex-start;
-    padding-left: 20px;
     align-items: start;
   }
   #line-container {
   grid-area: line;
 }
 #map-container{
-  margin-top: 50px;
-  margin-right: 20px;
   svg.map {
-    max-height: 900px;
+    //max-height: 900px;
   }
 } 
 }*/
 /* @media (min-width:1024px) {
   #grid-container {
-    margin: 50px;
     grid-template-columns: 2fr 5fr;
     grid-template-areas:
     "title map"
     "legend map"
     "line line"
   }
-  .title {
-  text-align: left;
-  margin-bottom: 0;
-  padding-bottom: 0;
-  }
   #legend-container {
     display: flex;
     justify-content: flex-start;
-    padding-left: 20px;
     align-items: start;
   }
   #line-container {
   grid-area: line;
-  padding-left: 20px;
 }
 #map-container{
-  margin-top: 0px;
-  margin-bottom: 0px;
-  margin-right: 20px;
   svg.map {
-    max-height: 75vh;
+    //max-height: 75vh;
   }
 }
 } */
