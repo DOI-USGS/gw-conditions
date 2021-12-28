@@ -11,11 +11,16 @@
         <h3>
           Jan 1 - Dec 31, 2021
         </h3>
+<!--         <p
+          class="text"
+        >
+          Groundwater is an important natural resource held in aquifers beneath the Earth's surface. Groundwater levels change due to  natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
+        </p> -->
         <p
           id="title-sub"
           class="title"
         >
-          Groundwater levels are shown relative to the daily historic record at each site.  
+          Groundwater levels relative to the historic record at each site (percentile).  
         </p>
       </div>
       <div id="map-container">
@@ -37,12 +42,24 @@
             y2="25"
             class="legend-line"
           />
+          <path fill="#BF6200" d="M-10 0 C -10 0 0 45 10 0 Z" transform="translate(20, 25)" id="Verylow" class="peak_symbol"></path>
+          <path fill="#FEB100" d="M-10 0 C -10 0 0 32 10 0 Z" transform="translate(112, 25)" id="Low" class="peak_symbol"></path>
+          <path fill="#B3B3B3" d="M-10 0 C -10 0 0 15 10 0 C 10 0 0 -15 -10 0 Z" transform="translate(204, 25)" id="Normal" class="peak_symbol"></path>
+          <path fill="#2E9EC6" d="M-10 0 C -10 0 0 -32 10 0 Z" transform="translate(296, 25)" id="High" class="peak_symbol"></path>
+          <path fill="#28648A" d="M-10 0 C -10 0 0 -45 10 0 Z" transform="translate(388, 25)" id="Veryhigh" class="peak_symbol"></path>
+          <g id="legend-text" />
         </svg>
       </div>
       <div id="line-container">
+        
         <p>
-          Water levels through time
+          Groundwater sites by water level (% of sites)
         </p>
+        <svg
+        id="line-chart"
+        preserveAspectRatio="xMinYMin meet"
+        >
+        </svg>
       </div>
       <div id="text-container">
         <h3>
@@ -51,18 +68,14 @@
         <p
           class="text"
         >
-          Groundwater is an important natural resource that <a
-            href="https://www.usgs.gov/special-topics/water-science-school/science/public-supply-water-use"
-            target="_blank"
-          > accounts for around 33% of public water supply to homes and businesses</a>. Groundwater levels change due to both natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
+          Groundwater is an important natural resource held in aquifers beneath the Earth's surface. Groundwater levels change due to  natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
         </p>
         <p
           class="text"
-        >
-          The map above illustrates changes in groundwater at 3,600 wells across the U.S.. Each site shows groundwater levels relative to the daily historic record (<a
+        >This map animates groundwater levels at {{this.n_sites}} well sites across the U.S. Groundwater levels are shown relative to the daily historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
-          >percentile</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. 
+          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The percent of sites in each water-level category is shown in the corresponding time series chart. 
         </p>
         <p
           class="text"
@@ -81,7 +94,10 @@
           <a
             href=""
             target="_blank"
-          >See the latest U.S. River Conditions</a>  
+          >See the latest U.S. River Conditions</a> and other <a href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
+          target="_blank"
+          >data visualizations from the USGS Vizlab
+          </a>.
         </p>
       </div>
     </div>
@@ -105,7 +121,6 @@ export default {
       // dimensions
       width: null,
       height: null,
-      margin: { top: 50, right: 0, bottom: 50, left: 0 },
       mar: 50,
 
       // data mgmt
@@ -121,8 +136,10 @@ export default {
       current_time: 0,
       start: 0,
       n_days: null,
+      n_sites: null,
       sites_list: null,
-      //t2: null,
+      line_height: 100,
+      x_nudge: 30,
       isPlaying: null,
 
       // style for timeline
@@ -134,7 +151,6 @@ export default {
       xScale: null,
       yScale: null,
       line: null,
-      //gwl_color: null,
 
      // Blue-Brown
       verylow: "#BF6200",
@@ -150,8 +166,8 @@ export default {
       this.d3 = Object.assign(d3);
 
       // resize
-      this.width = window.innerWidth - this.margin.left - this.margin.right;
-      this.height = window.innerHeight*.5 - this.margin.top - this.margin.bottom;
+      this.width = window.innerWidth*0.92;// based on margins defined in css
+      this.height = window.innerHeight*.5;
       this.pal_BuBr = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
       
       // read in data
@@ -205,7 +221,7 @@ export default {
 
         // sites 
         this.sites_list = site_coords.map(function(d)  { return d.site_no })
-        var n = this.sites_list.length // to create nested array for indexing in animation
+        this.n_sites = this.sites_list.length // to create nested array for indexing in animation
 
         // site placement on map
         var sites_x = site_coords.map(function(d) { return d.x })
@@ -214,7 +230,7 @@ export default {
         // reorganize - site is the key with gwl for each day of the wy
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
         var peaky = [];
-        for (i = 1; i < n; i++) {
+        for (i = 1; i < this.n_sites; i++) {
             var key = this.sites_list[i];
             var day_seq = this.date_peaks.map(function(d){  return d['day_seq']; });
             var gwl = this.date_peaks.map(function(d){  return d[key]; });
@@ -255,8 +271,8 @@ export default {
         // control animation
         this.animateLine(this.start);
         this.animateGWL(this.start);
-        var play_container = this.d3.select("#x-line");
-        this.playButton(play_container, "340","-25");
+        var play_container = this.d3.select("#line-chart");
+        //this.playButton(play_container, "340","-25");
 
       },
       addButtons(time_container, time_labels){
@@ -265,22 +281,20 @@ export default {
        // want these to be buttons that rewind the animation to the date
        // and also drive annotations to events
 
-        var button_month = time_container.select('svg')
+        var button_month = time_container.select('#line-chart')
           .append("g")
-          .attr("transform", "translate(20," + 120 + ")")
-          .attr("z-index", 100)
+          .attr("transform", "translate(" + this.x_nudge + "," + (this.line_height+this.mar/2) + ")")
 
-        // month points on timeline
-        button_month.selectAll(".button_inner")
+        // month lines on timeline
+        button_month.selectAll(".month_tick")
           .data(time_labels).enter()
-          .append("circle")
+          .append("line")
           .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
-          .attr("r", 3)
-          .attr("cx", function(d) { return self.xScale(d.day_seq) })
-          .attr("cy", 0)
-          .attr("stroke", "white")
-          .attr("stroke-width", "2px")
-          .attr("fill", this.button_color)
+          .attr("x1", function(d) { return self.xScale(d.day_seq) })
+          .attr("x2", function(d) { return self.xScale(d.day_seq) })
+          .attr("y1", 0)
+          .attr("y2", 5)
+          .attr("stroke", "black")
 
         // month labels
         button_month.selectAll(".button_name")
@@ -288,10 +302,10 @@ export default {
           .enter()
           .append("text")
           .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
-          .attr("x", function(d) { return self.xScale(d.day_seq)-10 }) // centering on pt
-          .attr("y", 25)
-          .text(function(d, i) { return d.month_label })
-          .attr("text-align", "start")
+          .attr("x", function(d) { return self.xScale(d.day_seq)-15 }) // centering on pt
+          .attr("y", 23)
+          .text(function(d) { return d.month_label })
+
 
         // filter to just year annotations for first month they appear
         var year_labels = time_labels.filter(function(el) {
@@ -304,8 +318,8 @@ export default {
           .enter()
           .append("text")
           .attr("class", function(d,i) { return "button_year button_" + d.year } ) 
-          .attr("x", function(d) { return self.xScale(d.day_seq)-10 }) // centering on pt
-          .attr("y", 45)
+          .attr("x", function(d) { return self.xScale(d.day_seq)-15 }) // centering on pt
+          .attr("y", 40)
           .text(function(d, i) { return d.year })
 
         // chart title
@@ -320,56 +334,38 @@ export default {
       drawLine(time_container, prop_data) {
         const self = this;
 
-        var line_height = 250;
-        var y_nudge = 20;
-
         // set up svg for timeline
-        var svg = time_container
-          .append("svg")
-          .attr("width", "100%")
-          .attr("preserveAspectRatio", "xMinYMin meet")
-          .attr("viewBox", "0 -20 " + this.width + " " + line_height)
-          .attr("id", "x-line")
+        var svg = time_container.select("svg")
+          .attr("viewBox", "0 0 " + this.width + " " + (this.line_height+this.mar+this.mar))
+          .append("g")
+          .attr("id", "time-chart")
+          .attr("transform", "translate(" + this.x_nudge + "," + this.mar/2 + ")")
+
 
         // define axes
         var xLine = this.d3.axisBottom()
           .scale(this.xScale)
-          .ticks(0).tickSize(0);
+          .ticks(0).tickSize(0); // add using imported label data
 
         var yLine = this.d3.axisLeft().tickFormat(this.d3.format('~%'))
           .scale(this.yScale)
           .ticks(2).tickSize(6);
 
         // draw axes
-        var xliney = svg.append("g")
+        svg.append("g")
           .call(xLine)
-          .attr("transform", "translate(20," + 120 + ")")
+          .attr("transform", "translate(0," + (this.line_height) + ")")
           .classed("liney", true)
 
-        var yliney = svg.append("g")
+        svg.append("g")
           .call(yLine)
-          .attr("transform", "translate(47," +  y_nudge + ")")
           .classed("liney", true)
-
-        // style axes
-        xliney.select("path.domain")
-          .attr("id", "timeline-x")
-          .attr("color", "black")
-          .attr("stroke-width", "2px")
-
-        yliney.select("path.domain")
-          .attr("id", "timeline-y")
-          .attr("color", "black")
-          .attr("stroke-width", "2px")
 
         // add line chart
         // line chart showing proportion of gages in each category
-        var line_chart = svg.append("g")
-          .classed("time-chart", true)
-          .attr("id", "time-legend")
-          .attr("transform", "translate(20," +  y_nudge + ")")
+        var line_chart = this.d3.select("#time-chart")
 
-        // add line chart
+        // add lines to chart
         line_chart.append("g")
           .attr("fill", "none")
           .attr("stroke-linejoin", "round")
@@ -380,10 +376,11 @@ export default {
           .attr("d", d => self.line(d.perc))
           .attr("stroke", function(d) { return self.gwl_color(d.key_quant) })
           .attr("stroke-width", "3px")
-          .attr("opacity", 0.7);
+          .attr("opacity", 0.8);
 
         // animate line to time
         line_chart.append("rect")
+          .attr("transform", "translate(" + this.x_nudge +"," + 0 + ")")
           .data(this.days)
           .classed("hilite", true)
           .attr("width", "5")
@@ -418,13 +415,13 @@ export default {
 
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
-          .domain([0, this.n_days-1])
-          .range([this.mar/2, this.width-2*this.mar])
+          .domain([1, this.n_days])
+          .range([0, this.width-this.mar])
 
         // y axis of line chart
         this.yScale = this.d3.scaleLinear()
           .domain([0, 0.6]) // this should come from the data - round up from highest proportion value
-          .range([100, 0])
+          .range([this.line_height, 0])
 
         // line drawing 
         this.line = this.d3.line()
@@ -565,7 +562,7 @@ export default {
         .attr("stroke", this.button_color)
         .attr("fill", this.button_color)
 
-      this.d3.selectAll(".button_inner")
+      this.d3.selectAll(".month_tick")
         .transition()
         .duration(100)
         .attr("stroke", this.button_color)
@@ -580,9 +577,6 @@ export default {
       makeLegend(){
         const self = this;
 
-        var legend_height = 140;
-        var legend_width = 240;
-
         // make a legend 
         var legend_peak = this.d3.select("#legend")
           .append("g")
@@ -593,98 +587,8 @@ export default {
         var perc_label = ["(0 - 0.1)", "(0.1 - 0.25)" ,"(0.25 - 0.75)", "(0.75 - 0.9)", "(0.9 - 1.0)"]
 
         // draw path shapes and labels
-        var legend_title_x = 0;
         var legend_label_x = 30;
-     /*    legend_peak
-          .append("text")
-          .text("Groundwater levels")
-          .attr("x", legend_title_x)
-          .attr("y", "20")
-          .style("font-size", "1rem")
-          .style("font-weight", 600) // matching css of .axis_labels
-          .attr("text-anchor", "start") */
-
-    /*     legend_peak
-          .append("text")
-          .text("Percentile based on historic")
-          .attr("x", legend_title_x)
-          .attr("y", "40")
-          .style("font-size", "1rem")
-          .style("font-weight", 400)
-          .attr("text-anchor", "start")
-
-          legend_peak
-          .append("text")
-          .text("daily record at each site")
-          .attr("x", legend_title_x)
-          .attr("y", "60")
-          .style("font-size", "1rem")
-          .style("font-weight", 400)
-          .attr("text-anchor", "start") */
-
-      
-        var label_end = 120; // moves legend keys and labels up and down //180
-        var label_space = 20; // spacing between legend elements
         
-        // add glyphs
-        // this is the original legend with the label stacked - the modified below makes linear for easier viewing on mobile
-/*         legend_peak.selectAll("peak_symbol")
-          .data(this.quant_peaks)
-          .enter()
-          .append("path")
-            .attr("fill", function(d){return self.gwl_color(d.quant)})
-            .attr("d", function(d){return d["path_quant"]})
-            .attr("transform", function(d, i){return "translate(" + 95 + ", " + ((label_end-8)-20*i) + ") scale(.85)"})
-            .attr("id", function(d){return d["quant"]})
-            .attr("class", "peak_symbol")
-
-        // add categorical labels ranked from very low to very high
-        legend_peak.selectAll("mylabels")
-          .data(legend_keys)
-          .enter()
-          .append("text")
-            .attr("x", legend_label_x+20)
-            .attr("y", function(d,i){ return label_end - (i*label_space)}) 
-            .text(function(d){ return d})
-            .attr("text-anchor", "end")
-            .style("alignment-baseline", "middle")
-            .style("font-weight", "600")
-            .attr("font-size", "16px")
-
-        // label percentile ranges in each category
-         legend_peak.selectAll("percLabels")
-          .data(perc_label)
-          .enter()
-          .append("text")
-            .attr("x", legend_label_x+60)
-            .attr("y", function(d,i){ return label_end - (i*label_space)}) 
-            .text(function(d){ return d})
-            .attr("text-anchor", "start")
-            .style("alignment-baseline", "middle")
-            .attr("font-size", "16px") */
-
-        // add glyphs - horizontal version
-        legend_peak.selectAll("peak_symbol")
-          .data(this.quant_peaks)
-          .enter()
-          .append("path")
-            .attr("fill", function(d){return self.gwl_color(d.quant)})
-            .attr("d", function(d){return d["path_quant"]})
-            .attr("transform", function(d, i){return "translate(" + (400-((380)-92*i)) + ", " + (25) + ")"})
-            .attr("id", function(d){return d["quant"]})
-            .attr("class", "peak_symbol")
-/* 
-        legend_peak
-          .append("line")
-            .attr("x1", 0)
-            .attr("x2", 470)
-            .attr("y1", 25)
-            .attr("y2", 25)
-            .classed("legend-line", true)
-            .attr("stroke", "grey")
- */
-
-
         // add categorical labels ranked from very low to very high
         legend_peak.selectAll("mylabels")
           .data(legend_keys)
@@ -696,10 +600,8 @@ export default {
             .attr("text-anchor", "start")
             .style("alignment-baseline", "middle")
             .style("font-weight", "600")
-            .attr("font-size", "1rem")
 
         // label percentile ranges in each category
-
          legend_peak.selectAll("percLabels")
           .data(perc_label)
           .enter()
@@ -802,7 +704,7 @@ section {
   justify-content: left;
   align-items: left;
   svg.map {
-    max-height: 650px;
+    max-height: 70vh;
   }
 }
 
@@ -814,8 +716,10 @@ section {
 #legend-container {
   grid-area: legend;
   display: flex;
-  justify-content: center;
+  justify-content: left;
   align-items: flex-start;
+  width: 100%;
+  max-width: 500px;
 }
 #title-container {
   height: auto;
@@ -928,12 +832,25 @@ text.tick {
   font-size: 1rem;
 
 }
-text.button_name {
-  font-size: 3rem;
+.month_tick {
+  stroke: black;
+  stroke-width: 2px;
+  fill: black;
+}
+.button_name, .button_year {
+  font-size: 0.7rem;
+  text-align: center;
+  text-anchor: middle;
+  dominant-baseline: top;
 }
 line.legend-line {
   stroke-dasharray: 3;
   stroke-width: 2;
   stroke: grey;
 }
+.liney {
+  color: black;
+  stroke-width: 2px;
+}
+
 </style>
