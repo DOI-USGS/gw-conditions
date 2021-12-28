@@ -15,7 +15,7 @@
           id="title-sub"
           class="title"
         >
-          Groundwater levels relative to the historic record at each site (percentile).  
+          Sites on the map animate daily groundwater levels through time. Groundwater levels are shown relative to the historic record at each site (percentile).  
         </p>
       </div>
       <div id="map-container">
@@ -73,6 +73,11 @@
             class="peak_symbol"
           />
         </svg>
+        <button 
+        id="button-play"
+        class="usa-button usa-button--outline"
+        >Play
+        </button>
       </div>
       <div id="line-container">
         <p>
@@ -311,7 +316,7 @@ export default {
         var time_container = this.d3.select("#line-container");
 
         this.drawLineChart(time_container, percData);
-        this.addButtons(time_container, time_labels);
+        this.addLabels(time_container, time_labels);
 
         // control animation
         this.animateLine(this.start);
@@ -320,7 +325,7 @@ export default {
         this.playButton(map_svg, "700","520");
 
       },
-      addButtons(time_container, time_labels){
+      addLabels(time_container, time_labels){
         const self = this;
        // timeline labels
 
@@ -720,6 +725,7 @@ export default {
 </script>
 <style scoped lang="scss">
 $dark: #323333;
+
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
 section {
@@ -772,6 +778,7 @@ section {
   max-width: 700px;
   margin: auto;
   svg{
+    max-width: 500px;
     margin: auto;
   }
 }
@@ -802,6 +809,12 @@ section {
 .text-content:last-child {
   margin-bottom: 1rem;
 }
+#button-play {
+  width: 100px;
+  height: 50px;
+  margin: auto;
+}
+
 // drop shadow on map outline
 #bkgrd-map-grp {
   filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.45));
@@ -809,7 +822,61 @@ section {
   color: white;
   fill: white;
 }
+// apply style from uswds
+.usa-button--outline {
+  background-color: #9b6adb9e;
+  box-shadow: inset 0 0 0 0px #9b6adb9e;
+  color: black;
+  appearance: none;
+  border: 0;
+  border-radius: 0.25rem;
 
+  cursor: pointer;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.75rem 1.25rem;
+  text-align: center;
+  text-decoration: none;
+  overflow: visible;
+
+}
+button, select {
+  text-transform: none;
+}
+
+button {
+    appearance: auto;
+    text-rendering: auto;
+    letter-spacing: normal;
+    word-spacing: normal;
+    line-height: normal;
+    text-transform: none;
+    text-indent: 0px;
+    text-shadow: none;
+    align-items: flex-start;
+    box-sizing: border-box;
+    margin: 0em;
+    padding: 1px 6px;
+    border-image: initial;
+}
+[type=button], [type=reset], [type=submit], button {
+    -webkit-appearance: button;
+}
+button:hover,
+button:focus {
+    background: #9b6adb9e;
+    color: black;
+}
+
+button:focus {
+    outline: 1px solid #fff;
+    outline-offset: -4px;
+}
+
+button:active {
+    transform: scale(0.99);
+}
 // desktop
 /* @media (min-width:700px) {
   #grid-container {
@@ -836,7 +903,7 @@ section {
 } */
 // glyph paths
 .pressMe:active {
-  background-color: #9b6adb8e;
+  background-color: #b57dff8e;
   box-shadow: 0 5px #666;
   transform: translateY(4px);
 }
