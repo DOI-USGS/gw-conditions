@@ -47,7 +47,6 @@
           <path fill="#B3B3B3" d="M-10 0 C -10 0 0 15 10 0 C 10 0 0 -15 -10 0 Z" transform="translate(204, 25)" id="Normal" class="peak_symbol"></path>
           <path fill="#2E9EC6" d="M-10 0 C -10 0 0 -32 10 0 Z" transform="translate(296, 25)" id="High" class="peak_symbol"></path>
           <path fill="#28648A" d="M-10 0 C -10 0 0 -45 10 0 Z" transform="translate(388, 25)" id="Veryhigh" class="peak_symbol"></path>
-          <g id="legend-text" />
         </svg>
       </div>
       <div id="line-container">
@@ -302,10 +301,10 @@ export default {
           .enter()
           .append("text")
           .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
-          .attr("x", function(d) { return self.xScale(d.day_seq)-15 }) // centering on pt
+          .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
           .attr("y", 23)
           .text(function(d) { return d.month_label })
-          .attr("text-anchor", "center")
+          .attr("text-anchor", "middle")
           .style("alignment-baseline", "top")
 
 
@@ -320,10 +319,10 @@ export default {
           .enter()
           .append("text")
           .attr("class", function(d,i) { return "button_year button_" + d.year } ) 
-          .attr("x", function(d) { return self.xScale(d.day_seq)-15 }) // centering on pt
+          .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
           .attr("y", 40)
           .text(function(d, i) { return d.year })
-          .attr("text-anchor", "center")
+          .attr("text-anchor", "middle")
           .style("alignment-baseline", "top")
 
       },
@@ -595,9 +594,10 @@ export default {
             .attr("text-anchor", "start")
             .style("alignment-baseline", "middle")
             .style("font-weight", "600")
+            .classed("legend-text", true)
 
         // label percentile ranges in each category
-         legend_peak.selectAll("percLabels")
+  /*        legend_peak.selectAll("percLabels")
           .data(perc_label)
           .enter()
           .append("text")
@@ -606,7 +606,7 @@ export default {
             .text(function(d){ return d})
             .attr("text-anchor", "start")
             .style("alignment-baseline", "middle")
-            .attr("font-size", "0.8rem")
+            .attr("font-size", "0.8rem") */
 
       },
       drawFrame1(map_svg, data){         
@@ -675,13 +675,14 @@ $dark: #323333;
 // mobile first
 section {
   width: 92vw;
-  margin: 0 4vw;
+  margin: auto;
 }
 #grid-container {
   display: grid;
-  max-width: 1920px;
+  max-width: 1700px;
   width: 92vw;
   height: auto;
+  margin-right: 0;
   vertical-align: middle;
   overflow: hidden;
   grid-template-columns: 1fr;
@@ -697,10 +698,10 @@ section {
   padding-bottom: 0px;
   margin-top: 0.5rem;
   display: flex;
-  justify-content: left;
-  align-items: left;
+  justify-content: center;
+  align-items: center;
   svg.map {
-    max-height: 70vh;
+    max-height: 68vh;
   }
 }
 
@@ -716,6 +717,11 @@ section {
   align-items: flex-start;
   width: 100%;
   max-width: 500px;
+    .legend-text {
+    @media screen and (max-width: 450px) {
+        font-size: 32px;
+      }
+  }
 }
 #title-container {
   height: auto;
@@ -732,7 +738,7 @@ section {
   margin-top: 0.5rem;
 }
 .text:last-child {
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 }
 // drop shadow on map outline
 #bkgrd-map-grp {
@@ -740,10 +746,6 @@ section {
   stroke-width: 0.2;
   color: white;
   fill: white;
-}
-// annotated timeline
-.liney {
-  stroke-width: 2px;
 }
 
 // desktop
@@ -810,10 +812,6 @@ section {
 }
 } */
 // glyph paths
-.gwl_glyph {
-  stroke: none; 
-  fill-opacity: 50%;
-}
 .pressMe:active {
   background-color: #9b6adb8e;
   box-shadow: 0 5px #666;
@@ -824,21 +822,6 @@ section {
   box-shadow: 0 1px #666;
   transform: translateY(1px);
 }
-text.tick {
-  //font-size: 1rem;
-
-}
-.month_tick {
-  stroke: black;
-  stroke-width: 2px;
-  fill: black;
-}
-/* .button_name, .button_year {
-  font-size: 0.7rem;
-  text-align: center;
-  text-anchor: middle;
-  dominant-baseline: top;
-} */
 line.legend-line {
   stroke-dasharray: 3;
   stroke-width: 2;

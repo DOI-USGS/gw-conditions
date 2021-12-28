@@ -28,7 +28,7 @@
   #code-repository-link-container {
     display: flex;
     justify-content: right;
-    width: 100%;
+    width: 96%;
     background-color:#323333;
     margin: 0 auto;
     padding: 0.4rem;

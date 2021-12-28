@@ -73,17 +73,13 @@ body {
       padding: 0;
       line-height: 1.2;
       //font-size: clamp(100%, 1rem + 2rem, 24px);
-      font-size: 24px;
-      font-weight: 400;
+      font-size: 20px;
+      font-weight: 300;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       width: 100%;
-      @media screen and (max-width: 600px) {
+      @media screen and (max-width: 800px) {
         font-size: 16px;
-      }
-      .axis_label {
-        font-size: clamp(100%, 1rem + 2rem, 24px);
-        font-weight: 400;
       }
   }
   h1, h2, h3 {
@@ -102,7 +98,7 @@ h1{
 h2{
   font-size: 3em;
   @media screen and (max-width: 600px) {
-    font-size: 1.4em;
+    font-size: 1.5em;
   }
 }
 h3{
@@ -114,10 +110,29 @@ h3{
 }
 p, text {
   padding: 0.5em 0 0 0; 
-  font-family: $open_sans;
+  font-family: $Assistant;
   font-weight: 400;
   line-height: 1.3;
   margin: 0px 0px;
+  @media screen and (max-width: 800px) {
+        font-size: 16px;
+      }
+}
+// make svg text smaller than main text at small viewport sizes so it fits on the screen
+text {
+  font-size: 18px;
+  @media screen and (max-width: 800px) {
+        font-size: 16px;
+      }
+  @media screen and (max-width: 550px) {
+        font-size: 13px;
+      }
+   }
+   // legend text is scaled differently because the svg has a max-width property set 
+.legend-text {
+    @media screen and (max-width: 550px) {
+        font-size: 20px;
+      }
 }
 
 </style>
