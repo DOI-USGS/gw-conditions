@@ -170,8 +170,8 @@ export default {
       font_size: '16px',
 
       // style for timeline
-      button_color: "grey",
-      button_hilite: "black",
+      label_color: "grey",
+      label_hilite: "black",
 
       // scales
       dates: null,
@@ -287,7 +287,7 @@ export default {
           };
 
         this.days = site_count.map(function(d) { return  d['day_seq']})
-        //this.dates = site_count.map(function(d) { return  d['Date']}) // was used for date ticker
+        this.dates = site_count.map(function(d) { return  d['Date']}) // for date ticker
         this.n_days = this.days.length
 
         if (this.mobileView){
@@ -317,24 +317,22 @@ export default {
         this.animateLine(this.start);
         this.animateGWL(this.start);
         var play_container = this.d3.select("#line-chart");
-        //this.playButton(play_container, "340","-25");
+        this.playButton(map_svg, "700","520");
 
       },
       addButtons(time_container, time_labels){
         const self = this;
-       // timeline events/"buttons"
-       // want these to be buttons that rewind the animation to the date
-       // and also drive annotations to events
+       // timeline labels
 
-        var button_month = time_container.select('#line-chart')
+        var label_month = time_container.select('#line-chart')
           .append("g")
           .attr("transform", "translate(" + this.margin_x + "," + (this.line_height+this.mar/2) + ")")
 
         // month lines on timeline
-        button_month.selectAll(".month_tick")
+        label_month.selectAll(".month_tick")
           .data(time_labels).enter()
           .append("line")
-          .attr("class", function(d,i) { return "button_inner inner_" + d.month_label + "_" + d.year } ) 
+          .attr("class", function(d,i) { return "label_inner inner_" + d.month_label + "_" + d.year } ) 
           .attr("x1", function(d) { return self.xScale(d.day_seq) })
           .attr("x2", function(d) { return self.xScale(d.day_seq) })
           .attr("y1", 0)
@@ -342,11 +340,11 @@ export default {
           .attr("stroke", "black")
 
         // month labels
-        button_month.selectAll(".button_name")
+        label_month.selectAll(".label_name")
           .data(time_labels)
           .enter()
           .append("text")
-          .attr("class", function(d,i) { return "button_name name_" + d.month_label + "_" + d.year } ) 
+          .attr("class", function(d,i) { return "label_name name_" + d.month_label + "_" + d.year } ) 
           .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
           .attr("y", (this.label_y+10))
           .text(function(d) { return d.month_label })
@@ -364,11 +362,11 @@ export default {
         });
 
         // add year labels to timeline
-        button_month.selectAll(".button_year")
+        label_month.selectAll(".label_year")
           .data(year_labels)
           .enter()
           .append("text")
-          .attr("class", function(d,i) { return "button_year button_" + d.year } ) 
+          .attr("class", function(d,i) { return "label_year label_" + d.year } ) 
           .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
           .attr("y", (this.label_y*2+15))
           .text(function(d, i) { return d.year })
@@ -422,7 +420,8 @@ export default {
           .attr("d", d => self.line(d.perc))
           .attr("stroke", function(d) { return self.gwl_color(d.key_quant) })
           .attr("stroke-width", "3px")
-          .attr("opacity", 0.8);
+          .attr("opacity", 0.8)
+
 
         // animate line to time
         line_chart.append("rect")
@@ -435,11 +434,11 @@ export default {
           .attr("x", self.xScale(this.days[this.start]))
 
         // add date ticker
-  /*      line_chart
+    /*    line_chart
         .append("text")
         .attr("class", "ticker-date") 
-        .attr("x", self.xScale(365)) // centering on pt
-        .attr("y", -10)
+        .attr("x", self.xScale(300)) // centering on pt
+        .attr("y", -30)
         .text( this.dates[this.start])
         .attr("text-anchor", "end") */
 
@@ -539,21 +538,20 @@ export default {
         self.isPlaying = false;
 
         // undim button
-        let button_rect = this.d3.selectAll(".play_button").selectAll("rect")
+        let label_rect = this.d3.selectAll(".play_button").selectAll("rect")
           .style("fill", '#9b6adb8e')
 
       },
       animateLine(start){
         // animates grey line on timeseries chart to represent current timepoint
         const self = this;
-        var line_height = 250;
         
         // set indicator for play button
         self.isPlaying = true
 
         // dim play button rectangle
-        let button_rect = this.d3.selectAll(".play_button").selectAll("rect")
-        button_rect
+        let label_rect = this.d3.selectAll(".play_button").selectAll("rect")
+        label_rect
             .style("fill", "#d6d6d6")
 
 
@@ -565,7 +563,7 @@ export default {
           .end()
           .then(() => this.animateLine(start+1))
 
-         /*  this.d3.selectAll(".ticker-date")
+        /*   this.d3.selectAll(".ticker-date")
           .transition()
             .duration(this.day_length) 
             .text(this.dates[start])
@@ -580,7 +578,7 @@ export default {
 
           // once animation has completed, reset color of play button
           // and set isPlaying to false
-          button_rect
+          label_rect
               .transition()
               .delay(this.day_length*(this.n_days-1))
               .on("end", self.resetPlayButton);
@@ -591,33 +589,33 @@ export default {
         this.d3.selectAll("." + d.name)
         .transition()
         .duration(100)
-        .attr("stroke", this.button_hilite)
+        .attr("stroke", this.label_hilite)
 
         this.d3.selectAll(".inner_" + d.name )
         .transition()
         .duration(100)
         .attr("r", 6)
-        .attr("fill", this.button_hilite)
+        .attr("fill", this.label_hilite)
       },
       buttonDeSelect(d){
         // unhighlight on mouseout
-        this.d3.selectAll(".button_name")
+        this.d3.selectAll(".label_name")
         .transition()
         .duration(100)
-        .attr("stroke", this.button_color)
-        .attr("fill", this.button_color)
+        .attr("stroke", this.label_color)
+        .attr("fill", this.label_color)
 
       this.d3.selectAll(".month_tick")
         .transition()
         .duration(100)
-        .attr("stroke", this.button_color)
-        .attr("fill", this.button_color)
+        .attr("stroke", this.label_color)
+        .attr("fill", this.label_color)
 
         this.d3.selectAll(".inner_" + d.name )
         .transition()
         .duration(100)
         .attr("r", 3)
-        .attr("fill", this.button_color)
+        .attr("fill", this.label_color)
       },
       makeLegend(){
         const self = this;
@@ -821,20 +819,11 @@ section {
     "legend map"
     "line line"
   }
-
   #legend-container {
     display: flex;
     justify-content: flex-start;
     align-items: start;
   }
-  #line-container {
-  grid-area: line;
-}
-#map-container{
-  svg.map {
-    //max-height: 900px;
-  }
-} 
 }*/
 /* @media (min-width:1024px) {
   #grid-container {
@@ -844,19 +833,6 @@ section {
     "legend map"
     "line line"
   }
-  #legend-container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: start;
-  }
-  #line-container {
-  grid-area: line;
-}
-#map-container{
-  svg.map {
-    //max-height: 75vh;
-  }
-}
 } */
 // glyph paths
 .pressMe:active {
@@ -878,5 +854,13 @@ line.legend-line {
   color: black;
   stroke-width: 2px;
 }
-
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 60px;
+  height: 28px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+}
 </style>
