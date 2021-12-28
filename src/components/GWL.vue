@@ -139,7 +139,7 @@ export default {
       n_sites: null,
       sites_list: null,
       line_height: 100,
-      x_nudge: 30,
+      x_nudge: 40,
       isPlaying: null,
 
       // style for timeline
@@ -265,7 +265,7 @@ export default {
 
         // animated time chart
         var time_container = this.d3.select("#line-container");
-        this.drawLine(time_container, percData);
+        this.drawLineChart(time_container, percData);
         this.addButtons(time_container, time_labels);
 
         // control animation
@@ -305,6 +305,8 @@ export default {
           .attr("x", function(d) { return self.xScale(d.day_seq)-15 }) // centering on pt
           .attr("y", 23)
           .text(function(d) { return d.month_label })
+          .attr("text-anchor", "center")
+          .style("alignment-baseline", "top")
 
 
         // filter to just year annotations for first month they appear
@@ -321,17 +323,11 @@ export default {
           .attr("x", function(d) { return self.xScale(d.day_seq)-15 }) // centering on pt
           .attr("y", 40)
           .text(function(d, i) { return d.year })
-
-        // chart title
-  /*       button_month
-          .append("text")
-          .attr("class", function(d,i) { return "axis_label" } ) 
-          .attr("x", function(d) { return self.xScale(1)-40 }) // centering on pt
-          .attr("y", -120)
-          .text(function(d, i) { return "Wells by groundwater level" }) */
+          .attr("text-anchor", "center")
+          .style("alignment-baseline", "top")
 
       },
-      drawLine(time_container, prop_data) {
+      drawLineChart(time_container, prop_data) {
         const self = this;
 
         // set up svg for timeline
@@ -365,7 +361,7 @@ export default {
         // line chart showing proportion of gages in each category
         var line_chart = this.d3.select("#time-chart")
 
-        // add lines to chart
+        // add percent lines to chart
         line_chart.append("g")
           .attr("fill", "none")
           .attr("stroke-linejoin", "round")
@@ -380,7 +376,6 @@ export default {
 
         // animate line to time
         line_chart.append("rect")
-          .attr("transform", "translate(" + this.x_nudge +"," + 0 + ")")
           .data(this.days)
           .classed("hilite", true)
           .attr("width", "5")
@@ -416,7 +411,7 @@ export default {
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
           .domain([1, this.n_days])
-          .range([0, this.width-this.mar])
+          .range([0, this.width-this.mar-20])
 
         // y axis of line chart
         this.yScale = this.d3.scaleLinear()
@@ -531,7 +526,7 @@ export default {
           this.d3.selectAll(".hilite")
             .transition()
             .duration(this.day_length) 
-            .attr("x", self.xScale(this.days[this.n_days-1]))
+            .attr("x", self.xScale(this.days[0]))
 
           // once animation has completed, reset color of play button
           // and set isPlaying to false
@@ -653,12 +648,13 @@ export default {
             .end() // end is important because it waits for EVERY element to finish the transition before callback, keeps things in sync
             .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day
         } else {
-      // if it's the last day of the water year, stop animation 
+      // if it's the last day of the water year, stop animation on the first frame
+
           this.peak_grp
             .transition('daily_gwl')
             .duration(this.day_length)  // duration of each day
-            .attr("d", function(d) { return self.quant_path_gylph(d.gwl[this.n_days-1]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
-            .attr("fill", function(d) { return self.quant_color(d.gwl[this.n_days-1]) })
+            .attr("d", function(d) { return self.quant_path_gylph(d.gwl[0]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
+            .attr("fill", function(d) { return self.quant_color(d.gwl[0]) })
         }
       },
       animatePathD(start, current_path){
@@ -829,7 +825,7 @@ section {
   transform: translateY(1px);
 }
 text.tick {
-  font-size: 1rem;
+  //font-size: 1rem;
 
 }
 .month_tick {
@@ -837,12 +833,12 @@ text.tick {
   stroke-width: 2px;
   fill: black;
 }
-.button_name, .button_year {
+/* .button_name, .button_year {
   font-size: 0.7rem;
   text-align: center;
   text-anchor: middle;
   dominant-baseline: top;
-}
+} */
 line.legend-line {
   stroke-dasharray: 3;
   stroke-width: 2;
