@@ -290,6 +290,8 @@ export default {
         //this.dates = site_count.map(function(d) { return  d['Date']}) // was used for date ticker
         this.n_days = this.days.length
 
+        console.log(this.mobileView)
+
         if (this.mobileView){
           this.line_height = 100;
           this.font_size = '16px';
