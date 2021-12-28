@@ -15,6 +15,12 @@ module.exports = {
                     { cleanupIDs: false },
                     { collapseGroups: false },
                     { removeEmptyContainers: false },
+                    { removeDoctype: false },
+                    { removeXMLProcInst: false },
+                    { removeXMLNS: false },
+                    { removeTitle: false },
+                    { removeDesc: false },
+                    { removeDimensions: false },
                   ],
                 },
               });
