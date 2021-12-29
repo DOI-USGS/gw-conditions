@@ -15,7 +15,7 @@
           id="title-sub"
           class="title"
         >
-          Sites on the map animate daily groundwater levels through time. Groundwater levels are shown relative to the historic record at each site (percentile).  
+          Sites on the map animate daily groundwater levels through time. Symbols show whether groundwater levels are higher or lower than the historic record at each site.  
         </p>
       </div>
       <div id="map-container">
@@ -24,6 +24,9 @@
           class="map"
         />
       </div>
+      <div
+      id="container-container"
+      >
       <div id="legend-container">
         <svg 
           id="legend"
@@ -73,12 +76,15 @@
             class="peak_symbol"
           />
         </svg>
+              </div>
+        <div id="button-container">
         <button 
         id="button-play"
         class="usa-button usa-button--outline"
         >Play
         </button>
-      </div>
+        </div>
+        </div>
       <div id="line-container">
         <p>
           Groundwater sites by water level (% of sites; total = {{this.n_sites}})
@@ -321,8 +327,8 @@ export default {
         // control animation
         this.animateLine(this.start);
         this.animateGWL(this.start);
-        var play_container = this.d3.select("#line-chart");
-        this.playButton(map_svg, "700","520");
+        //var play_container = this.d3.select("#line-chart");
+        //this.playButton(map_svg, "700","520");
 
       },
       addLabels(time_container, time_labels){
@@ -742,7 +748,7 @@ section {
   grid-template-columns: 1fr;
   grid-template-areas:
   "title"
-  "legend"
+  "container"
   "map"
   "line"
   "text"
@@ -759,7 +765,6 @@ section {
     max-height: 68vh;
   }
 }
-
 #line-container {
   grid-area: line;
   width: 100%;
@@ -771,15 +776,19 @@ section {
     overflow: visible;
   }
 }
-
 #legend-container {
-  grid-area: legend;
+  //grid-area: legend;
   width: 100%;
-  max-width: 700px;
-  margin: auto;
+  max-width: 500px;
+  float: left;
+ // margin: 0;
+  align-self: right;
+  justify-self: end;
   svg{
     max-width: 500px;
     margin: auto;
+    align-self: start;
+    justify-self: start;
   }
 }
 #title-container {
@@ -802,6 +811,24 @@ section {
   max-width: 700px;
   margin: 1rem auto;
 }
+#button-container {
+  //grid-area: button;
+  max-width: 100px;
+  height: auto;
+  float: right;
+  margin: auto;
+  text-align: right;
+  //justify-content: center;
+  //align-items: center;
+  //max-width: 200px;
+}
+#container-container {
+  grid-area: container;
+  width: 100%;
+  margin: auto;
+  max-width: 700px;
+ 
+}
 .text-content {
   margin: 0.5rem auto;
   max-width: 700px;
@@ -822,17 +849,17 @@ section {
   color: white;
   fill: white;
 }
-// apply style from uswds
+// apply button attr from uswds
 .usa-button--outline {
   background-color: #9b6adb9e;
   box-shadow: inset 0 0 0 0px #9b6adb9e;
   color: black;
   appearance: none;
   border: 0;
-  border-radius: 0.25rem;
+  border-radius: 0.35rem;
 
   cursor: pointer;
-  display: inline-block;
+  //display: inline-block;
   font-weight: 600;
   font-size: 1rem;
   padding: 0.75rem 1.25rem;
@@ -844,7 +871,6 @@ section {
 button, select {
   text-transform: none;
 }
-
 button {
     appearance: auto;
     text-rendering: auto;
@@ -871,11 +897,11 @@ button:focus {
 
 button:focus {
     outline: 1px solid #fff;
-    outline-offset: -4px;
+    outline-offset: -6px;
 }
 
 button:active {
-    transform: scale(0.99);
+    transform: scale(0.85);
 }
 // desktop
 /* @media (min-width:700px) {
