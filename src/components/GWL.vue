@@ -30,6 +30,7 @@
         class="usa-button usa-button--outline"
         >{{this.button_text}}
         </button>
+        <input type="checkbox"  class="toggle" />
         </div>
        <!--  <p
           id="map-text"
@@ -123,7 +124,7 @@ export default {
       days: null, // used to index days in sequence
 
       peak_grp: null,
-      day_length: 50, // frame duration in milliseconds
+      day_length: 30, // frame duration in milliseconds
       current_time: 0, // tracking animation timing
       n_days: null,
       n_sites: null,
@@ -288,6 +289,15 @@ export default {
         this.animateGWL(start);
 
         this.setButton();
+        // speed toggle
+        this.d3.select(".toggle")
+        .on("click", function() {
+          if(this.checked) {
+            self.day_length = 200;
+          } else {
+            self.day_length = 30;
+          }
+        })
 
       },
       formatDates(dates){
@@ -836,5 +846,51 @@ text.legend-label {
   color: black;
   stroke-width: 2px;
 }
+.toggle {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 70px;
+  height: 25px;
+  display: inline-block;
+  position: relative;
+  border-radius: 50px;
+  overflow: hidden;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  background-color: #707070;
+  transition: background-color ease 0.3s;
+}
 
+.toggle:before {
+  content: "fast slow";
+  display: block;
+  position: absolute;
+  z-index: 2;
+  width: 21px;
+  height: 21px;
+  background: #fff;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  font: 10px/28px Helvetica;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-indent: -28px;
+  word-spacing: 30px;
+  color: #fff;
+  text-shadow: -1px -1px rgba(0,0,0,0.15);
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 0.3s;
+}
+
+.toggle:checked {
+  background-color: $dark;
+}
+
+.toggle:checked:before {
+  left: 47px;
+}
 </style>
