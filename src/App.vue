@@ -130,12 +130,12 @@ text {
         font-size: 13px;
       }
    }
-   // legend text is scaled differently because the svg has a max-width property set 
+// legend text is scaled differently because the svg has a max-width property set 
 .legend-text {
-  font-size: 14px;
+ /*  font-size: 16px;
   @media screen and (max-width: 800px) {
-        font-size: 13px;
-      }
+        font-size: 20px;
+      } */
     @media screen and (max-width: 550px) {
         font-size: 20px;
       }
