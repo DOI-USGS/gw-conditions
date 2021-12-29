@@ -86,9 +86,12 @@
         </div>
         </div>
       <div id="line-container">
+        <h3>
+          Groundwater sites by water level
+        </h3>
         <p>
-          Groundwater sites by water level (% of {{this.n_sites}} sites)
-        </p>
+           ({{this.n_sites}} total sites)
+           </p>
         <svg
           id="line-chart"
           preserveAspectRatio="xMinYMin meet"
@@ -331,6 +334,7 @@ export default {
       setButton(){
         const self = this;
          // set button triggers
+         // switches between pause and play
         this.play_button
           .on("click", function(){
 
@@ -340,17 +344,11 @@ export default {
               self.d3.select("rect.hilite").interrupt("daily_line")
               // change button text
               self.button_text = "Play";
-              self.button_color = "black";
-              this.d3.select("button")
-              .attr("background-color", self.button_color)
             
             } else {
               self.animateGWL(self.current_time)
               self.animateLine(self.current_time)
               self.button_text = "Pause";
-              self.button_color = "purple";
-              this.d3.select("button")
-              .attr("background-color", self.button_color)
             }  
           })
 
@@ -725,6 +723,7 @@ section {
   width: 100%;
   margin: auto;
   max-width: 700px;
+  margin-bottom: 1rem;
  
 }
 .text-content {
@@ -734,13 +733,6 @@ section {
 .text-content:last-child {
   margin-bottom: 1rem;
 }
-#button-play {
-  width: auto;
-  max-width: 100px;
-  height: auto;
-  margin: auto;
-}
-
 // drop shadow on map outline
 #bkgrd-map-grp {
   filter: drop-shadow(0.2rem 0.2rem 0.5rem rgba(38, 49, 43, 0.45));
@@ -748,6 +740,17 @@ section {
   color: white;
   fill: white;
 }
+// pause/play button
+#button-play {
+  width: auto;
+  max-width: 100px;
+  height: auto;
+  margin: auto;
+  @media screen and (max-width: 550px) {
+        font-size: 16px;
+      }
+}
+
 // apply button attr from uswds
 .usa-button--outline {
   background-color: $dark;
@@ -758,7 +761,7 @@ section {
   cursor: pointer;
   font-weight: 600;
   font-size: 1rem;
-  padding: 0.75rem 1.25rem;
+  padding: 0.5rem 0.75rem;
   text-align: center;
   text-decoration: none;
   overflow: visible;
