@@ -39,12 +39,9 @@
         </p> -->
         </div>
       <div id="line-container">
-        <h3>
+        <!-- <h3>
           Groundwater sites by water level
-        </h3>
-        <p>
-           ({{this.n_sites}} total sites)
-           </p>
+        </h3> -->
         <svg
           id="line-chart"
           preserveAspectRatio="xMinYMin meet"
@@ -388,18 +385,28 @@ export default {
 
         var yLine = this.d3.axisLeft().tickFormat(this.d3.format('~%'))
           .scale(this.yScale)
-          .ticks(2).tickSize(6);
+          .ticks(2).tickSizeInner(4).tickSizeOuter(0);
 
         // draw axes
         svg.append("g")
           .call(xLine)
           .attr("transform", "translate(0," + (line_height) + ")")
-          .classed("liney", true)
+          .classed("axis", true)
 
         svg.append("g")
           .call(yLine)
-          .classed("liney", true)
+          .classed("axis", true)
           .attr("transform", "translate(" + margin_x + ", 0)")
+          .attr("z-index", "10")
+
+      // add a tiny box over top of axis to add better label
+        svg.append("rect")
+          .attr("width", "10")
+          .attr("height", "10")
+          .attr("x", margin_x-5)
+          .attr("y", "0")
+          .attr("fill", "rgb(223, 223, 223)")
+          .attr("z-index", "1")
 
         // add line chart showing proportion of gages in each category
         var line_chart = this.d3.select("#time-chart")
@@ -426,6 +433,22 @@ export default {
           .attr("opacity", 0.9)
           .attr("fill", "#9b6adb8e")
           .attr("x", self.xScale(this.days[0]))
+
+        // custom axis annotation
+        this.d3.select("g.tick:last-child")
+        .select("line")
+        .attr("x2", "0")
+
+        svg
+        .append("text")
+        .attr("class", "axis-text-top")
+        .text("of " + this.n_sites + " total sites")
+        .attr("text-anchor", "start")
+        .attr("font-size", "1rem")
+        .attr("x", margin_x)
+        .attr("y","0.32rem")
+        .attr("fill", "black")
+  
       },
       setScales(quant_path, line_height, margin_x){
 
@@ -803,7 +826,7 @@ text.legend-label {
   font-weight: 600;
   alignment-baseline: baseline;
 }
-.liney {
+.axis {
   color: black;
   stroke-width: 2px;
 }
