@@ -628,7 +628,7 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-$dark: #323333;
+$dark: rgba(54, 54, 54, 0.7);
 
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
@@ -735,8 +735,9 @@ section {
   margin-bottom: 1rem;
 }
 #button-play {
-  width: 100px;
-  height: 50px;
+  width: auto;
+  max-width: 100px;
+  height: auto;
   margin: auto;
 }
 
@@ -749,10 +750,10 @@ section {
 }
 // apply button attr from uswds
 .usa-button--outline {
-  background-color: black;
+  background-color: $dark;
   color: white;
   appearance: none;
-  border: 2px solid black;
+  border: 2px solid $dark;
   border-radius: 0.35rem;
   cursor: pointer;
   font-weight: 600;
@@ -779,11 +780,11 @@ button {
 }
 button:hover {
     background: white;
-    color: black;
-  box-shadow: 0 5px black;
+    color: $dark;
+  box-shadow: 0 5px $dark;
 }
 button:active {
-  background-color: black;
+  background-color: $dark;
   color: white;
   box-shadow: 0 5px white;
   transform: translateY(4px);
