@@ -22,54 +22,7 @@
       id="container-container"
       >
       <div id="legend-container">
-        <svg 
-          id="legend"
-          preserveAspectRatio="xMinYMin meet"
-          viewBox="0 0 500 80"
-        >
-          <line
-            x1="0"
-            x2="500"
-            y1="25"
-            y2="25"
-            class="legend-line"
-          />
-          <path
-            id="Verylow"
-            fill="#BF6200"
-            d="M-10 0 C -10 0 0 45 10 0 Z"
-            transform="translate(20, 25)"
-            class="peak_symbol"
-          />
-          <path
-            id="Low"
-            fill="#FEB100"
-            d="M-10 0 C -10 0 0 32 10 0 Z"
-            transform="translate(120, 25)"
-            class="peak_symbol"
-          />
-          <path
-            id="Normal"
-            fill="#B3B3B3"
-            d="M-10 0 C -10 0 0 15 10 0 C 10 0 0 -15 -10 0 Z"
-            transform="translate(220, 25)"
-            class="peak_symbol"
-          />
-          <path
-            id="High"
-            fill="#2E9EC6"
-            d="M-10 0 C -10 0 0 -32 10 0 Z"
-            transform="translate(320, 25)"
-            class="peak_symbol"
-          />
-          <path
-            id="Veryhigh"
-            fill="#28648A"
-            d="M-10 0 C -10 0 0 -45 10 0 Z"
-            transform="translate(420, 25)"
-            class="peak_symbol"
-          />
-        </svg>
+        <Legend />
               </div>
         <div id="button-container">
         <button 
@@ -78,12 +31,12 @@
         >{{this.button_text}}
         </button>
         </div>
-        <p
+       <!--  <p
           id="map-text"
           class="text-content"
         >
-          Sites on the map animate daily groundwater levels through time. Symbols show whether groundwater levels are higher or lower than the historic record at each site.  
-        </p>
+          Sites on the map animate daily groundwater levels through time. Map symbols indicate groundwater levels relative to the historic record, using percentile bins.  
+        </p> -->
         </div>
       <div id="line-container">
         <h3>
@@ -112,7 +65,7 @@
           This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
-          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The percent of sites in each water-level category is shown in the corresponding time series chart. 
+          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed on a given date. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
         <p
           class="text-content"
@@ -123,7 +76,7 @@
           >USGS</a> and the <a
             href="https://github.com/USGS-R/dataRetrieval"
             target="_blank"
-          >dataRetrieval package for R</a>.  
+          >dataRetrieval package for R</a>. All sites with a minimum of 3 years of data between 1900 and 2020 are included.
         </p>
         <p
           class="text-content"
@@ -151,7 +104,8 @@ import { isMobile } from 'mobile-device-detect';
 export default {
   name: "GWLsvg",
     components: {
-      GWLmap
+      GWLmap,
+      Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend")
     },
     data() {
     return {
@@ -189,7 +143,6 @@ export default {
       high: "#2E9EC6",
       veryhigh: "#28648A",
       pal_BuBr: null,
-      button_color: "transparent",
 
     }
   },
@@ -317,9 +270,6 @@ export default {
         var quant_path = [...new Set(quant_peaks.map(function(d) { return d.path_quant}))];
         this.setScales(quant_path, line_height, margin_x); // axes, color, and line drawing fun
 
-        // add legend
-        this.makeLegend();
-
         // draw the map
         var map_svg = this.d3.select("svg.map")
         this.drawFrame1(map_svg, peaky, start);
@@ -430,7 +380,6 @@ export default {
           .append("g")
           .attr("id", "time-chart")
           .attr("transform", "translate(" + 0 + "," + this.mar/2 + ")")
-
 
         // define axes
         var xLine = this.d3.axisBottom()
@@ -698,6 +647,7 @@ section {
     margin: auto;
     align-self: start;
     justify-self: start;
+    overflow: visible;
   }
 }
 #title-container {
@@ -832,11 +782,26 @@ button:active {
     "line line"
   }
 } */
-
+// legend styling
 line.legend-line {
   stroke-dasharray: 3;
   stroke-width: 2;
   stroke: grey;
+}
+line.legend-tick {
+  stroke-width: 2;
+  stroke: grey;
+}
+text.legend-text {
+  text-anchor: middle;
+  font-size: 0.8rem;
+  alignment-baseline: baseline;
+}
+text.legend-label {
+  text-anchor: middle;
+  font-size: 1rem;
+  font-weight: 600;
+  alignment-baseline: baseline;
 }
 .liney {
   color: black;
