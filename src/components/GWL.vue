@@ -179,6 +179,7 @@ export default {
       margin_x: 40,
       isPlaying: null,
       font_size: '16px',
+      play_button: null,
 
       // style for timeline
       label_color: "grey",
@@ -209,6 +210,8 @@ export default {
       this.height = window.innerHeight*.5;
       this.pal_BuBr = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
       
+      this.play_button = this.d3.select("#button-play")
+
       // read in data
       this.loadData();   
 
@@ -234,6 +237,7 @@ export default {
         Promise.all(promises).then(self.callback); // once it's loaded
       },
       callback(data) {
+        const self = this;
         // assign data
 
         // builds legend, has row for each category
@@ -329,6 +333,14 @@ export default {
         this.animateGWL(this.start);
         //var play_container = this.d3.select("#line-chart");
         //this.playButton(map_svg, "700","520");
+
+        this.play_button
+        .on("click", function(){
+          // interrupt running transitions
+          self.d3.selectAll("path.gwl").interrupt("daily_gwl")
+          self.d3.select("rect.hilite").interrupt("daily_line")
+ 
+        })
 
       },
       addLabels(time_container, time_labels){
@@ -568,7 +580,7 @@ export default {
 
         if (start < this.n_days){
           this.d3.selectAll(".hilite")
-          .transition()
+          .transition('daily_line')
             .duration(this.day_length) 
             .attr("x", self.xScale(this.days[start]))
           .end()
@@ -583,7 +595,7 @@ export default {
 
         } else {
           this.d3.selectAll(".hilite")
-            .transition()
+            .transition('daily_line')
             .duration(this.day_length) 
             .attr("x", self.xScale(this.days[0]))
 
@@ -682,7 +694,7 @@ export default {
 
             // draws a path for each site, using the first date
             this.peak_grp 
-             .attr("class", function(d) { return d.key })
+             .attr("class", function(d) { return "gwl " + d.key })
              .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
              .attr("opacity", ".7")
              .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) //{ return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
@@ -695,7 +707,7 @@ export default {
         if (start < this.n_days-2){
         
           this.peak_grp
-            .transition()
+            .transition('daily_gwl')
             .duration(this.day_length)
             .each(function(d,i) {
               let current_path = self.d3.select(this)
@@ -720,7 +732,7 @@ export default {
       animatePathD(start, current_path){
         const self = this;
         current_path
-          .transition('daily_gwl')
+          .transition()
           .attr("d", function(d) { 
             return self.quant_path_gylph(d.gwl[start])
             })
@@ -748,8 +760,8 @@ section {
   grid-template-columns: 1fr;
   grid-template-areas:
   "title"
-  "container"
   "map"
+  "container"
   "line"
   "text"
 }
