@@ -45,7 +45,13 @@
         <svg
           id="line-chart"
           preserveAspectRatio="xMinYMin meet"
-        />
+          aria-labelledby="chartTitleID chartDescID"
+          role="img"
+          >
+          <title id="chartTitleID">
+            A line chart showing the proportion of groundwater sites by water level through time.
+          </title><desc id="chartDescID">Five lines are drawn for the duration of the time period for sites categorized as very low, low, normal, high, and very high. Each line shows the proportion of the total groundwater sites in each category, which fluctuates through time due.</desc> 
+        </svg>
       </div>
       <div id="text-container">
         <h3>
