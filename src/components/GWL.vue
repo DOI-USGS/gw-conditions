@@ -11,12 +11,6 @@
         <h3>
           {{this.date_start}} to {{this.date_end}}
         </h3>
-        <p
-          id="title-sub"
-          class="title"
-        >
-          Sites on the map animate daily groundwater levels through time. Symbols show whether groundwater levels are higher or lower than the historic record at each site.  
-        </p>
       </div>
       <div id="map-container">
         <GWLmap
@@ -84,6 +78,12 @@
         >{{this.button_text}}
         </button>
         </div>
+        <p
+          id="map-text"
+          class="text-content"
+        >
+          Sites on the map animate daily groundwater levels through time. Symbols show whether groundwater levels are higher or lower than the historic record at each site.  
+        </p>
         </div>
       <div id="line-container">
         <h3>
@@ -305,11 +305,13 @@ export default {
           var font_size = '16px';
           var label_y = 10;
           var margin_x = 35;
+          this.mar = 25;
         } else {
           var line_height = 150;
           var font_size = '20px';
           var label_y = 20;
-          var margin_x = 40;
+          var margin_x = 50;
+          this.mar = 50;
         }
         // set up scales
         var quant_path = [...new Set(quant_peaks.map(function(d) { return d.path_quant}))];
@@ -424,7 +426,7 @@ export default {
 
         // set up svg for timeline
         var svg = time_container.select("svg")
-          .attr("viewBox", "0 0 " + this.width + " " + (line_height+this.mar+this.mar))
+          .attr("viewBox", "0 0 " + this.width + " " + (line_height+this.mar*2))
           .append("g")
           .attr("id", "time-chart")
           .attr("transform", "translate(" + 0 + "," + this.mar/2 + ")")
@@ -680,7 +682,7 @@ section {
   margin-bottom: 10px;
 
   svg{
-    overflow: visible;
+    overflow: hidden;
   }
 }
 #legend-container {
@@ -743,6 +745,9 @@ section {
 }
 .text-content:last-child {
   margin-bottom: 1rem;
+}
+#map-text {
+  display: inline-block;
 }
 // drop shadow on map outline
 #bkgrd-map-grp {
