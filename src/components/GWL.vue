@@ -81,13 +81,13 @@
         <button 
         id="button-play"
         class="usa-button usa-button--outline"
-        >Play
+        >{{this.button_text}}
         </button>
         </div>
         </div>
       <div id="line-container">
         <p>
-          Groundwater sites by water level (% of sites; total = {{this.n_sites}})
+          Groundwater sites by water level (% of {{this.n_sites}} sites)
         </p>
         <svg
           id="line-chart"
@@ -153,51 +153,37 @@ export default {
     return {
       publicPath: process.env.BASE_URL, // this is need for the data files in the public folder, this allows the application to find the files when on different deployment roots
       d3: null,
-      mobileVew: isMobile, // test for mobile
+      mobileView: isMobile, // test for mobile
 
       // dimensions
       width: null,
       height: null,
       mar: 50,
-
-      // data mgmt
-      quant_peaks: null,
-      date_peaks: null,
-      svg: null,
-      percData: null,
-      days: null,
-      quant_path_gylph: null,
+      days: null, // used to index days in sequence
 
       peak_grp: null,
-      day_length: 1, // frame duration in milliseconds
-      current_time: 0,
-      start: 0,
+      day_length: 50, // frame duration in milliseconds
+      current_time: 0, // tracking animation timing
       n_days: null,
       n_sites: null,
-      sites_list: null,
-      line_height: null,
-      margin_x: 40,
-      isPlaying: null,
-      font_size: '16px',
       play_button: null,
-
-      // style for timeline
-      label_color: "grey",
-      label_hilite: "black",
+      button_text: 'Pause',
 
       // scales
+      quant_path_gylph: null,
       dates: null,
       xScale: null,
       yScale: null,
       line: null,
 
-     // Blue-Brown
+     // Blue-Brown categorical color scale
       verylow: "#BF6200",
       low: "#FEB100",
       normal: "#B3B3B3",
       high: "#2E9EC6",
       veryhigh: "#28648A",
       pal_BuBr: null,
+      button_color: "transparent",
 
     }
   },
@@ -241,13 +227,13 @@ export default {
         // assign data
 
         // builds legend, has row for each category
-        this.quant_peaks = data[0]; 
+        var quant_peaks = data[0]; 
 
         // gwl site level timeseries data to make peak animation
         // row for each day/frame, col for each site
         // first column is the day, subsequent are named "gwl_" + site_no
         // site values are svg scaled svg positions for the animation
-        this.date_peaks = data[1]; 
+        var date_peaks = data[1]; 
 
         // site coordinates for map
         // TODO: pre-draw on map and pick up with d3
@@ -266,12 +252,12 @@ export default {
         var time_labels = data[4]; 
 
         // days in sequence
-        var day_seq = this.date_peaks.columns
+        var day_seq = date_peaks.columns
         day_seq.shift(); // drop first col with site_no
 
         // sites 
-        this.sites_list = site_coords.map(function(d)  { return d.site_no })
-        this.n_sites = this.sites_list.length // to create nested array for indexing in animation
+        var sites_list = site_coords.map(function(d)  { return d.site_no })
+        this.n_sites = sites_list.length // to create nested array for indexing in animation
 
         // site placement on map
         var sites_x = site_coords.map(function(d) { return d.x })
@@ -281,16 +267,16 @@ export default {
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
         var peaky = [];
         for (i = 1; i < this.n_sites; i++) {
-            var key = this.sites_list[i];
-            var day_seq = this.date_peaks.map(function(d){  return d['day_seq']; });
-            var gwl = this.date_peaks.map(function(d){  return d[key]; });
+            var key = sites_list[i];
+            var day_seq = date_peaks.map(function(d){  return d['day_seq']; });
+            var gwl = date_peaks.map(function(d){  return d[key]; });
             var site_x = sites_x[i];
             var site_y = sites_y[i];
             peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
         };
 
         // same for timeseries data but indexed by percentile category
-        var quant_cat = [...new Set(this.quant_peaks.map(function(d) { return d.quant}))];
+        var quant_cat = [...new Set(quant_peaks.map(function(d) { return d.quant}))];
         
         var n_quant = quant_cat.length
         var percData = [];
@@ -302,54 +288,80 @@ export default {
           };
 
         this.days = site_count.map(function(d) { return  d['day_seq']})
-        this.dates = site_count.map(function(d) { return  d['Date']}) // for date ticker
+        //this.dates = site_count.map(function(d) { return  d['Date']}) // for date ticker
         this.n_days = this.days.length
 
+        // slightly different dimensions for drawing line chart on mobile and desktop
         if (this.mobileView){
-          this.line_height = 100;
-          this.font_size = '16px';
-          this.label_y = 10;
+          var line_height = 100;
+          var font_size = '16px';
+          var label_y = 10;
+          var margin_x = 35;
         } else {
-          this.line_height = 150;
-          this.font_size = '20px';
-          this.label_y = 20;
+          var line_height = 150;
+          var font_size = '20px';
+          var label_y = 20;
+          var margin_x = 40;
         }
         // set up scales
-        this.setScales(); // axes, color, and line drawing fun
+        var quant_path = [...new Set(quant_peaks.map(function(d) { return d.path_quant}))];
+        this.setScales(quant_path, line_height, margin_x); // axes, color, and line drawing fun
+
+        // add legend
         this.makeLegend();
 
         // draw the map
         var map_svg = this.d3.select("svg.map")
-        this.drawFrame1(map_svg, peaky);
+        this.drawFrame1(map_svg, peaky, start);
 
         // animated time chart
         var time_container = this.d3.select("#line-container");
 
-        this.drawLineChart(time_container, percData);
-        this.addLabels(time_container, time_labels);
+        this.drawLineChart(time_container, percData, line_height, margin_x);
+        this.addLabels(time_container, time_labels, line_height, margin_x, font_size, label_y);
 
         // control animation
-        this.animateLine(this.start);
-        this.animateGWL(this.start);
-        //var play_container = this.d3.select("#line-chart");
-        //this.playButton(map_svg, "700","520");
+        var start = 0;
+        this.animateLine(start);
+        this.animateGWL(start);
 
-        this.play_button
-        .on("click", function(){
-          // interrupt running transitions
-          self.d3.selectAll("path.gwl").interrupt("daily_gwl")
-          self.d3.select("rect.hilite").interrupt("daily_line")
- 
-        })
+        this.setButton();
 
       },
-      addLabels(time_container, time_labels){
+      setButton(){
+        const self = this;
+         // set button triggers
+        this.play_button
+          .on("click", function(){
+
+            if (self.button_text == "Pause"){
+              // interrupt running transitions
+              self.peak_grp.interrupt("daily_gwl")
+              self.d3.select("rect.hilite").interrupt("daily_line")
+              // change button text
+              self.button_text = "Play";
+              self.button_color = "black";
+              this.d3.select("button")
+              .attr("background-color", self.button_color)
+            
+            } else {
+              self.animateGWL(self.current_time)
+              self.animateLine(self.current_time)
+              self.button_text = "Pause";
+              self.button_color = "purple";
+              this.d3.select("button")
+              .attr("background-color", self.button_color)
+            }  
+          })
+
+      },
+      addLabels(time_container, time_labels, line_height, margin_x, font_size, label_y){
         const self = this;
        // timeline labels
 
         var label_month = time_container.select('#line-chart')
           .append("g")
-          .attr("transform", "translate(" + this.margin_x + "," + (this.line_height+this.mar/2) + ")")
+          .attr("transform", "translate(" + 0+ "," + (line_height+this.mar/2) + ")")
 
         // month lines on timeline
         label_month.selectAll(".month_tick")
@@ -369,14 +381,14 @@ export default {
           .append("text")
           .attr("class", function(d,i) { return "label_name name_" + d.month_label + "_" + d.year } ) 
           .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
-          .attr("y", (this.label_y+10))
+          .attr("y", (label_y+10))
           .text(function(d) { return d.month_label })
           .attr("text-anchor", "middle")
           .style("alignment-baseline", "top")
-          .attr("font-size", this.font_size)
+          .attr("font-size", font_size)
 
           this.d3.selectAll(".tick text")
-            .attr("font-size", this.font_size)
+            .attr("font-size", font_size)
 
 
         // filter to just year annotations for first month they appear
@@ -391,22 +403,22 @@ export default {
           .append("text")
           .attr("class", function(d,i) { return "label_year label_" + d.year } ) 
           .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
-          .attr("y", (this.label_y*2+15))
+          .attr("y", (label_y*2+15))
           .text(function(d, i) { return d.year })
           .attr("text-anchor", "middle")
           .style("alignment-baseline", "top")
-          .attr("font-size", this.font_size)
+          .attr("font-size", font_size)
 
       },
-      drawLineChart(time_container, prop_data) {
+      drawLineChart(time_container, prop_data, line_height, margin_x) {
         const self = this;
 
         // set up svg for timeline
         var svg = time_container.select("svg")
-          .attr("viewBox", "0 0 " + this.width + " " + (this.line_height+this.mar+this.mar))
+          .attr("viewBox", "0 0 " + this.width + " " + (line_height+this.mar+this.mar))
           .append("g")
           .attr("id", "time-chart")
-          .attr("transform", "translate(" + this.margin_x + "," + this.mar/2 + ")")
+          .attr("transform", "translate(" + 0 + "," + this.mar/2 + ")")
 
 
         // define axes
@@ -421,15 +433,15 @@ export default {
         // draw axes
         svg.append("g")
           .call(xLine)
-          .attr("transform", "translate(0," + (this.line_height) + ")")
+          .attr("transform", "translate(0," + (line_height) + ")")
           .classed("liney", true)
 
         svg.append("g")
           .call(yLine)
           .classed("liney", true)
+          .attr("transform", "translate(" + margin_x + ", 0)")
 
-        // add line chart
-        // line chart showing proportion of gages in each category
+        // add line chart showing proportion of gages in each category
         var line_chart = this.d3.select("#time-chart")
 
         // add percent lines to chart
@@ -445,36 +457,22 @@ export default {
           .attr("stroke-width", "3px")
           .attr("opacity", 0.8)
 
-
         // animate line to time
         line_chart.append("rect")
           .data(this.days)
           .classed("hilite", true)
           .attr("width", "5")
-          .attr("height", this.line_height)
+          .attr("height", line_height)
           .attr("opacity", 0.9)
           .attr("fill", "#9b6adb8e")
-          .attr("x", self.xScale(this.days[this.start]))
-
-        // add date ticker
-    /*    line_chart
-        .append("text")
-        .attr("class", "ticker-date") 
-        .attr("x", self.xScale(300)) // centering on pt
-        .attr("y", -30)
-        .text( this.dates[this.start])
-        .attr("text-anchor", "end") */
-
+          .attr("x", self.xScale(this.days[0]))
       },
-      setScales(){
+      setScales(quant_path, line_height, margin_x){
 
         // set color scale for path fill
         this.quant_color = this.d3.scaleThreshold()
           .domain([-40, -25, 25, 40])
           .range(this.pal_BuBr) 
-
-        // set scale for path shape
-        var quant_path = [...new Set(this.quant_peaks.map(function(d) { return d.path_quant}))];
         
         this.quant_path_gylph = this.d3.scaleThreshold()
           .domain([-40, -25, 25, 40])
@@ -483,12 +481,12 @@ export default {
         // x axis of line chart
         this.xScale = this.d3.scaleLinear()
           .domain([1, this.n_days])
-          .range([0, this.width-this.margin_x])
+          .range([margin_x, this.width-(margin_x)])
 
         // y axis of line chart
         this.yScale = this.d3.scaleLinear()
           .domain([0, 0.6]) // this should come from the data - round up from highest proportion value
-          .range([this.line_height, 0])
+          .range([line_height, 0])
 
         // line drawing 
         this.line = this.d3.line()
@@ -502,81 +500,12 @@ export default {
           .range(this.pal_BuBr)
 
       },
-      playButton(svg, x, y) {
-        const self = this;
-         var svg_play = svg
-
-        var button = svg_play.append("g")
-          .attr("transform", "translate("+ x +","+ y +")")
-          .attr("class", "play_button");
-
-        button
-          .append("rect")
-          .attr("width", 100)
-          .attr("height", 40)
-          .attr("rx", 4)
-          .style("color", "black")
-          .style("fill","transparent")
-          .attr("stroke-width", "1px")
-          .classed("pressMe", true);
-
-        button
-          .append("text")
-          .text("Play")
-          .attr("x", 40)
-          .attr("y", 25)
-          .attr("font-size", "1.2rem")
-          .attr("font-weight", "600")
-
-        // append hover title
-        button
-          .append("title")
-          .text("replay")
-
-        button
-          .append("path")
-          .attr("d", "M7.5 7.5 L7.5 35 L32.5 20 Z")
-          .style("fill", "white")
-          .style("stroke", "black")
-          .attr("stroke-width", "2px");
-            
-        button.select("rect")
-          .on("mousedown", function() {
-            self.pressButton(self.isPlaying)
-          });
-      },
-      pressButton(playing) {
-        const self = this;
-
-        // trigger animation if animation is not already playing
-        if (playing == false) {
-          self.animateLine(0);
-          self.animateGWL(0);
-        }
-      },
-      resetPlayButton() {
-        const self = this;
-
-        // reset global playing variable to false now that animation is complete
-        self.isPlaying = false;
-
-        // undim button
-        let label_rect = this.d3.selectAll(".play_button").selectAll("rect")
-          .style("fill", '#9b6adb8e')
-
-      },
       animateLine(start){
         // animates grey line on timeseries chart to represent current timepoint
         const self = this;
         
-        // set indicator for play button
-        self.isPlaying = true
-
-        // dim play button rectangle
-        let label_rect = this.d3.selectAll(".play_button").selectAll("rect")
-        label_rect
-            .style("fill", "#d6d6d6")
-
+        // store time to restart at same point
+        self.current_time = start+1
 
         if (start < this.n_days){
           this.d3.selectAll(".hilite")
@@ -584,61 +513,19 @@ export default {
             .duration(this.day_length) 
             .attr("x", self.xScale(this.days[start]))
           .end()
-          .then(() => this.animateLine(start+1))
-
-        /*   this.d3.selectAll(".ticker-date")
-          .transition()
-            .duration(this.day_length) 
-            .text(this.dates[start])
-          .end()
-          .then(() => this.animateLine(start+1)) */
+          .then(() => this.animateLine(self.current_time))
 
         } else {
           this.d3.selectAll(".hilite")
             .transition('daily_line')
             .duration(this.day_length) 
             .attr("x", self.xScale(this.days[0]))
+          
+          // reset play/pause button
+          self.current_time = 0;
+          self.button_text = "Play";
 
-          // once animation has completed, reset color of play button
-          // and set isPlaying to false
-          label_rect
-              .transition()
-              .delay(this.day_length*(this.n_days-1))
-              .on("end", self.resetPlayButton);
         }
-      },
-      buttonSelect(d){
-        // highlight on timeline when hovered
-        this.d3.selectAll("." + d.name)
-        .transition()
-        .duration(100)
-        .attr("stroke", this.label_hilite)
-
-        this.d3.selectAll(".inner_" + d.name )
-        .transition()
-        .duration(100)
-        .attr("r", 6)
-        .attr("fill", this.label_hilite)
-      },
-      buttonDeSelect(d){
-        // unhighlight on mouseout
-        this.d3.selectAll(".label_name")
-        .transition()
-        .duration(100)
-        .attr("stroke", this.label_color)
-        .attr("fill", this.label_color)
-
-      this.d3.selectAll(".month_tick")
-        .transition()
-        .duration(100)
-        .attr("stroke", this.label_color)
-        .attr("fill", this.label_color)
-
-        this.d3.selectAll(".inner_" + d.name )
-        .transition()
-        .duration(100)
-        .attr("r", 3)
-        .attr("fill", this.label_color)
       },
       makeLegend(){
         const self = this;
@@ -681,30 +568,29 @@ export default {
             .attr("font-size", "0.8rem") */
 
       },
-      drawFrame1(map_svg, data){         
+      drawFrame1(map_svg, data, start){         
         // draw the first frame of the animation
         const self = this;
 
-          // draw sites with D3
-          var start = this.start;
-            this.peak_grp = map_svg.selectAll("path.gwl_glyph")
-              .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
-              .join("path") // match with selection
-              .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
+        // draw sites with D3
+          this.peak_grp = map_svg.selectAll("path.gwl_glyph")
+            .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
+            .join("path") // match with selection
+            .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
 
-            // draws a path for each site, using the first date
-            this.peak_grp 
-             .attr("class", function(d) { return "gwl " + d.key })
-             .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
-             .attr("opacity", ".7")
-             .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) //{ return "M-10 0 C -10 0 0 " + d.gwl[start] + " 10 0 Z" } ) // d.gwl.# corresponds to day of wy, starting with 0
-
+        // draws a path for each site, using the first date
+        this.peak_grp 
+          .attr("class", function(d) { return "gwl " + d.key })
+          .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
+          .attr("opacity", ".7")
+          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) 
+        
       },
       animateGWL(start){
         const self = this;
-      // animate path d and fill by wy day    
+        // animate path d and fill by wy day  
     
-        if (start < this.n_days-2){
+        if (start < this.n_days-1){
         
           this.peak_grp
             .transition('daily_gwl')
@@ -718,7 +604,7 @@ export default {
               }
             })
             .end() // end is important because it waits for EVERY element to finish the transition before callback, keeps things in sync
-            .then(() => this.animateGWL(start+1)) // loop animation increasing by 1 day
+            .then(() => this.animateGWL(self.current_time)) // loop animation increasing by 1 day
         } else {
       // if it's the last day of the water year, stop animation on the first frame
 
@@ -863,15 +749,12 @@ section {
 }
 // apply button attr from uswds
 .usa-button--outline {
-  background-color: #9b6adb9e;
-  box-shadow: inset 0 0 0 0px #9b6adb9e;
-  color: black;
+  background-color: black;
+  color: white;
   appearance: none;
-  border: 0;
+  border: 2px solid black;
   border-radius: 0.35rem;
-
   cursor: pointer;
-  //display: inline-block;
   font-weight: 600;
   font-size: 1rem;
   padding: 0.75rem 1.25rem;
@@ -880,40 +763,30 @@ section {
   overflow: visible;
 
 }
-button, select {
-  text-transform: none;
-}
 button {
     appearance: auto;
     text-rendering: auto;
     letter-spacing: normal;
     word-spacing: normal;
     line-height: normal;
-    text-transform: none;
-    text-indent: 0px;
-    text-shadow: none;
-    align-items: flex-start;
+    align-items: center;
     box-sizing: border-box;
     margin: 0em;
-    padding: 1px 6px;
-    border-image: initial;
+    padding: 1px 4px;
 }
 [type=button], [type=reset], [type=submit], button {
     -webkit-appearance: button;
 }
-button:hover,
-button:focus {
-    background: #9b6adb9e;
+button:hover {
+    background: white;
     color: black;
+  box-shadow: 0 5px black;
 }
-
-button:focus {
-    outline: 1px solid #fff;
-    outline-offset: -6px;
-}
-
 button:active {
-    transform: scale(0.85);
+  background-color: black;
+  color: white;
+  box-shadow: 0 5px white;
+  transform: translateY(4px);
 }
 // desktop
 /* @media (min-width:700px) {
@@ -939,17 +812,7 @@ button:active {
     "line line"
   }
 } */
-// glyph paths
-.pressMe:active {
-  background-color: #b57dff8e;
-  box-shadow: 0 5px #666;
-  transform: translateY(4px);
-}
-.pressMe:hover {
-  background-color: #b996e78e;
-  box-shadow: 0 1px #666;
-  transform: translateY(1px);
-}
+
 line.legend-line {
   stroke-dasharray: 3;
   stroke-width: 2;
@@ -959,13 +822,5 @@ line.legend-line {
   color: black;
   stroke-width: 2px;
 }
-div.tooltip {
-  position: absolute;
-  text-align: center;
-  width: 60px;
-  height: 28px;
-  padding: 2px;
-  font: 12px sans-serif;
-  background: lightsteelblue;
-}
+
 </style>
