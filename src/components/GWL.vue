@@ -9,7 +9,7 @@
           U.S. Groundwater Conditions
         </h2>
         <h3>
-          Jan 1 - Dec 31, 2021
+          {{this.date_start}} to {{this.date_end}}
         </h3>
         <p
           id="title-sub"
@@ -145,7 +145,8 @@
 import * as d3 from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { isMobile } from 'mobile-device-detect';
-// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis,
+// TODO: load only used d3 modules
+// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis, d3-time-format
 
 export default {
   name: "GWLsvg",
@@ -171,6 +172,8 @@ export default {
       n_sites: null,
       play_button: null,
       button_text: 'Pause',
+      date_start: null,
+      date_end: null,
 
       // scales
       quant_path_gylph: null,
@@ -290,10 +293,12 @@ export default {
           percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
           };
 
+        // managing dates and time sequencing
         this.days = site_count.map(function(d) { return  d['day_seq']})
-        //this.dates = site_count.map(function(d) { return  d['Date']}) // for date ticker
         this.n_days = this.days.length
-
+        var dates = site_count.map(function(d) { return  d['Date']}) 
+        this.formatDates(dates);
+        
         // slightly different dimensions for drawing line chart on mobile and desktop
         if (this.mobileView){
           var line_height = 100;
@@ -317,9 +322,8 @@ export default {
         var map_svg = this.d3.select("svg.map")
         this.drawFrame1(map_svg, peaky, start);
 
-        // animated time chart
+        // animated timeseries line chart
         var time_container = this.d3.select("#line-container");
-
         this.drawLineChart(time_container, percData, line_height, margin_x);
         this.addLabels(time_container, time_labels, line_height, margin_x, font_size, label_y);
 
@@ -329,6 +333,13 @@ export default {
         this.animateGWL(start);
 
         this.setButton();
+
+      },
+      formatDates(dates){
+
+        const formatTime = this.d3.utcFormat("%b %e, %Y");
+        this.date_start = formatTime(new Date(dates[0]));
+        this.date_end = formatTime(new Date(dates[this.n_days-1]));
 
       },
       setButton(){
