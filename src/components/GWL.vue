@@ -11,12 +11,12 @@
         <h3>
           Jan 1 - Dec 31, 2021
         </h3>
-        <p
+   <!--      <p
           id="title-sub"
           class="title"
         >
           Sites on the map animate daily groundwater levels through time. Symbols show whether groundwater levels are higher or lower than the historic record at each site.  
-        </p>
+        </p> -->
       </div>
       <div id="map-container">
         <GWLmap
@@ -649,6 +649,28 @@ section {
   "line"
   "text"
 }
+// desktop
+@media (min-width:700px) {
+  #grid-container {
+    grid-template-columns: 2fr 5fr;
+    grid-template-areas:
+    "title map"
+    "container map"
+    "text line"
+  }
+  #legend-container {
+
+  }
+}
+ @media (min-width:1024px) {
+  #grid-container {
+    grid-template-columns: 5fr 5fr;
+    grid-template-areas:
+    "title container"
+    "map map"
+    "text line"
+  }
+}
 #map-container{
   grid-area: map;
   padding: 0rem;
@@ -792,30 +814,6 @@ button:active {
   box-shadow: 0 5px white;
   transform: translateY(4px);
 }
-// desktop
-/* @media (min-width:700px) {
-  #grid-container {
-    grid-template-columns: 2fr 5fr;
-    grid-template-areas:
-    "title map"
-    "legend map"
-    "line line"
-  }
-  #legend-container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: start;
-  }
-}*/
-/* @media (min-width:1024px) {
-  #grid-container {
-    grid-template-columns: 2fr 5fr;
-    grid-template-areas:
-    "title map"
-    "legend map"
-    "line line"
-  }
-} */
 
 line.legend-line {
   stroke-dasharray: 3;
