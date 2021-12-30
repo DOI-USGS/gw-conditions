@@ -9,9 +9,9 @@
           U.S. Groundwater Conditions
         </h2>
         <h3>
-          {{this.date_start}} to {{this.date_end}}
+          {{ this.date_start }} to {{ this.date_end }}
         </h3>
-   <!--      <p
+        <!--      <p
           id="title-sub"
           class="title"
         >
@@ -24,88 +24,99 @@
           class="map"
         />
       </div>
-      <div
+      <!--      <div
       id="container-container"
-      >
+      > -->
       <div id="legend-container">
         <Legend />
-              </div>
-        <div id="button-container">
+      </div>
+      <div id="button-container">
         <button 
-        id="button-play"
-        class="usa-button usa-button--outline"
-        >{{this.button_text}}
+          id="button-play"
+          class="usa-button usa-button--outline"
+        >
+          {{ this.button_text }}
         </button>
-        <input type="checkbox"  class="toggle" />
-        </div>
-       <!--  <p
+        <input
+          type="checkbox"
+          class="toggle"
+        >
+      </div>
+      <!--  <p
           id="map-text"
           class="text-content"
         >
           Sites on the map animate daily groundwater levels through time. Map symbols indicate groundwater levels relative to the historic record, using percentile bins.  
         </p> -->
-        </div>
-      <div id="line-container">
-        <!-- <h3>
+    <!-- </div> -->
+    <div id="line-container">
+      <!-- <h3>
           Groundwater sites by water level
         </h3> -->
-        <svg
-          id="line-chart"
-          preserveAspectRatio="xMinYMin meet"
-          aria-labelledby="chartTitleID chartDescID"
-          role="img"
-          >
-          <title id="chartTitleID">
-            A line chart showing the proportion of groundwater sites by water level through time.
-          </title><desc id="chartDescID">Five lines are drawn for the duration of the time period for sites categorized as very low, low, normal, high, and very high. Each line shows the proportion of the total groundwater sites in each category, which fluctuates through time due.</desc> 
-        </svg>
-      </div>
-      <div id="text-container">
-        <h3>
+      <svg
+        id="line-chart"
+        preserveAspectRatio="xMinYMin meet"
+        aria-labelledby="chartTitleID chartDescID"
+        role="img"
+      >
+        <title id="chartTitleID">
+          A line chart showing the proportion of groundwater sites by water level through time.
+        </title><desc id="chartDescID">Five lines are drawn for the duration of the time period for sites categorized as very low, low, normal, high, and very high. Each line shows the proportion of the total groundwater sites in each category, which fluctuates through time due.</desc> 
+      </svg>
+    </div>
+    <div id="text-container">
+      <!--       <h3>
           Changing groundwater levels 
-        </h3> 
-        <p
+        </h3>  -->
+      <!--     <p
           class="text-content"
         >
           Groundwater is an important natural resource held in aquifers beneath the Earth's surface. Groundwater levels change due to  natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
-        </p>
-        <p
+        </p> -->
+      <!--        <p
           class="text-content"
         >
           This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
           >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed on a given date. The corresponding time series chart shows the percent of sites in each water-level category through time. 
-        </p>
-        <p
-          class="text-content"
-        >
-          This animation uses groundwater data available through <a
-            href="https://waterdata.usgs.gov/nwis"
-            target="_blank"
-          >USGS</a> and the <a
-            href="https://github.com/USGS-R/dataRetrieval"
-            target="_blank"
-          >dataRetrieval package for R</a>. All sites with a minimum of 3 years of data between 1900 and 2020 are included.
-        </p>
-        <p
-          class="text-content"
-        >
-          <a
-            href=""
-            target="_blank"
-          >See the latest U.S. River Conditions</a> and other <a
-            href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
-            target="_blank"
-          >data visualizations from the USGS Vizlab
-          </a>.
-        </p>
-      </div>
+        </p> -->
+      <p
+        class="text-content"
+      >
+        This animation uses groundwater data available through <a
+          href="https://waterdata.usgs.gov/nwis"
+          target="_blank"
+        >USGS</a> and the <a
+          href="https://github.com/USGS-R/dataRetrieval"
+          target="_blank"
+        >dataRetrieval package for R</a>. All sites with a minimum of 3 years of data between 1900 and 2020 are included.
+      </p>
+      <p
+        class="text-content"
+      >
+        <a
+          href=""
+          target="_blank"
+        >See the latest U.S. River Conditions</a> and other <a
+          href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
+          target="_blank"
+        >data visualizations from the USGS Vizlab
+        </a>.
+      </p>
+    </div>
     </div>
   </section>
 </template>
 <script>
-import * as d3 from 'd3';
+//import * as d3 from 'd3';
+import {select, selectAll } from 'd3-selection';
+import { scaleLinear, scaleThreshold, scaleOrdinal } from 'd3-scale';
+import * as d3Trans from 'd3-transition';
+import { utcFormat } from 'd3-time-format';
+import { axisBottom, axisLeft } from 'd3-axis';
+import { csv } from 'd3-fetch';
+import { line, path , format} from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { isMobile } from 'mobile-device-detect';
 // TODO: load only used d3 modules
@@ -157,7 +168,7 @@ export default {
     }
   },
   mounted(){
-      this.d3 = Object.assign(d3);
+      this.d3 = Object.assign({d3Trans, scaleLinear, scaleThreshold, scaleOrdinal, select, selectAll, csv, utcFormat, line, path, axisBottom, axisLeft, format  });
 
       // resize
       var window_line = document.getElementById('line-container')
@@ -638,12 +649,13 @@ $dark: rgba(54, 54, 54, 0.7);
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
 section {
-  width: 92vw;
+  width: 90vw;
   margin: auto;
 }
 #grid-container {
   display: grid;
-  max-width: 1600px;
+  min-height: 95vh;
+  max-width: 2900px;
   margin: auto;
   height: auto;
   vertical-align: middle;
@@ -652,32 +664,24 @@ section {
   grid-template-areas:
   "title"
   "map"
-  "container"
+  "legend"
+  "buttons"
   "line"
   "text"
 }
 // desktop
-@media (min-width:700px) {
-  #grid-container {
-    grid-template-columns: 2fr 5fr;
-    grid-template-areas:
-    "title map"
-    "container map"
-    "text line"
-  }
-  #legend-container {
 
-  }
-}
- @media (min-width:1024px) {
+ @media (min-width:1200px) {
   #grid-container {
-    grid-template-columns: 5fr 5fr;
+    min-height: 95vh;
+    grid-template-columns: 3fr 6fr;
     grid-template-areas:
     "title container"
-    "map map"
-    "text line"
+    "line map"
+    "text map"
   }
 }
+
 #map-container{
   grid-area: map;
   padding: 0rem;
@@ -895,5 +899,21 @@ text.legend-label {
 
 .toggle:checked:before {
   left: 47px;
+}
+// alternative layouts
+@media (min-width:1800px) {
+  #grid-container {
+    min-height: 95vh;
+    grid-template-columns: 3fr 7fr;
+    grid-template-areas:
+    "title title"
+    "container map"
+    "line map"
+    "text map"
+    ". ."
+  }
+  #title-container {
+    justify-self: start;
+  }
 }
 </style>
