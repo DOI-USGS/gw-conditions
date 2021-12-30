@@ -9,7 +9,7 @@
           U.S. Groundwater Conditions
         </h2>
         <h3>
-          Jan 1 - Dec 31, 2021
+          {{this.date_start}} to {{this.date_end}}
         </h3>
    <!--      <p
           id="title-sub"
@@ -28,54 +28,7 @@
       id="container-container"
       >
       <div id="legend-container">
-        <svg 
-          id="legend"
-          preserveAspectRatio="xMinYMin meet"
-          viewBox="0 0 500 80"
-        >
-          <line
-            x1="0"
-            x2="500"
-            y1="25"
-            y2="25"
-            class="legend-line"
-          />
-          <path
-            id="Verylow"
-            fill="#BF6200"
-            d="M-10 0 C -10 0 0 45 10 0 Z"
-            transform="translate(20, 25)"
-            class="peak_symbol"
-          />
-          <path
-            id="Low"
-            fill="#FEB100"
-            d="M-10 0 C -10 0 0 32 10 0 Z"
-            transform="translate(120, 25)"
-            class="peak_symbol"
-          />
-          <path
-            id="Normal"
-            fill="#B3B3B3"
-            d="M-10 0 C -10 0 0 15 10 0 C 10 0 0 -15 -10 0 Z"
-            transform="translate(220, 25)"
-            class="peak_symbol"
-          />
-          <path
-            id="High"
-            fill="#2E9EC6"
-            d="M-10 0 C -10 0 0 -32 10 0 Z"
-            transform="translate(320, 25)"
-            class="peak_symbol"
-          />
-          <path
-            id="Veryhigh"
-            fill="#28648A"
-            d="M-10 0 C -10 0 0 -45 10 0 Z"
-            transform="translate(420, 25)"
-            class="peak_symbol"
-          />
-        </svg>
+        <Legend />
               </div>
         <div id="button-container">
         <button 
@@ -83,19 +36,29 @@
         class="usa-button usa-button--outline"
         >{{this.button_text}}
         </button>
+        <input type="checkbox"  class="toggle" />
         </div>
+       <!--  <p
+          id="map-text"
+          class="text-content"
+        >
+          Sites on the map animate daily groundwater levels through time. Map symbols indicate groundwater levels relative to the historic record, using percentile bins.  
+        </p> -->
         </div>
       <div id="line-container">
-        <h3>
+        <!-- <h3>
           Groundwater sites by water level
-        </h3>
-        <p>
-           ({{this.n_sites}} total sites)
-           </p>
+        </h3> -->
         <svg
           id="line-chart"
           preserveAspectRatio="xMinYMin meet"
-        />
+          aria-labelledby="chartTitleID chartDescID"
+          role="img"
+          >
+          <title id="chartTitleID">
+            A line chart showing the proportion of groundwater sites by water level through time.
+          </title><desc id="chartDescID">Five lines are drawn for the duration of the time period for sites categorized as very low, low, normal, high, and very high. Each line shows the proportion of the total groundwater sites in each category, which fluctuates through time due.</desc> 
+        </svg>
       </div>
       <div id="text-container">
         <h3>
@@ -112,7 +75,7 @@
           This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
-          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The percent of sites in each water-level category is shown in the corresponding time series chart. 
+          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed on a given date. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
         <p
           class="text-content"
@@ -123,7 +86,7 @@
           >USGS</a> and the <a
             href="https://github.com/USGS-R/dataRetrieval"
             target="_blank"
-          >dataRetrieval package for R</a>.  
+          >dataRetrieval package for R</a>. All sites with a minimum of 3 years of data between 1900 and 2020 are included.
         </p>
         <p
           class="text-content"
@@ -145,12 +108,14 @@
 import * as d3 from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { isMobile } from 'mobile-device-detect';
-// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis,
+// TODO: load only used d3 modules
+// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis, d3-time-format
 
 export default {
   name: "GWLsvg",
     components: {
-      GWLmap
+      GWLmap,
+      Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend")
     },
     data() {
     return {
@@ -165,12 +130,14 @@ export default {
       days: null, // used to index days in sequence
 
       peak_grp: null,
-      day_length: 50, // frame duration in milliseconds
+      day_length: 30, // frame duration in milliseconds
       current_time: 0, // tracking animation timing
       n_days: null,
       n_sites: null,
       play_button: null,
       button_text: 'Pause',
+      date_start: null,
+      date_end: null,
 
       // scales
       quant_path_gylph: null,
@@ -186,7 +153,6 @@ export default {
       high: "#2E9EC6",
       veryhigh: "#28648A",
       pal_BuBr: null,
-      button_color: "transparent",
 
     }
   },
@@ -290,36 +256,36 @@ export default {
           percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
           };
 
+        // managing dates and time sequencing
         this.days = site_count.map(function(d) { return  d['day_seq']})
-        //this.dates = site_count.map(function(d) { return  d['Date']}) // for date ticker
         this.n_days = this.days.length
-
+        var dates = site_count.map(function(d) { return  d['Date']}) 
+        this.formatDates(dates);
+        
         // slightly different dimensions for drawing line chart on mobile and desktop
         if (this.mobileView){
           var line_height = 100;
           var font_size = '16px';
           var label_y = 10;
           var margin_x = 35;
+          this.mar = 25;
         } else {
           var line_height = 150;
           var font_size = '20px';
           var label_y = 20;
-          var margin_x = 40;
+          var margin_x = 50;
+          this.mar = 50;
         }
         // set up scales
         var quant_path = [...new Set(quant_peaks.map(function(d) { return d.path_quant}))];
         this.setScales(quant_path, line_height, margin_x); // axes, color, and line drawing fun
 
-        // add legend
-        this.makeLegend();
-
         // draw the map
         var map_svg = this.d3.select("svg.map")
         this.drawFrame1(map_svg, peaky, start);
 
-        // animated time chart
+        // animated timeseries line chart
         var time_container = this.d3.select("#line-container");
-
         this.drawLineChart(time_container, percData, line_height, margin_x);
         this.addLabels(time_container, time_labels, line_height, margin_x, font_size, label_y);
 
@@ -329,6 +295,22 @@ export default {
         this.animateGWL(start);
 
         this.setButton();
+        // speed toggle
+        this.d3.select(".toggle")
+        .on("click", function() {
+          if(this.checked) {
+            self.day_length = 200;
+          } else {
+            self.day_length = 30;
+          }
+        })
+
+      },
+      formatDates(dates){
+
+        const formatTime = this.d3.utcFormat("%b %e, %Y");
+        this.date_start = formatTime(new Date(dates[0]));
+        this.date_end = formatTime(new Date(dates[this.n_days-1]));
 
       },
       setButton(){
@@ -413,11 +395,10 @@ export default {
 
         // set up svg for timeline
         var svg = time_container.select("svg")
-          .attr("viewBox", "0 0 " + this.width + " " + (line_height+this.mar+this.mar))
+          .attr("viewBox", "0 0 " + this.width + " " + (line_height+this.mar*2))
           .append("g")
           .attr("id", "time-chart")
           .attr("transform", "translate(" + 0 + "," + this.mar/2 + ")")
-
 
         // define axes
         var xLine = this.d3.axisBottom()
@@ -426,18 +407,28 @@ export default {
 
         var yLine = this.d3.axisLeft().tickFormat(this.d3.format('~%'))
           .scale(this.yScale)
-          .ticks(2).tickSize(6);
+          .ticks(2).tickSizeInner(4).tickSizeOuter(0);
 
         // draw axes
         svg.append("g")
           .call(xLine)
           .attr("transform", "translate(0," + (line_height) + ")")
-          .classed("liney", true)
+          .classed("axis", true)
 
         svg.append("g")
           .call(yLine)
-          .classed("liney", true)
+          .classed("axis", true)
           .attr("transform", "translate(" + margin_x + ", 0)")
+          .attr("z-index", "10")
+
+      // add a tiny box over top of axis to add better label
+        svg.append("rect")
+          .attr("width", "10")
+          .attr("height", "10")
+          .attr("x", margin_x-5)
+          .attr("y", "0")
+          .attr("fill", "rgb(223, 223, 223)")
+          .attr("z-index", "1")
 
         // add line chart showing proportion of gages in each category
         var line_chart = this.d3.select("#time-chart")
@@ -464,6 +455,22 @@ export default {
           .attr("opacity", 0.9)
           .attr("fill", "#9b6adb8e")
           .attr("x", self.xScale(this.days[0]))
+
+        // custom axis annotation
+        this.d3.select("g.tick:last-child")
+        .select("line")
+        .attr("x2", "0")
+
+        svg
+        .append("text")
+        .attr("class", "axis-text-top")
+        .text("of " + this.n_sites + " total sites")
+        .attr("text-anchor", "start")
+        .attr("font-size", "1rem")
+        .attr("x", margin_x)
+        .attr("y","0.32rem")
+        .attr("fill", "black")
+  
       },
       setScales(quant_path, line_height, margin_x){
 
@@ -691,7 +698,7 @@ section {
   margin-bottom: 10px;
 
   svg{
-    overflow: visible;
+    overflow: hidden;
   }
 }
 #legend-container {
@@ -707,6 +714,7 @@ section {
     margin: auto;
     align-self: start;
     justify-self: start;
+    overflow: visible;
   }
 }
 #title-container {
@@ -754,6 +762,9 @@ section {
 }
 .text-content:last-child {
   margin-bottom: 1rem;
+}
+#map-text {
+  display: inline-block;
 }
 // drop shadow on map outline
 #bkgrd-map-grp {
@@ -814,15 +825,75 @@ button:active {
   box-shadow: 0 5px white;
   transform: translateY(4px);
 }
-
 line.legend-line {
   stroke-dasharray: 3;
   stroke-width: 2;
   stroke: grey;
 }
-.liney {
+line.legend-tick {
+  stroke-width: 2;
+  stroke: grey;
+}
+text.legend-text {
+  text-anchor: middle;
+  font-size: 0.8rem;
+  alignment-baseline: baseline;
+}
+text.legend-label {
+  text-anchor: middle;
+  font-size: 1rem;
+  font-weight: 600;
+  alignment-baseline: baseline;
+}
+.axis {
   color: black;
   stroke-width: 2px;
 }
+.toggle {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 70px;
+  height: 25px;
+  display: inline-block;
+  position: relative;
+  border-radius: 50px;
+  overflow: hidden;
+  outline: none;
+  border: none;
+  cursor: pointer;
+  background-color: #707070;
+  transition: background-color ease 0.3s;
+}
 
+.toggle:before {
+  content: "fast slow";
+  display: block;
+  position: absolute;
+  z-index: 2;
+  width: 21px;
+  height: 21px;
+  background: #fff;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  font: 10px/28px Helvetica;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-indent: -28px;
+  word-spacing: 30px;
+  color: #fff;
+  text-shadow: -1px -1px rgba(0,0,0,0.15);
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 0.3s;
+}
+
+.toggle:checked {
+  background-color: $dark;
+}
+
+.toggle:checked:before {
+  left: 47px;
+}
 </style>

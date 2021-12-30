@@ -31,7 +31,9 @@ targets:
       target_name, 
       svg_width = svg_width, 
       svg_height = svg_height,
-      digits = 3)
+      digits = 3,
+      aria_title,
+      aria_desc)
     depends:
      - '2_process/out/nws_states.shp'
       

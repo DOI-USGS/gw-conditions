@@ -86,6 +86,10 @@ targets:
     command: I(700)
   scico_palette:
     command: c(I('roma'))
+  aria_title:
+    command: c(I('An animated map of groundwater levels across the United States and territories'))
+  aria_desc:
+    command: c(I('Over 3500 USGS well locations across the U.S. are animated through time to show daily groundwater levels compared to the past record. For each site, an arrow-like gylph reflects whether current groundwater levels are higher or lower than has been recorded before, using percentiles binned into 5 range categories; very low, low, normal, high, and very high. The animation is different depending on the given time range.'))
     
 ##-- Animate configs --##
   

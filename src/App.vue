@@ -100,14 +100,17 @@ h2{
         font-size: 2.3rem;
       }
   @media screen and (max-width: 650px) {
-    font-size: 2em;
+    font-size: 1.3em;
   }
 }
 h3{
   font-size: 1.5em;
   padding-top: 0em;
+  @media screen and (max-width: 800px) {
+      font-size: 1.3em;
+  }  
   @media screen and (max-width: 650px) {
-      font-size: 1.2em;
+      font-size: 1em;
   }  
 }
 p, text {
