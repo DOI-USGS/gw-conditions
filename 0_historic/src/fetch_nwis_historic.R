@@ -51,6 +51,11 @@ pull_sites_by_service <- function(site_df, service) {
   site_df %>% filter(data_type_cd == service) %>% pull(site_no)
 }
 
+fetch_gw_site_tz <- function(sites) {
+  readNWISsite(sites) %>% 
+    select(site_no, tz_cd)
+}
+
 fetch_gw_site_info <- function(data_fn) {
   sites <- read_csv(data_fn, col_types = 'cDn') %>% 
     pull(site_no) %>% 

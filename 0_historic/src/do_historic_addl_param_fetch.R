@@ -34,6 +34,17 @@ do_historic_addl_param_fetch <- function(final_target, addl_states, addl_gw_para
               steps[["identify_states"]]$target_name, task_name)
     }
   )
+
+  # Need local timezones for averaging to daily values
+  create_addl_sites_tz_xwalk <- create_task_step(
+    step_name = 'sites_tz_xwalk',
+    target_name = function(task_name, ...) {
+      sprintf('addl_sites_tz_xwalk_%s', task_name)
+    },
+    command = function(..., task_name, steps) {
+      sprintf("fetch_gw_site_tz(%s)", steps[['inventory_sites']]$target_name)
+    }
+  )
   
   download_addl_data <- create_task_step(
     step_name = 'download_addl_data',
@@ -51,7 +62,8 @@ do_historic_addl_param_fetch <- function(final_target, addl_states, addl_gw_para
                "request_limit = historic_uv_fetch_size_limit,",
                "'0_historic/src/do_historic_gw_fetch.R',",
                "'0_historic/src/fetch_nwis_historic.R',",
-               "include_ymls = I('%s'))" = task_makefile)
+               "include_ymls = I('%s')," = task_makefile,
+               "gw_site_tz_xwalk_nm = I('%s'))" = steps[['sites_tz_xwalk']]$target_name)
     }
   )
   
