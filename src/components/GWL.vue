@@ -40,9 +40,9 @@
         </p> -->
         </div>
       <div id="line-container">
-        <!-- <h3>
+        <h3>
           Groundwater sites by water level
-        </h3> -->
+        </h3>
         <svg
           id="line-chart"
           preserveAspectRatio="xMinYMin meet"
@@ -74,6 +74,17 @@
         <p
           class="text-content"
         >
+          Learn more about g  (<a
+            href="https://waterwatch.usgs.gov/ptile.html"
+            target="_blank"
+          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
+        </p>
+        <h3>
+          Data processing
+        </h3>
+        <p
+          class="text-content"
+        >
           The historic daily record was built by using the <a
             href="https://github.com/USGS-R/dataRetrieval"
             target="_blank"
@@ -87,7 +98,7 @@
           class="text-content"
         >
           <a
-            href=""
+            href="https://twitter.com/USGS_DataSci/status/1459276617277231111"
             target="_blank"
           >See the latest U.S. River Conditions</a> and other <a
             href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
@@ -100,8 +111,6 @@
   </section>
 </template>
 <script>
-import * as d3 from 'd3';
-//import * as d3 from 'd3';
 import {select, selectAll } from 'd3-selection';
 import { scaleLinear, scaleThreshold, scaleOrdinal } from 'd3-scale';
 import * as d3Trans from 'd3-transition';
@@ -111,8 +120,6 @@ import { csv } from 'd3-fetch';
 import { line, path , format} from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { isMobile } from 'mobile-device-detect';
-// TODO: load only used d3 modules
-// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis, d3-time-format
 
 export default {
   name: "GWLsvg",
@@ -187,7 +194,7 @@ export default {
         // read in data 
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-year21.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords.csv",  this.d3.autotype), 
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels.csv",  this.d3.autotype),

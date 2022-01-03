@@ -22,7 +22,7 @@ targets:
     depends:
       - visualizations/data/gw-conditions-peaks-map.svg.ind
       - visualizations/data/gw-conditions-site-coords.csv.ind
-      - visualizations/data/gw-conditions-wy20.csv.ind
+      - visualizations/data/gw-conditions-year21.csv.ind
       - visualizations/data/gw-conditions-daily-proportions.csv.ind
       - src/assets/gw-conditions-peaks-map.svg # Currently a temporary fix!
 
@@ -37,7 +37,7 @@ targets:
     depends:
      - '2_process/out/nws_states.shp'
       
-  3_visualize/out/gw-conditions-wy20.csv:
+  3_visualize/out/gw-conditions-year21.csv:
     command: gwl_to_peak(
       target_name, 
       gw_anomaly_data_w_colors)
@@ -56,8 +56,8 @@ targets:
   visualizations/data/gw-conditions-peaks-map.svg.ind:
     command: s3_put(target_name, '3_visualize/out/gw-conditions-peaks-map.svg', config_file = I('lib/cfg/s3_config_viz.yml'))
     
-  visualizations/data/gw-conditions-wy20.csv.ind:
-    command: s3_put(target_name, '3_visualize/out/gw-conditions-wy20.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
+  visualizations/data/gw-conditions-year21.csv.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-year21.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
 
   visualizations/data/gw-conditions-site-coords.csv.ind:
     command: s3_put(target_name, '3_visualize/out/gw-conditions-site-coords.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
