@@ -69,18 +69,19 @@
           This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
-          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed on a given date. The corresponding time series chart shows the percent of sites in each water-level category through time. 
+          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
         <p
           class="text-content"
         >
-          This animation uses groundwater data available through <a
-            href="https://waterdata.usgs.gov/nwis"
-            target="_blank"
-          >USGS</a> and the <a
+          The historic daily record was built by using the <a
             href="https://github.com/USGS-R/dataRetrieval"
             target="_blank"
-          >dataRetrieval package for R</a>. All sites with a minimum of 3 years of data between 1900 and 2020 are included.
+          >R package dataRetrieval</a> to pull 
+          <a
+            href="https://waterdata.usgs.gov/nwis"
+            target="_blank"
+          >USGS National Water Information System (NWIS)</a> data between January 1, 1900 and December 31, 2020 for the USGS parameter code, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were retained in the historic daily record.
         </p>
         <p
           class="text-content"
@@ -100,6 +101,14 @@
 </template>
 <script>
 import * as d3 from 'd3';
+//import * as d3 from 'd3';
+import {select, selectAll } from 'd3-selection';
+import { scaleLinear, scaleThreshold, scaleOrdinal } from 'd3-scale';
+import * as d3Trans from 'd3-transition';
+import { utcFormat } from 'd3-time-format';
+import { axisBottom, axisLeft } from 'd3-axis';
+import { csv } from 'd3-fetch';
+import { line, path , format} from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { isMobile } from 'mobile-device-detect';
 // TODO: load only used d3 modules
@@ -127,7 +136,7 @@ export default {
       day_length: 10, // frame duration in milliseconds
       current_time: 0, // tracking animation timing
       n_days: null,
-      n_sites: null,
+      n_sites: {},
       play_button: null,
       button_text: 'Pause',
       date_start: null,
@@ -151,7 +160,7 @@ export default {
     }
   },
   mounted(){
-      this.d3 = Object.assign(d3);
+      this.d3 = Object.assign({d3Trans, scaleLinear, scaleThreshold, scaleOrdinal, select, selectAll, csv, utcFormat, line, path, axisBottom, axisLeft, format  });
 
       // resize
       var window_line = document.getElementById('line-container')
@@ -795,13 +804,11 @@ line.legend-tick {
 text.legend-text {
   text-anchor: middle;
   font-size: 0.8rem;
-  alignment-baseline: baseline;
 }
 text.legend-label {
   text-anchor: middle;
   font-size: 1rem;
   font-weight: 600;
-  alignment-baseline: baseline;
 }
 .axis {
   color: black;
