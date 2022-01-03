@@ -55,14 +55,14 @@
         </svg>
       </div>
       <div id="text-container">
-        <h3>
+        <!-- <h3>
           Changing groundwater levels 
         </h3> 
         <p
           class="text-content"
         >
           Groundwater is an important natural resource held in aquifers beneath the Earth's surface. Groundwater levels change due to  natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
-        </p>
+        </p> -->
         <p
           class="text-content"
         >
@@ -124,7 +124,7 @@ export default {
       days: null, // used to index days in sequence
 
       peak_grp: null,
-      day_length: 30, // frame duration in milliseconds
+      day_length: 10, // frame duration in milliseconds
       current_time: 0, // tracking animation timing
       n_days: null,
       n_sites: null,
@@ -293,9 +293,9 @@ export default {
         this.d3.select(".toggle")
         .on("click", function() {
           if(this.checked) {
-            self.day_length = 200;
+            self.day_length = 300;
           } else {
-            self.day_length = 30;
+            self.day_length = 10;
           }
         })
 
@@ -526,47 +526,6 @@ export default {
 
         }
       },
-      makeLegend(){
-        const self = this;
-
-        // make a legend 
-        var legend_peak = this.d3.select("#legend")
-          .append("g")
-        
-        // legend elements
-        var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
-        //var perc_label = ["0.00 - 0.10", "0.10 - 0.25" ,"0.25 - 0.75", "0.75 - 0.90", "0.90 - 1.00"] // percentile ranges
-        var perc_label = ["(0 - 0.1)", "(0.1 - 0.25)" ,"(0.25 - 0.75)", "(0.75 - 0.9)", "(0.9 - 1.0)"]
-
-        // draw path shapes and labels
-        var legend_label_x = 30;
-        
-        // add categorical labels ranked from very low to very high
-        legend_peak.selectAll("labels")
-          .data(legend_keys)
-          .enter()
-          .append("text")
-            .attr("y", legend_label_x+35)
-            .attr("x", function(d,i){ return 400-((390)-100*i)}) 
-            .text(function(d){ return d})
-            .attr("text-anchor", "start")
-            .style("alignment-baseline", "middle")
-            .style("font-weight", "600")
-            .classed("legend-text", true)
-
-        // label percentile ranges in each category
-  /*        legend_peak.selectAll("percLabels")
-          .data(perc_label)
-          .enter()
-          .append("text")
-            .attr("y", legend_label_x+55)
-            .attr("x", function(d,i){ return 400-((390)-92*i)}) 
-            .text(function(d){ return d})
-            .attr("text-anchor", "start")
-            .style("alignment-baseline", "middle")
-            .attr("font-size", "0.8rem") */
-
-      },
       drawFrame1(map_svg, data, start){         
         // draw the first frame of the animation
         const self = this;
@@ -628,7 +587,7 @@ export default {
 </script>
 <style scoped lang="scss">
 $dark: rgba(54, 54, 54, 0.7);
-
+$light: #B3B3B3;
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
 section {
@@ -676,13 +635,13 @@ section {
 #legend-container {
   //grid-area: legend;
   width: 100%;
-  max-width: 500px;
+  max-width: 550px;
   float: left;
  // margin: 0;
   align-self: right;
   justify-self: end;
   svg{
-    max-width: 500px;
+    max-width: 550px;
     margin: auto;
     align-self: start;
     justify-self: start;
@@ -758,18 +717,20 @@ section {
 
 // apply button attr from uswds
 .usa-button--outline {
-  background-color: $dark;
-  color: white;
-  appearance: none;
   border: 2px solid $dark;
+      background: white;
+    color: $dark;
+    box-shadow: 2px 3px $dark;
   border-radius: 0.35rem;
   cursor: pointer;
   font-weight: 600;
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
+  margin: 1rem 1rem;
   text-align: center;
   text-decoration: none;
   overflow: visible;
+  width: 80px;
 
 }
 button {
@@ -787,15 +748,15 @@ button {
     -webkit-appearance: button;
 }
 button:hover {
-    background: white;
-    color: $dark;
-  box-shadow: 0 5px $dark;
+    background: #9b6adb8e;
+    color: white;
+    box-shadow: 2px 3px $dark;
 }
 button:active {
-  background-color: $dark;
+  background-color: #9b6adb8e;
   color: white;
-  box-shadow: 0 5px white;
-  transform: translateY(4px);
+  box-shadow: 2px 3px white;
+  transform: translateY(3px) translateX(2px);
 }
 // desktop
 /* @media (min-width:700px) {
@@ -859,7 +820,7 @@ text.legend-label {
   outline: none;
   border: none;
   cursor: pointer;
-  background-color: #707070;
+  background-color: $dark; // color for slow
   transition: background-color ease 0.3s;
 }
 
@@ -874,20 +835,17 @@ text.legend-label {
   left: 2px;
   top: 2px;
   border-radius: 50%;
-  font: 10px/28px Helvetica;
-  text-transform: uppercase;
+  font: 16px/28px Helvetica;
   font-weight: bold;
-  text-indent: -28px;
-  word-spacing: 30px;
+  text-indent: -37px;
+  word-spacing: 29px;
   color: #fff;
-  text-shadow: -1px -1px rgba(0,0,0,0.15);
   white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 0.3s;
 }
 
 .toggle:checked {
-  background-color: $dark;
+  background-color: $dark; // color fot fast
 }
 
 .toggle:checked:before {

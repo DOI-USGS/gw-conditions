@@ -2,7 +2,7 @@
         <svg 
           id="legend"
           preserveAspectRatio="xMinYMin meet"
-          viewBox="0 -10 500 60"
+          viewBox="-25 -10 570 60"
           aria-labelledby="legendTitleID legendDescID"
           role="img"
         >
