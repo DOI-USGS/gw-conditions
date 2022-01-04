@@ -9,7 +9,7 @@
           U.S. Groundwater Conditions
         </h2>
         <h3>
-          {{this.date_start}} to {{this.date_end}}
+          {{ this.date_start }} to {{ this.date_end }}
         </h3>
       </div>
       <div id="map-container">
@@ -19,50 +19,46 @@
         />
       </div>
       <div
-      id="container-container"
+        id="container-container"
       >
-      <div id="legend-container">
-        <Legend />
-              </div>
-        <div id="button-container">
-        <button 
-        id="button-play"
-        class="usa-button usa-button--outline"
-        >{{this.button_text}}
-        </button>
-        <input type="checkbox"  class="toggle" />
+        <div id="legend-container">
+          <Legend />
         </div>
-       <!--  <p
+        <div id="button-container">
+          <button 
+            id="button-play"
+            class="usa-button usa-button--outline"
+          >
+            {{ this.button_text }}
+          </button>
+          <input
+            type="checkbox"
+            class="toggle"
+          >
+        </div>
+        <!--  <p
           id="map-text"
           class="text-content"
         >
           Sites on the map animate daily groundwater levels through time. Map symbols indicate groundwater levels relative to the historic record, using percentile bins.  
         </p> -->
-        </div>
+      </div>
       <div id="line-container">
-        <h3>
+        <h4>
           Groundwater sites by water level
-        </h3>
+        </h4>
         <svg
           id="line-chart"
           preserveAspectRatio="xMinYMin meet"
           aria-labelledby="chartTitleID chartDescID"
           role="img"
-          >
+        >
           <title id="chartTitleID">
             A line chart showing the proportion of groundwater sites by water level through time.
           </title><desc id="chartDescID">Five lines are drawn for the duration of the time period for sites categorized as very low, low, normal, high, and very high. Each line shows the proportion of the total groundwater sites in each category, which fluctuates through time due.</desc> 
         </svg>
       </div>
       <div id="text-container">
-        <!-- <h3>
-          Changing groundwater levels 
-        </h3> 
-        <p
-          class="text-content"
-        >
-          Groundwater is an important natural resource held in aquifers beneath the Earth's surface. Groundwater levels change due to  natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
-        </p> -->
         <p
           class="text-content"
         >
@@ -74,14 +70,15 @@
         <p
           class="text-content"
         >
-          Learn more about g  (<a
-            href="https://waterwatch.usgs.gov/ptile.html"
+          To learn more about groundwater monitoring efforts by the USGS and partners go to: <a
+            href="usgs.gov/gwsip"
             target="_blank"
-          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
+          >usgs.gov/gwsip</a>. 
         </p>
-        <h3>
+        <br>
+        <h4>
           Data processing
-        </h3>
+        </h4>
         <p
           class="text-content"
         >
@@ -94,6 +91,12 @@
             target="_blank"
           >USGS National Water Information System (NWIS)</a> data between January 1, 1900 and December 31, 2020 for the USGS parameter code, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were retained in the historic daily record.
         </p>
+        <br>
+        <hr>
+                <img
+          id="vizlab-wordmark"
+          src="@/assets/usgsHeaderAndFooter/images/usgsvizlab-wordmark-black.png"
+        >
         <p
           class="text-content"
         >
@@ -106,6 +109,7 @@
           >data visualizations from the USGS Vizlab
           </a>.
         </p>
+
       </div>
     </div>
   </section>
@@ -683,6 +687,7 @@ section {
   grid-area: text;
   max-width: 700px;
   margin: 1rem auto;
+  margin-top: 0;
 }
 #button-container {
   //grid-area: button;
@@ -691,9 +696,6 @@ section {
   float: right;
   margin: auto;
   text-align: right;
-  //justify-content: center;
-  //align-items: center;
-  //max-width: 200px;
 }
 #container-container {
   grid-area: container;
@@ -774,30 +776,6 @@ button:active {
   box-shadow: 2px 3px white;
   transform: translateY(3px) translateX(2px);
 }
-// desktop
-/* @media (min-width:700px) {
-  #grid-container {
-    grid-template-columns: 2fr 5fr;
-    grid-template-areas:
-    "title map"
-    "legend map"
-    "line line"
-  }
-  #legend-container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: start;
-  }
-}*/
-/* @media (min-width:1024px) {
-  #grid-container {
-    grid-template-columns: 2fr 5fr;
-    grid-template-areas:
-    "title map"
-    "legend map"
-    "line line"
-  }
-} */
 // legend styling
 line.legend-line {
   stroke-dasharray: 3;
@@ -864,5 +842,11 @@ text.legend-label {
 
 .toggle:checked:before {
   left: 47px;
+}
+#vizlab-wordmark {
+  max-width: 200px;
+  display: block;
+  margin: auto;
+  justify-self: center;
 }
 </style>

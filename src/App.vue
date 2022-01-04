@@ -81,7 +81,7 @@ body {
         //font-size: 16px;
       }
   }
-  h1, h2, h3 {
+  h1, h2, h3, h4 {
     line-height: 1;
     text-align: left;
     font-family: $Assistant;
@@ -105,9 +105,20 @@ h2{
 }
 h3{
   font-size: 1.5em;
-  padding-top: 0em;
+  padding-top: 0.5em;
   @media screen and (max-width: 800px) {
       font-size: 1.3em;
+  }  
+  @media screen and (max-width: 650px) {
+      font-size: 1em;
+  }  
+}
+h4{
+  font-size: 1.2em;
+  padding-top: 0em;
+  font-weight: 600;
+  @media screen and (max-width: 800px) {
+      font-size: 1em;
   }  
   @media screen and (max-width: 650px) {
       font-size: 1em;
