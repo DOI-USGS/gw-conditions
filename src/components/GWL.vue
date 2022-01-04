@@ -20,35 +20,34 @@
           class="map"
         />
       </div>
-      <div
-        id="container-container"
-      >
         <div id="legend-container">
           <Legend />
         </div>
         <div id="button-container">
+          <div id="spacer">
           <button 
             id="button-play"
             class="usa-button usa-button--outline"
           >
             {{ this.button_text }}
           </button>
-          <input
+          <button 
+            id="button-speed"
+            class="usa-button usa-button--outline"
+          >
+            {{ this.button_text_speed }}
+          </button>
+          <!-- <input
             type="checkbox"
             class="toggle"
-          >
+          > -->
+          </div>
         </div>
-        <!--  <p
-          id="map-text"
-          class="text-content"
-        >
-          Sites on the map animate daily groundwater levels through time. Map symbols indicate groundwater levels relative to the historic record, using percentile bins.  
-        </p> -->
-      </div>
+
       <div id="line-container">
-        <!--        <h4>
+               <h4>
           Groundwater sites by water level
-        </h4> -->
+        </h4>
         <svg
           id="line-chart"
           preserveAspectRatio="xMinYMin meet"
@@ -153,7 +152,9 @@ export default {
       n_days: null,
       n_sites: {},
       play_button: null,
+      speed_button: null,
       button_text: 'Pause',
+      button_text_speed: 'Slower',
       date_start: null,
       date_end: null,
 
@@ -184,6 +185,7 @@ export default {
       this.pal_BuBr = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
       
       this.play_button = this.d3.select("#button-play")
+      this.speed_button = this.d3.select("#button-speed")
 
       // read in data
       this.loadData();   
@@ -313,15 +315,7 @@ export default {
         this.animateGWL(start);
 
         this.setButton();
-        // speed toggle
-        this.d3.select(".toggle")
-        .on("click", function() {
-          if(this.checked) {
-            self.day_length = 300;
-          } else {
-            self.day_length = 10;
-          }
-        })
+        this.setSpeed();
 
       },
       formatDates(dates){
@@ -351,6 +345,21 @@ export default {
               self.button_text = "Pause";
             }  
           })
+
+      },
+      setSpeed(){
+        const self = this;
+        this.speed_button
+        .on("click", function(){
+          if (self.button_text_speed == "Slower"){
+            // speed toggle
+             self.day_length = 300;
+             self.button_text_speed = "Faster";
+          } else {
+            self.day_length = 10
+            self.button_text_speed = "Slower";
+          }
+        })
 
       },
       addLabels(time_container, time_labels, line_height, margin_x, font_size, label_y){
@@ -629,9 +638,11 @@ section {
   grid-template-areas:
   "title"
   "map"
-  "container"
+  "legend"
+  "button"
   "line"
-  "text"
+  "text";
+
 }
 #map-container{
   grid-area: map;
@@ -657,11 +668,12 @@ section {
   }
 }
 #legend-container {
-  //grid-area: legend;
+   grid-area: legend;
   width: 100%;
+  margin: auto;
+  margin-bottom: 1rem;
+ justify-content: center;
   max-width: 550px;
-  float: left;
- // margin: 0;
   align-self: right;
   justify-self: end;
   svg{
@@ -671,6 +683,7 @@ section {
     justify-self: start;
     overflow: visible;
   }
+
 }
 #title-container {
   grid-area: title;
@@ -694,20 +707,15 @@ section {
   margin-top: 0;
 }
 #button-container {
-  //grid-area: button;
-  max-width: 100px;
-  height: auto;
-  float: right;
-  margin: auto;
-  text-align: right;
-}
-#container-container {
-  grid-area: container;
+  grid-area: button;
   width: 100%;
-  margin: auto;
   max-width: 700px;
+  height: auto;
+  min-height: 40px;
+  margin: auto;
   margin-bottom: 1rem;
- 
+  justify-content: space-evenly;
+  position: relative;
 }
 .text-content {
   margin: 0.5rem auto;
@@ -726,33 +734,26 @@ section {
   color: white;
   fill: white;
 }
-// pause/play button
-#button-play {
-  width: auto;
-  max-width: 100px;
-  height: auto;
-  margin: auto;
-  @media screen and (max-width: 550px) {
-        font-size: 16px;
-      }
-}
-
-// apply button attr from uswds
+// buttons
 .usa-button--outline {
+  justify-content: space-evenly;
+  width: 100px;
+  height: auto;
   border: 2px solid $dark;
-      background: white;
-    color: $dark;
-    box-shadow: 2px 3px $dark;
+  background: white;
+  color: $dark;
+  box-shadow: 2px 3px $dark;
   border-radius: 0.35rem;
   cursor: pointer;
   font-weight: 700;
   font-size: 1rem;
-  padding: 0.5rem 0.75rem;
-  margin: 1rem 1rem;
+  padding: 0.5rem 0.5rem;
   text-align: center;
   text-decoration: none;
   overflow: visible;
-  width: 80px;
+  @media screen and (max-width: 550px) {
+        font-size: 16px;
+      }
 
 }
 button {
@@ -763,8 +764,8 @@ button {
     line-height: normal;
     align-items: center;
     box-sizing: border-box;
-    margin: 0em;
-    padding: 1px 4px;
+    padding: 1rem 4px;
+    margin: 0rem 1rem;;
 }
 [type=button], [type=reset], [type=submit], button {
     -webkit-appearance: button;
@@ -804,13 +805,14 @@ text.legend-label {
   stroke-width: 2px;
 }
 .toggle {
+    position: absolute;
+  top: 20%;
+  left: 50%;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   width: 70px;
   height: 25px;
-  display: inline-block;
-  position: relative;
   border-radius: 50px;
   overflow: hidden;
   outline: none;
@@ -818,11 +820,15 @@ text.legend-label {
   cursor: pointer;
   background-color: $dark; // color for slow
   transition: background-color ease 0.3s;
+  margin: auto;
+  justify-content: space-evenly;
 }
-
+#spacer {
+  display: flex;
+  justify-content: center;
+}
 .toggle:before {
   content: "fast slow";
-  display: block;
   position: absolute;
   z-index: 2;
   width: 21px;
@@ -841,7 +847,7 @@ text.legend-label {
 }
 
 .toggle:checked {
-  background-color: $dark; // color fot fast
+  background-color: $dark; // color for fast
 }
 
 .toggle:checked:before {
