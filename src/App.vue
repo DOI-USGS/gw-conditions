@@ -105,7 +105,7 @@ h2{
 }
 h3{
   font-size: 1.5em;
-  padding-top: 0.5em;
+  //padding-top: 0.5em;
   @media screen and (max-width: 800px) {
       font-size: 1.3em;
   }  
@@ -124,7 +124,7 @@ h4{
       font-size: 1em;
   }  
 }
-p, text {
+p, text, caption {
   padding: 0.5em 0 0 0; 
   font-family: $Assistant;
   font-weight: 400;
@@ -133,6 +133,14 @@ p, text {
   @media screen and (max-width: 800px) {
         font-size: 16px;
       }
+}
+caption {
+  padding: 0;
+  font-style: italic;
+  font-size: 0.8rem;
+  display: block;
+  width: 100%;
+  max-width: 700px;
 }
 // make svg text smaller than main text at small viewport sizes so it fits on the screen
 text {

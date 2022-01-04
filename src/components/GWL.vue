@@ -9,10 +9,12 @@
           U.S. Groundwater Conditions
         </h2>
         <h3>
-          {{ this.date_start }} to {{ this.date_end }}
+          {{ date_start }} to {{ date_end }}
         </h3>
+      <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
+        
         <GWLmap
           id="map_gwl"
           class="map"
@@ -44,9 +46,9 @@
         </p> -->
       </div>
       <div id="line-container">
-        <h4>
+        <!--        <h4>
           Groundwater sites by water level
-        </h4>
+        </h4> -->
         <svg
           id="line-chart"
           preserveAspectRatio="xMinYMin meet"
@@ -57,6 +59,9 @@
             A line chart showing the proportion of groundwater sites by water level through time.
           </title><desc id="chartDescID">Five lines are drawn for the duration of the time period for sites categorized as very low, low, normal, high, and very high. Each line shows the proportion of the total groundwater sites in each category, which fluctuates through time due.</desc> 
         </svg>
+        <caption>
+          The percent of groundwater sites on the map by water-level category.
+        </caption>
       </div>
       <div id="text-container">
         <p
@@ -93,7 +98,7 @@
         </p>
         <br>
         <hr>
-                <img
+        <img
           id="vizlab-wordmark"
           src="@/assets/usgsHeaderAndFooter/images/usgsvizlab-wordmark-black.png"
         >
@@ -109,7 +114,6 @@
           >data visualizations from the USGS Vizlab
           </a>.
         </p>
-
       </div>
     </div>
   </section>
