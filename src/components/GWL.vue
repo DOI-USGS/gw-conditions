@@ -642,6 +642,15 @@ section {
   "button"
   "line"
   "text";
+   @media screen and (min-width: 551px) {
+      grid-template-columns: 1fr 2fr;
+      grid-template-areas:
+      "title title"
+      "map map"
+      "button legend"
+      "line line"
+      "text text";
+      }
 
 }
 #map-container{
@@ -675,7 +684,7 @@ section {
  justify-content: center;
   max-width: 550px;
   align-self: right;
-  justify-self: end;
+  justify-self: start;
   svg{
     max-width: 550px;
     margin: auto;
@@ -683,6 +692,14 @@ section {
     justify-self: start;
     overflow: visible;
   }
+   @media screen and (min-width: 551px) {
+      justify-content: start;
+
+      svg {
+        align-self: start;
+        justify-self: start;
+      }
+      }
 
 }
 #title-container {
@@ -826,8 +843,11 @@ text.legend-label {
 #spacer {
   display: flex;
   justify-content: center;
+  @media screen and (min-width: 551px) {
+      justify-content: end;
+      }
 }
-.toggle:before {
+/* .toggle:before {
   content: "fast slow";
   position: absolute;
   z-index: 2;
@@ -852,7 +872,7 @@ text.legend-label {
 
 .toggle:checked:before {
   left: 47px;
-}
+} */
 #vizlab-wordmark {
   max-width: 200px;
   display: block;
