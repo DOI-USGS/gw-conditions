@@ -70,7 +70,7 @@ do_historic_addl_param_fetch <- function(final_target, addl_states, addl_gw_para
   # Create the task plan
   task_plan <- create_task_plan(
     task_names = tasks,
-    task_steps = list(identify_states, inventory_sites, download_addl_data),
+    task_steps = list(identify_states, inventory_sites, create_addl_sites_tz_xwalk, download_addl_data),
     final_steps = "download_addl_data",
     add_complete = FALSE)
   

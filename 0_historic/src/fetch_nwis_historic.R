@@ -61,7 +61,7 @@ fetch_gw_site_info <- function(data_fn) {
     pull(site_no) %>% 
     unique()
   readNWISsite(sites) %>% 
-    select(site_no, station_nm, state_cd, dec_lat_va, dec_long_va)
+    select(site_no, station_nm, state_cd, dec_lat_va, dec_long_va, tz_cd)
 }
 
 fetch_addl_uv_sites <- function(addl_states, param_cd, start_date, end_date) {
