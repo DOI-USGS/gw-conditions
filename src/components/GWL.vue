@@ -853,5 +853,18 @@ text.legend-label {
   margin: auto;
   justify-self: center;
 }
-
+.line-islands {
+  stroke-dasharray: 1,3;
+  fill: transparent;
+  stroke: $dark;
+}
+#map-text text{
+  font-size: 0.6rem;
+  color: $dark;
+  opacity: 0.6;
+  font-style: italic;
+}
+#label-islands {
+  opacity: 0.65;
+}
 </style>
