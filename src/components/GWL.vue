@@ -9,107 +9,115 @@
           U.S. Groundwater Conditions
         </h2>
         <h3>
-          {{ this.date_start }} to {{ this.date_end }}
+          {{ date_start }} to {{ date_end }}
         </h3>
-        <!--      <p
-          id="title-sub"
-          class="title"
-        >
-          Sites on the map animate daily groundwater levels through time. Symbols show whether groundwater levels are higher or lower than the historic record at each site.  
-        </p> -->
+      <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
+        
         <GWLmap
           id="map_gwl"
           class="map"
         />
       </div>
-      <!--      <div
-      id="container-container"
-      > -->
-      <div id="legend-container">
-        <Legend />
-      </div>
-      <div id="button-container">
-        <button 
-          id="button-play"
-          class="usa-button usa-button--outline"
-        >
-          {{ this.button_text }}
-        </button>
-        <input
-          type="checkbox"
-          class="toggle"
-        >
-      </div>
-      <!--  <p
-          id="map-text"
-          class="text-content"
-        >
-          Sites on the map animate daily groundwater levels through time. Map symbols indicate groundwater levels relative to the historic record, using percentile bins.  
-        </p> -->
-    <!-- </div> -->
-    <div id="line-container">
-      <!-- <h3>
+        <div id="legend-container">
+          <Legend />
+        </div>
+        <div id="button-container">
+          <div id="spacer">
+          <button 
+            id="button-play"
+            class="usa-button usa-button--outline"
+          >
+            {{ this.button_text }}
+          </button>
+          <button 
+            id="button-speed"
+            class="usa-button usa-button--outline"
+          >
+            {{ this.button_text_speed }}
+          </button>
+          <!-- <input
+            type="checkbox"
+            class="toggle"
+          > -->
+          </div>
+        </div>
+
+      <div id="line-container">
+               <h4>
           Groundwater sites by water level
-        </h3> -->
-      <svg
-        id="line-chart"
-        preserveAspectRatio="xMinYMin meet"
-        aria-labelledby="chartTitleID chartDescID"
-        role="img"
-      >
-        <title id="chartTitleID">
-          A line chart showing the proportion of groundwater sites by water level through time.
-        </title><desc id="chartDescID">Five lines are drawn for the duration of the time period for sites categorized as very low, low, normal, high, and very high. Each line shows the proportion of the total groundwater sites in each category, which fluctuates through time due.</desc> 
-      </svg>
-    </div>
-    <div id="text-container">
-      <!--       <h3>
-          Changing groundwater levels 
-        </h3>  -->
-      <!--     <p
-          class="text-content"
+        </h4>
+        <svg
+          id="line-chart"
+          preserveAspectRatio="xMinYMin meet"
+          aria-labelledby="chartTitleID chartDescID"
+          role="img"
         >
-          Groundwater is an important natural resource held in aquifers beneath the Earth's surface. Groundwater levels change due to  natural and human-driven causes like pumping, drought, and seasonal variation in rainfall.
-        </p> -->
-      <!--        <p
+          <title id="chartTitleID">
+            A line chart showing the proportion of groundwater sites by water level through time.
+          </title><desc id="chartDescID">Five lines are drawn for the duration of the time period for sites categorized as very low, low, normal, high, and very high. Each line shows the proportion of the total groundwater sites in each category, which fluctuates through time due.</desc> 
+        </svg>
+        <caption>
+          The percent of groundwater sites on the map by water-level category.
+        </caption>
+      </div>
+      <div id="text-container">
+        <p
           class="text-content"
         >
           This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
-          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed on a given date. The corresponding time series chart shows the percent of sites in each water-level category through time. 
-        </p> -->
-      <p
-        class="text-content"
-      >
-        This animation uses groundwater data available through <a
-          href="https://waterdata.usgs.gov/nwis"
-          target="_blank"
-        >USGS</a> and the <a
-          href="https://github.com/USGS-R/dataRetrieval"
-          target="_blank"
-        >dataRetrieval package for R</a>. All sites with a minimum of 3 years of data between 1900 and 2020 are included.
-      </p>
-      <p
-        class="text-content"
-      >
-        <a
-          href=""
-          target="_blank"
-        >See the latest U.S. River Conditions</a> and other <a
-          href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
-          target="_blank"
-        >data visualizations from the USGS Vizlab
-        </a>.
-      </p>
-    </div>
+          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
+        </p>
+        <p
+          class="text-content"
+        >
+          To learn more about groundwater monitoring efforts by the USGS and partners go to: <a
+            href="usgs.gov/gwsip"
+            target="_blank"
+          >usgs.gov/gwsip</a>. 
+        </p>
+        <br>
+        <h4>
+          Data processing
+        </h4>
+        <p
+          class="text-content"
+        >
+          The historic daily record was built by using the <a
+            href="https://github.com/USGS-R/dataRetrieval"
+            target="_blank"
+          >R package dataRetrieval</a> to pull 
+          <a
+            href="https://waterdata.usgs.gov/nwis"
+            target="_blank"
+          >USGS National Water Information System (NWIS)</a> data between January 1, 1900 and December 31, 2020 for the USGS parameter code, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were retained in the historic daily record.
+        </p>
+        <br>
+        <hr>
+        <img
+          id="vizlab-wordmark"
+          src="@/assets/usgsHeaderAndFooter/images/usgsvizlab-wordmark-black.png"
+        >
+        <p
+          class="text-content"
+        >
+          <a
+            href="https://twitter.com/USGS_DataSci/status/1459276617277231111"
+            target="_blank"
+          >See the latest U.S. River Conditions</a> and other <a
+            href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
+            target="_blank"
+          >data visualizations from the USGS Vizlab
+          </a>.
+        </p>
+      </div>
     </div>
   </section>
 </template>
 <script>
-//import * as d3 from 'd3';
 import {select, selectAll } from 'd3-selection';
 import { scaleLinear, scaleThreshold, scaleOrdinal } from 'd3-scale';
 import * as d3Trans from 'd3-transition';
@@ -119,8 +127,6 @@ import { csv } from 'd3-fetch';
 import { line, path , format} from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { isMobile } from 'mobile-device-detect';
-// TODO: load only used d3 modules
-// modules: d3-scale, d3-selection, d3-transition, d3-path, d3-axis, d3-time-format
 
 export default {
   name: "GWLsvg",
@@ -141,12 +147,14 @@ export default {
       days: null, // used to index days in sequence
 
       peak_grp: null,
-      day_length: 30, // frame duration in milliseconds
+      day_length: 10, // frame duration in milliseconds
       current_time: 0, // tracking animation timing
       n_days: null,
-      n_sites: null,
+      n_sites: {},
       play_button: null,
+      speed_button: null,
       button_text: 'Pause',
+      button_text_speed: 'Slower',
       date_start: null,
       date_end: null,
 
@@ -177,6 +185,7 @@ export default {
       this.pal_BuBr = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
       
       this.play_button = this.d3.select("#button-play")
+      this.speed_button = this.d3.select("#button-speed")
 
       // read in data
       this.loadData();   
@@ -195,7 +204,7 @@ export default {
         // read in data 
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-wy20.csv",  this.d3.autotype),
+        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-year21.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords.csv",  this.d3.autotype), 
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions.csv",  this.d3.autotype),
         self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels.csv",  this.d3.autotype),
@@ -306,15 +315,7 @@ export default {
         this.animateGWL(start);
 
         this.setButton();
-        // speed toggle
-        this.d3.select(".toggle")
-        .on("click", function() {
-          if(this.checked) {
-            self.day_length = 200;
-          } else {
-            self.day_length = 30;
-          }
-        })
+        this.setSpeed();
 
       },
       formatDates(dates){
@@ -344,6 +345,21 @@ export default {
               self.button_text = "Pause";
             }  
           })
+
+      },
+      setSpeed(){
+        const self = this;
+        this.speed_button
+        .on("click", function(){
+          if (self.button_text_speed == "Slower"){
+            // speed toggle
+             self.day_length = 300;
+             self.button_text_speed = "Faster";
+          } else {
+            self.day_length = 10
+            self.button_text_speed = "Slower";
+          }
+        })
 
       },
       addLabels(time_container, time_labels, line_height, margin_x, font_size, label_y){
@@ -543,47 +559,6 @@ export default {
 
         }
       },
-      makeLegend(){
-        const self = this;
-
-        // make a legend 
-        var legend_peak = this.d3.select("#legend")
-          .append("g")
-        
-        // legend elements
-        var legend_keys = ["Very low", "Low", "Normal", "High","Very high"]; // labels
-        //var perc_label = ["0.00 - 0.10", "0.10 - 0.25" ,"0.25 - 0.75", "0.75 - 0.90", "0.90 - 1.00"] // percentile ranges
-        var perc_label = ["(0 - 0.1)", "(0.1 - 0.25)" ,"(0.25 - 0.75)", "(0.75 - 0.9)", "(0.9 - 1.0)"]
-
-        // draw path shapes and labels
-        var legend_label_x = 30;
-        
-        // add categorical labels ranked from very low to very high
-        legend_peak.selectAll("labels")
-          .data(legend_keys)
-          .enter()
-          .append("text")
-            .attr("y", legend_label_x+35)
-            .attr("x", function(d,i){ return 400-((390)-100*i)}) 
-            .text(function(d){ return d})
-            .attr("text-anchor", "start")
-            .style("alignment-baseline", "middle")
-            .style("font-weight", "600")
-            .classed("legend-text", true)
-
-        // label percentile ranges in each category
-  /*        legend_peak.selectAll("percLabels")
-          .data(perc_label)
-          .enter()
-          .append("text")
-            .attr("y", legend_label_x+55)
-            .attr("x", function(d,i){ return 400-((390)-92*i)}) 
-            .text(function(d){ return d})
-            .attr("text-anchor", "start")
-            .style("alignment-baseline", "middle")
-            .attr("font-size", "0.8rem") */
-
-      },
       drawFrame1(map_svg, data, start){         
         // draw the first frame of the animation
         const self = this;
@@ -645,17 +620,16 @@ export default {
 </script>
 <style scoped lang="scss">
 $dark: rgba(54, 54, 54, 0.7);
-
+$light: #B3B3B3;
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
 section {
-  width: 90vw;
+  width: 92vw;
   margin: auto;
 }
 #grid-container {
   display: grid;
-  min-height: 95vh;
-  max-width: 2900px;
+  max-width: 1600px;
   margin: auto;
   height: auto;
   vertical-align: middle;
@@ -665,23 +639,20 @@ section {
   "title"
   "map"
   "legend"
-  "buttons"
+  "button"
   "line"
-  "text"
-}
-// desktop
+  "text";
+   @media screen and (min-width: 551px) {
+      grid-template-columns: 1fr 2fr;
+      grid-template-areas:
+      "title title"
+      "map map"
+      "button legend"
+      "line line"
+      "text text";
+      }
 
- @media (min-width:1200px) {
-  #grid-container {
-    min-height: 95vh;
-    grid-template-columns: 3fr 6fr;
-    grid-template-areas:
-    "title container"
-    "line map"
-    "text map"
-  }
 }
-
 #map-container{
   grid-area: map;
   padding: 0rem;
@@ -706,20 +677,30 @@ section {
   }
 }
 #legend-container {
-  //grid-area: legend;
+   grid-area: legend;
   width: 100%;
-  max-width: 500px;
-  float: left;
- // margin: 0;
+  margin: auto;
+  margin-bottom: 1rem;
+ justify-content: center;
+  max-width: 550px;
   align-self: right;
-  justify-self: end;
+  justify-self: start;
   svg{
-    max-width: 500px;
+    max-width: 550px;
     margin: auto;
     align-self: start;
     justify-self: start;
     overflow: visible;
   }
+   @media screen and (min-width: 551px) {
+      justify-content: start;
+
+      svg {
+        align-self: start;
+        justify-self: start;
+      }
+      }
+
 }
 #title-container {
   grid-area: title;
@@ -740,25 +721,18 @@ section {
   grid-area: text;
   max-width: 700px;
   margin: 1rem auto;
+  margin-top: 0;
 }
 #button-container {
-  //grid-area: button;
-  max-width: 100px;
-  height: auto;
-  float: right;
-  margin: auto;
-  text-align: right;
-  //justify-content: center;
-  //align-items: center;
-  //max-width: 200px;
-}
-#container-container {
-  grid-area: container;
+  grid-area: button;
   width: 100%;
-  margin: auto;
   max-width: 700px;
+  height: auto;
+  min-height: 40px;
+  margin: auto;
   margin-bottom: 1rem;
- 
+  justify-content: space-evenly;
+  position: relative;
 }
 .text-content {
   margin: 0.5rem auto;
@@ -777,31 +751,26 @@ section {
   color: white;
   fill: white;
 }
-// pause/play button
-#button-play {
-  width: auto;
-  max-width: 100px;
-  height: auto;
-  margin: auto;
-  @media screen and (max-width: 550px) {
-        font-size: 16px;
-      }
-}
-
-// apply button attr from uswds
+// buttons
 .usa-button--outline {
-  background-color: $dark;
-  color: white;
-  appearance: none;
+  justify-content: space-evenly;
+  width: 100px;
+  height: auto;
   border: 2px solid $dark;
+  background: white;
+  color: $dark;
+  box-shadow: 2px 3px $dark;
   border-radius: 0.35rem;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0.5rem;
   text-align: center;
   text-decoration: none;
   overflow: visible;
+  @media screen and (max-width: 550px) {
+        font-size: 16px;
+      }
 
 }
 button {
@@ -812,23 +781,24 @@ button {
     line-height: normal;
     align-items: center;
     box-sizing: border-box;
-    margin: 0em;
-    padding: 1px 4px;
+    padding: 1rem 4px;
+    margin: 0rem 1rem;;
 }
 [type=button], [type=reset], [type=submit], button {
     -webkit-appearance: button;
 }
 button:hover {
-    background: white;
-    color: $dark;
-  box-shadow: 0 5px $dark;
+    background: #9b6adb8e;
+    color: white;
+    box-shadow: 2px 3px $dark;
 }
 button:active {
-  background-color: $dark;
+  background-color: #9b6adb8e;
   color: white;
-  box-shadow: 0 5px white;
-  transform: translateY(4px);
+  box-shadow: 2px 3px white;
+  transform: translateY(3px) translateX(2px);
 }
+// legend styling
 line.legend-line {
   stroke-dasharray: 3;
   stroke-width: 2;
@@ -841,38 +811,44 @@ line.legend-tick {
 text.legend-text {
   text-anchor: middle;
   font-size: 0.8rem;
-  alignment-baseline: baseline;
 }
 text.legend-label {
   text-anchor: middle;
   font-size: 1rem;
-  font-weight: 600;
-  alignment-baseline: baseline;
+  font-weight: 700;
 }
 .axis {
   color: black;
   stroke-width: 2px;
 }
 .toggle {
+    position: absolute;
+  top: 20%;
+  left: 50%;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   width: 70px;
   height: 25px;
-  display: inline-block;
-  position: relative;
   border-radius: 50px;
   overflow: hidden;
   outline: none;
   border: none;
   cursor: pointer;
-  background-color: #707070;
+  background-color: $dark; // color for slow
   transition: background-color ease 0.3s;
+  margin: auto;
+  justify-content: space-evenly;
 }
-
-.toggle:before {
+#spacer {
+  display: flex;
+  justify-content: center;
+  @media screen and (min-width: 551px) {
+      justify-content: end;
+      }
+}
+/* .toggle:before {
   content: "fast slow";
-  display: block;
   position: absolute;
   z-index: 2;
   width: 21px;
@@ -881,39 +857,40 @@ text.legend-label {
   left: 2px;
   top: 2px;
   border-radius: 50%;
-  font: 10px/28px Helvetica;
-  text-transform: uppercase;
+  font: 16px/28px Helvetica;
   font-weight: bold;
-  text-indent: -28px;
-  word-spacing: 30px;
+  text-indent: -37px;
+  word-spacing: 29px;
   color: #fff;
-  text-shadow: -1px -1px rgba(0,0,0,0.15);
   white-space: nowrap;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
   transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 0.3s;
 }
 
 .toggle:checked {
-  background-color: $dark;
+  background-color: $dark; // color for fast
 }
 
 .toggle:checked:before {
   left: 47px;
+} */
+#vizlab-wordmark {
+  max-width: 200px;
+  display: block;
+  margin: auto;
+  justify-self: center;
 }
-// alternative layouts
-@media (min-width:1800px) {
-  #grid-container {
-    min-height: 95vh;
-    grid-template-columns: 3fr 7fr;
-    grid-template-areas:
-    "title title"
-    "container map"
-    "line map"
-    "text map"
-    ". ."
-  }
-  #title-container {
-    justify-self: start;
-  }
+.line-islands {
+  stroke-dasharray: 1,3;
+  fill: transparent;
+  stroke: $dark;
+}
+#map-text text{
+  font-size: 0.6rem;
+  color: $dark;
+  opacity: 0.6;
+  font-style: italic;
+}
+#label-islands {
+  opacity: 0.65;
 }
 </style>

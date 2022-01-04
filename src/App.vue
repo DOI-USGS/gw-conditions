@@ -81,11 +81,11 @@ body {
         //font-size: 16px;
       }
   }
-  h1, h2, h3 {
+  h1, h2, h3, h4 {
     line-height: 1;
     text-align: left;
     font-family: $Assistant;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0 0;
   }
 h1{
@@ -95,9 +95,10 @@ h1{
   }
 }
 h2{
-  font-size: 2.8em;
+  font-size: 2.75em;
+  font-weight: 700;
   @media screen and (max-width: 800px) {
-        font-size: 2.3rem;
+        font-size: 2rem;
       }
   @media screen and (max-width: 650px) {
     font-size: 1.3em;
@@ -105,7 +106,7 @@ h2{
 }
 h3{
   font-size: 1.5em;
-  padding-top: 0em;
+  //padding-top: 0.5em;
   @media screen and (max-width: 800px) {
       font-size: 1.3em;
   }  
@@ -113,7 +114,18 @@ h3{
       font-size: 1em;
   }  
 }
-p, text {
+h4{
+  font-size: 1.2em;
+  padding-top: 0em;
+  font-weight: 600;
+  @media screen and (max-width: 800px) {
+      font-size: 1em;
+  }  
+  @media screen and (max-width: 650px) {
+      font-size: 1em;
+  }  
+}
+p, text, caption {
   padding: 0.5em 0 0 0; 
   font-family: $Assistant;
   font-weight: 400;
@@ -122,6 +134,14 @@ p, text {
   @media screen and (max-width: 800px) {
         font-size: 16px;
       }
+}
+caption {
+  padding: 0;
+  font-style: italic;
+  font-size: 0.8rem;
+  display: block;
+  width: 100%;
+  max-width: 700px;
 }
 // make svg text smaller than main text at small viewport sizes so it fits on the screen
 text {
