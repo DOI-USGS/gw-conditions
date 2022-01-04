@@ -85,7 +85,7 @@ body {
     line-height: 1;
     text-align: left;
     font-family: $Assistant;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0 0;
   }
 h1{
@@ -95,9 +95,10 @@ h1{
   }
 }
 h2{
-  font-size: 2.8em;
+  font-size: 2.75em;
+  font-weight: 700;
   @media screen and (max-width: 800px) {
-        font-size: 2.3rem;
+        font-size: 2rem;
       }
   @media screen and (max-width: 650px) {
     font-size: 1.3em;

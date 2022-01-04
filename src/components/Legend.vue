@@ -2,7 +2,7 @@
   <svg 
     id="legend"
     preserveAspectRatio="xMinYMin meet"
-    viewBox="0 -10 500 60"
+    viewBox="0 -30 500 80"
     aria-labelledby="legendTitleID legendDescID"
     role="img"
   >
@@ -85,6 +85,7 @@
       y2="30"
       class="legend-tick"
     />
+  <!--   percentile labels -->
     <text
       x="1"
       y="45"
@@ -115,43 +116,62 @@
       class="legend-text"
     >0.25
     </text>
+     <text
+      x="250"
+      y="45"
+      class="legend-text"
+    >percentile
+    </text>
     <text
       x="375"
       y="45"
       class="legend-text"
     >0.75
     </text>
-          
+        <!--   text labels -->
     <text
-      x="20"
-      y="0"
+      x="22"
+      y="-25"
       class="legend-label"
-    >Very low
+    >Very
+    </text>
+     <text
+      x="22"
+      y="-5"
+      class="legend-label"
+    >low
     </text>
     <text
-      x="499"
-      y="0"
+      x="472"
+      y="-30"
       class="legend-label"
-    >Very high
+    >Very
+    </text>
+    <text
+      x="472"
+      y="-5"
+      class="legend-label"
+    >high
     </text>
     <text
       x="90"
-      y="0"
+      y="-5"
       class="legend-label"
     >Low
     </text>
     <text
       x="410"
-      y="0"
+      y="-5"
       class="legend-label"
     >High
     </text>
     <text
       x="250"
-      y="0"
+      y="-5"
       class="legend-label"
     >Normal
     </text>
+   <!--  glyphs -->
     <path
       id="Verylow"
       fill="#BF6200"
@@ -233,7 +253,7 @@ text.legend-text {
 text.legend-label {
   text-anchor: middle;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   alignment-baseline: baseline;
 }
 

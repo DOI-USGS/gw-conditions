@@ -745,7 +745,7 @@ section {
     box-shadow: 2px 3px $dark;
   border-radius: 0.35rem;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1rem;
   padding: 0.5rem 0.75rem;
   margin: 1rem 1rem;
@@ -797,7 +797,7 @@ text.legend-text {
 text.legend-label {
   text-anchor: middle;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 .axis {
   color: black;
@@ -853,4 +853,5 @@ text.legend-label {
   margin: auto;
   justify-self: center;
 }
+
 </style>
