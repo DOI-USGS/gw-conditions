@@ -152,6 +152,13 @@ text {
   @media screen and (max-width: 550px) {
         font-size: 13px;
       }
+      // no highlight svg text
+  -webkit-touch-callout: none; /* iOS Safari */
+   -webkit-user-select: none;   /* Chrome/Safari/Opera */
+   -khtml-user-select: none;    /* Konqueror */
+   -moz-user-select: none;      /* Firefox */
+   -ms-user-select: none;       /* Internet Explorer/Edge */
+   user-select: none;           /* Non-prefixed version, currently not supported by any browser */
    }
 // legend text is scaled differently because the svg has a max-width property set 
 .legend-text {
