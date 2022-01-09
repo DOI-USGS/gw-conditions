@@ -170,5 +170,9 @@ text {
         font-size: 20px;
       }
 }
-
+span {
+  .tooltiptext {
+    font-size: 0.8rem;
+  }
+}
 </style>

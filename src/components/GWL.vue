@@ -60,21 +60,15 @@
       </div>
       <div id="text-container">
         <p
-          class="text-content"
+          class="text-content tooltip"
         >
-          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (<a
-            href="https://waterwatch.usgs.gov/ptile.html"
-            target="_blank"
-          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
+          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
+            <span class="tooltip-span">using percentiles</span>
+            <span class="tooltiptext">
+              The percentile is the percent of groundwater observations in the past that fall below the daily value. For instance, if a site is in the 10th percentile, only 10% of days in the entire data record at that site have had lower water levels - that's uncommonly low! 
+            </span>
+              ), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
-         <Sidebar>
-        <template v-slot:sidebarTitle>
-          percentile
-        </template>
-        <template v-slot:sidebarMessage>
-          <p><span class="emph">percentile</span> </p>
-        </template>
-      </Sidebar>
         <p
           class="text-content"
         >
@@ -131,13 +125,11 @@ import { csv } from 'd3-fetch';
 import { line, path , format} from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { isMobile } from 'mobile-device-detect';
-import Sidebar from '@/components/Sidebar';
 
 export default {
   name: "GWLsvg",
     components: {
       GWLmap,
-      Sidebar,
       Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend")
     },
     data() {
@@ -625,7 +617,7 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-$dark: rgba(54, 54, 54, 0.7);
+$dark: rgba(54, 54, 54, 0.8);
 $light: #B3B3B3;
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
@@ -872,5 +864,37 @@ text.legend-label {
 }
 #label-islands {
   opacity: 0.65;
+}
+.tooltip-span {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted $dark;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 250px;
+  background-color: rgba(54, 54, 54, 0.9);;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+.tooltiptext {
+  P {
+  font-size: 0.8 rem;
+  }
+  overflow: visible;
+  //top: 0;
+  //left: 50%;
+  margin-left: -170px;
+  margin-top: 20px;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }
 </style>
