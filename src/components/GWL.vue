@@ -64,7 +64,7 @@
         >
           This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
             <span class="tooltip-span">using percentiles</span>
-            <span class="tooltiptext">
+            <span class="tooltiptext" style="font-size: 0.8rem;">
               The percentile is the percent of groundwater observations in the past that fall below the daily value. For instance, if a site is in the 10th percentile, only 10% of days in the entire data record at that site have had lower water levels - that's uncommonly low! 
             </span>
               ), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
@@ -874,11 +874,11 @@ text.legend-label {
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 250px;
-  background-color: rgba(54, 54, 54, 0.9);;
+  background-color: rgba(54, 54, 54, 0.95);;
   color: #fff;
   text-align: center;
   border-radius: 6px;
-  padding: 5px 0;
+  padding: 5px 5px;
 
   /* Position the tooltip */
   position: absolute;
