@@ -37,10 +37,6 @@
           >
             {{ this.button_text_speed }}
           </button>
-          <!-- <input
-            type="checkbox"
-            class="toggle"
-          > -->
           </div>
         </div>
 
@@ -66,11 +62,19 @@
         <p
           class="text-content"
         >
-          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
+          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (<a
             href="https://waterwatch.usgs.gov/ptile.html"
             target="_blank"
           >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
+         <Sidebar>
+        <template v-slot:sidebarTitle>
+          percentile
+        </template>
+        <template v-slot:sidebarMessage>
+          <p><span class="emph">percentile</span> </p>
+        </template>
+      </Sidebar>
         <p
           class="text-content"
         >
@@ -93,7 +97,7 @@
           <a
             href="https://waterdata.usgs.gov/nwis"
             target="_blank"
-          >USGS National Water Information System (NWIS)</a> data between January 1, 1900 and December 31, 2020 for the USGS parameter code, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were retained in the historic daily record.
+          >USGS National Water Information System (NWIS)</a> data between January 1, 1900 and December 31, 2020 for the USGS parameter code, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were used in the historic record.
         </p>
         <br>
         <hr>
@@ -127,11 +131,13 @@ import { csv } from 'd3-fetch';
 import { line, path , format} from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
 import { isMobile } from 'mobile-device-detect';
+import Sidebar from '@/components/Sidebar';
 
 export default {
   name: "GWLsvg",
     components: {
       GWLmap,
+      Sidebar,
       Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend")
     },
     data() {
@@ -847,32 +853,6 @@ text.legend-label {
       justify-content: end;
       }
 }
-/* .toggle:before {
-  content: "fast slow";
-  position: absolute;
-  z-index: 2;
-  width: 21px;
-  height: 21px;
-  background: #fff;
-  left: 2px;
-  top: 2px;
-  border-radius: 50%;
-  font: 16px/28px Helvetica;
-  font-weight: bold;
-  text-indent: -37px;
-  word-spacing: 29px;
-  color: #fff;
-  white-space: nowrap;
-  transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 0.3s;
-}
-
-.toggle:checked {
-  background-color: $dark; // color for fast
-}
-
-.toggle:checked:before {
-  left: 47px;
-} */
 #vizlab-wordmark {
   max-width: 200px;
   display: block;
