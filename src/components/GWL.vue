@@ -14,17 +14,16 @@
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
-        
         <GWLmap
           id="map_gwl"
           class="map"
         />
       </div>
-        <div id="legend-container">
-          <Legend />
-        </div>
-        <div id="button-container">
-          <div id="spacer">
+      <div id="legend-container">
+        <Legend />
+      </div>
+      <div id="button-container">
+        <div id="spacer">
           <button 
             id="button-play"
             class="usa-button usa-button--outline"
@@ -41,11 +40,11 @@
             type="checkbox"
             class="toggle"
           > -->
-          </div>
         </div>
+      </div>
 
       <div id="line-container">
-               <h4>
+        <h4>
           Groundwater sites by water level
         </h4>
         <svg
