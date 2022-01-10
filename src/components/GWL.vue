@@ -228,6 +228,7 @@ export default {
         // need to consider how to handle sites with no data on the first date 
         // variables: x, y, site_no, aqfr_type
         var site_coords = data[2]; 
+        console.log(site_coords)
 
         // proportion of sites by each category over time
         // variables: Date, day_seq (an integer from 1 to the last day), n_sites, and a column for each gwl category
@@ -243,13 +244,11 @@ export default {
         day_seq.shift(); // drop first col with site_no. list of all the active
 
         // sites 
-        var sites_list = day_seq //site_coords.map(function(d)  { return d.site_no })
-        var sites_active = date_peaks
-        console.log(sites_list)
+        var sites_list = site_coords.map(function(d)  { return d.site_no })
         this.n_sites = sites_list.length // to create nested array for indexing in animation
+        console.log(sites_list)
 
         // site placement on map
-        console.log(site_coords)
         var sites_x = site_coords.map(function(d) { return d.x })
         var sites_y = site_coords.map(function(d) { return d.y })
 
@@ -883,7 +882,7 @@ text.legend-label {
   margin-left: -170px;
   margin-top: 20px;
 }
-span.tooltip-span:hover .tooltiptext {
+.tooltip:hover .tooltiptext {
   visibility: visible;
 }
 .ticks {
