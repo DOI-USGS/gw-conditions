@@ -1,6 +1,7 @@
 
-convert_to_spatial_obj <- function(gw_site_info, proj_str) {
+convert_to_spatial_obj <- function(gw_site_info, proj_str, gw_anomaly_data) {
   gw_site_info %>% 
+    filter(site_no %in% gw_anomaly_data$site_no) %>% ## only add sites with data during time range
     st_as_sf(coords = c("dec_long_va", "dec_lat_va"), 
              crs = 4326) %>% 
     st_transform(proj_str)

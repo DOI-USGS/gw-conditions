@@ -65,7 +65,7 @@
           This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
             <span class="tooltip-span">using percentiles</span>
             <span class="tooltiptext" style="font-size: 0.8rem;">
-              The percentile is the percent of groundwater observations in the past that fall below the daily value. For instance, if a site is in the 10th percentile, only 10% of days in the entire data record at that site have had lower water levels - that's uncommonly low! 
+              The percentile calculates the percent of days in the past that groundwater was below the current value. For a site is in the 10th percentile, water levels have been lower 10% of the time. 
             </span>
               ), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
@@ -108,8 +108,8 @@
           >See the latest U.S. River Conditions</a> and other <a
             href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
             target="_blank"
-          >data visualizations from the USGS Vizlab
-          </a>.
+          >data visualizations from the USGS VizLab
+          </a>
         </p>
       </div>
     </div>
@@ -240,13 +240,16 @@ export default {
 
         // days in sequence
         var day_seq = date_peaks.columns
-        day_seq.shift(); // drop first col with site_no
+        day_seq.shift(); // drop first col with site_no. list of all the active
 
         // sites 
-        var sites_list = site_coords.map(function(d)  { return d.site_no })
+        var sites_list = day_seq //site_coords.map(function(d)  { return d.site_no })
+        var sites_active = date_peaks
+        console.log(sites_list)
         this.n_sites = sites_list.length // to create nested array for indexing in animation
 
         // site placement on map
+        console.log(site_coords)
         var sites_x = site_coords.map(function(d) { return d.x })
         var sites_y = site_coords.map(function(d) { return d.y })
 
@@ -537,7 +540,7 @@ export default {
         // store time to restart at same point
         self.current_time = start+1
 
-        if (start < this.n_days){
+        if (start < this.n_days-1){
           this.d3.selectAll(".hilite")
           .transition('daily_line')
             .duration(this.day_length) 
@@ -819,25 +822,6 @@ text.legend-label {
   color: black;
   stroke-width: 2px;
 }
-.toggle {
-    position: absolute;
-  top: 20%;
-  left: 50%;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 70px;
-  height: 25px;
-  border-radius: 50px;
-  overflow: hidden;
-  outline: none;
-  border: none;
-  cursor: pointer;
-  background-color: $dark; // color for slow
-  transition: background-color ease 0.3s;
-  margin: auto;
-  justify-content: space-evenly;
-}
 #spacer {
   display: flex;
   justify-content: center;
@@ -869,22 +853,27 @@ text.legend-label {
   position: relative;
   display: inline-block;
   border-bottom: 1px dotted $dark;
+  z-index: 10;
 }
 
-.tooltip .tooltiptext {
+.tooltip {
+  display: inline-block;
+}
+
+.tooltiptext {
   visibility: hidden;
-  width: 250px;
-  background-color: rgba(54, 54, 54, 0.95);;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 5px;
 
   /* Position the tooltip */
   position: absolute;
   z-index: 1;
 }
 .tooltiptext {
+  width: 250px;
+  background-color: rgba(54, 54, 54, 0.95);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 7px 7px;
   P {
   font-size: 0.8 rem;
   }
@@ -894,7 +883,11 @@ text.legend-label {
   margin-left: -170px;
   margin-top: 20px;
 }
-.tooltip:hover .tooltiptext {
+span.tooltip-span:hover .tooltiptext {
   visibility: visible;
 }
+.ticks {
+  font: 10px sans-serif;
+}
+
 </style>
