@@ -14,17 +14,16 @@
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
-        
         <GWLmap
           id="map_gwl"
           class="map"
         />
       </div>
-        <div id="legend-container">
-          <Legend />
-        </div>
-        <div id="button-container">
-          <div id="spacer">
+      <div id="legend-container">
+        <Legend />
+      </div>
+      <div id="button-container">
+        <div id="spacer">
           <button 
             id="button-play"
             class="usa-button usa-button--outline"
@@ -37,11 +36,11 @@
           >
             {{ this.button_text_speed }}
           </button>
-          </div>
         </div>
+      </div>
 
       <div id="line-container">
-               <h4>
+        <h4>
           Groundwater sites by water level
         </h4>
         <svg
@@ -63,11 +62,14 @@
           class="text-content tooltip"
         >
           This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
-            <span class="tooltip-span">using percentiles</span>
-            <span class="tooltiptext" style="font-size: 0.8rem;">
-              The percentile calculates the percent of days in the past that groundwater was below the current value. For a site is in the 10th percentile, water levels have been lower 10% of the time. 
-            </span>
-              ), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
+          <span class="tooltip-span">using percentiles</span>
+          <span
+            class="tooltiptext"
+            style="font-size: 0.8rem;"
+          >
+            The percentile calculates the percent of days in the past that groundwater was below the current value. For a site is in the 10th percentile, water levels have been lower 10% of the time. 
+          </span>
+          ), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
         <p
           class="text-content"
@@ -90,7 +92,10 @@
           >USGS National Water Information System (NWIS)</a>, accessed using the <a
             href="https://github.com/USGS-R/dataRetrieval"
             target="_blank"
-          >dataRetrieval package for R</a>. To calculate percentiles we use a historic daily record spanning January 1, 1900 to December 31, 2020. To pull NWIS groundwater data for this historic daily record, we used the USGS <a href="https://help.waterdata.usgs.gov/codes-and-parameters/parameters" target="_blank">parameter code</a>, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were used in the historic record, and sites were limited to those with continuous data. This may include provisional data.
+          >dataRetrieval package for R</a>. To calculate percentiles we use a historic daily record spanning January 1, 1900 to December 31, 2020. To pull NWIS groundwater data for this historic daily record, we used the USGS <a
+            href="https://help.waterdata.usgs.gov/codes-and-parameters/parameters"
+            target="_blank"
+          >parameter code</a>, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were used in the historic record, and sites were limited to those with continuous data. This may include provisional data.
         </p>
         <br>
         <hr>
@@ -154,6 +159,8 @@ export default {
       button_text_speed: 'Slower',
       date_start: null,
       date_end: null,
+      date_list: null,
+      formatTime: null,
 
       // scales
       quant_path_gylph: null,
@@ -227,7 +234,6 @@ export default {
         // need to consider how to handle sites with no data on the first date 
         // variables: x, y, site_no, aqfr_type
         var site_coords = data[2]; 
-        console.log(site_coords)
 
         // proportion of sites by each category over time
         // variables: Date, day_seq (an integer from 1 to the last day), n_sites, and a column for each gwl category
@@ -245,7 +251,6 @@ export default {
         // sites 
         var sites_list = site_coords.map(function(d)  { return d.site_no })
         this.n_sites = sites_list.length // to create nested array for indexing in animation
-        console.log(sites_list)
 
         // site placement on map
         var sites_x = site_coords.map(function(d) { return d.x })
@@ -278,8 +283,8 @@ export default {
         // managing dates and time sequencing
         this.days = site_count.map(function(d) { return  d['day_seq']})
         this.n_days = this.days.length
-        var dates = site_count.map(function(d) { return  d['Date']}) 
-        this.formatDates(dates);
+        this.dates = site_count.map(function(d) { return  d['Date']}) 
+        this.formatDates(this.dates);
         
         // slightly different dimensions for drawing line chart on mobile and desktop
         if (this.mobileView){
@@ -319,9 +324,9 @@ export default {
       },
       formatDates(dates){
 
-        const formatTime = this.d3.utcFormat("%b %e, %Y");
-        this.date_start = formatTime(new Date(dates[0]));
-        this.date_end = formatTime(new Date(dates[this.n_days-1]));
+        this.formatTime = this.d3.utcFormat("%b %e, %Y");
+        this.date_start = this.formatTime(new Date(dates[0]));
+        this.date_end = this.formatTime(new Date(dates[this.n_days-1]));
 
       },
       setButton(){
@@ -546,6 +551,13 @@ export default {
           .end()
           .then(() => this.animateLine(self.current_time))
 
+          this.d3.selectAll(".ticker-date")
+          .transition()
+            .duration(this.day_length) 
+            .text(this.dates[start])
+          .end()
+          .then(() => this.animateLine(start))
+
         } else {
           this.d3.selectAll(".hilite")
             .transition('daily_line')
@@ -555,6 +567,12 @@ export default {
           // reset play/pause button
           self.current_time = 0;
           self.button_text = "Play";
+
+          // animate date ticker
+        /*   this.d3.selectAll(".ticker-date")
+          .transition()
+            .duration(this.day_length) 
+            .text(self.formatTime(new Date(this.dates[start])))//this.dates[0]) */
 
         }
       },
@@ -574,6 +592,17 @@ export default {
           .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
           .attr("opacity", ".7")
           .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) 
+
+          // add date ticker
+/*     map_svg
+        .append("text")
+        .attr("class", "ticker-date") 
+        //.attr("x", 500) // centering on pt
+       // .attr("y", 100)
+       .attr("transform",`translate(600, 500)`)
+        .text(self.formatTime(new Date(this.dates[start])))//this.dates[start])
+        .attr("text-anchor", "end") 
+        console.log(this.dates[start]) */
         
       },
       animateGWL(start){
