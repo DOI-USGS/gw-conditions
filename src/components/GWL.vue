@@ -14,17 +14,16 @@
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
-        
         <GWLmap
           id="map_gwl"
           class="map"
         />
       </div>
-        <div id="legend-container">
-          <Legend />
-        </div>
-        <div id="button-container">
-          <div id="spacer">
+      <div id="legend-container">
+        <Legend />
+      </div>
+      <div id="button-container">
+        <div id="spacer">
           <button 
             id="button-play"
             class="usa-button usa-button--outline"
@@ -37,15 +36,11 @@
           >
             {{ this.button_text_speed }}
           </button>
-          <!-- <input
-            type="checkbox"
-            class="toggle"
-          > -->
-          </div>
         </div>
+      </div>
 
       <div id="line-container">
-               <h4>
+        <h4>
           Groundwater sites by water level
         </h4>
         <svg
@@ -64,18 +59,23 @@
       </div>
       <div id="text-container">
         <p
-          class="text-content"
+          class="text-content tooltip"
         >
-          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the daily historic record (<a
-            href="https://waterwatch.usgs.gov/ptile.html"
-            target="_blank"
-          >using percentiles</a>), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
+          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
+          <span class="tooltip-span">using percentiles</span>
+          <span
+            class="tooltiptext"
+            style="font-size: 0.8rem;"
+          >
+            The percentile calculates the percent of days in the past that groundwater was below the current value. For a site is in the 10th percentile, water levels have been lower 10% of the time. 
+          </span>
+          ), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
         <p
           class="text-content"
         >
           To learn more about groundwater monitoring efforts by the USGS and partners go to: <a
-            href="usgs.gov/gwsip"
+            href="https://www.usgs.gov/programs/groundwater-and-streamflow-information-program"
             target="_blank"
           >usgs.gov/gwsip</a>. 
         </p>
@@ -86,14 +86,16 @@
         <p
           class="text-content"
         >
-          The historic daily record was built by using the <a
-            href="https://github.com/USGS-R/dataRetrieval"
-            target="_blank"
-          >R package dataRetrieval</a> to pull 
-          <a
+          This visualization is based on groundwater data from the <a
             href="https://waterdata.usgs.gov/nwis"
             target="_blank"
-          >USGS National Water Information System (NWIS)</a> data between January 1, 1900 and December 31, 2020 for the USGS parameter code, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were retained in the historic daily record.
+          >USGS National Water Information System (NWIS)</a>, accessed using the <a
+            href="https://github.com/USGS-R/dataRetrieval"
+            target="_blank"
+          >dataRetrieval package for R</a>. To calculate percentiles we use a historic daily record spanning January 1, 1900 to December 31, 2020. To pull NWIS groundwater data for this historic daily record, we used the USGS <a
+            href="https://help.waterdata.usgs.gov/codes-and-parameters/parameters"
+            target="_blank"
+          >parameter code</a>, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were used in the historic record, and sites were limited to those with continuous data. This may include provisional data.
         </p>
         <br>
         <hr>
@@ -110,8 +112,8 @@
           >See the latest U.S. River Conditions</a> and other <a
             href="https://labs.waterdata.usgs.gov/visualizations/vizlab-home/index.html?utm_source=viz&utm_medium=link&utm_campaign=gw_conditions#/"
             target="_blank"
-          >data visualizations from the USGS Vizlab
-          </a>.
+          >data visualizations from the USGS VizLab
+          </a>
         </p>
       </div>
     </div>
@@ -157,6 +159,8 @@ export default {
       button_text_speed: 'Slower',
       date_start: null,
       date_end: null,
+      date_list: null,
+      formatTime: null,
 
       // scales
       quant_path_gylph: null,
@@ -242,7 +246,7 @@ export default {
 
         // days in sequence
         var day_seq = date_peaks.columns
-        day_seq.shift(); // drop first col with site_no
+        day_seq.shift(); // drop first col with site_no. list of all the active
 
         // sites 
         var sites_list = site_coords.map(function(d)  { return d.site_no })
@@ -279,8 +283,8 @@ export default {
         // managing dates and time sequencing
         this.days = site_count.map(function(d) { return  d['day_seq']})
         this.n_days = this.days.length
-        var dates = site_count.map(function(d) { return  d['Date']}) 
-        this.formatDates(dates);
+        this.dates = site_count.map(function(d) { return  d['Date']}) 
+        this.formatDates(this.dates);
         
         // slightly different dimensions for drawing line chart on mobile and desktop
         if (this.mobileView){
@@ -320,9 +324,9 @@ export default {
       },
       formatDates(dates){
 
-        const formatTime = this.d3.utcFormat("%b %e, %Y");
-        this.date_start = formatTime(new Date(dates[0]));
-        this.date_end = formatTime(new Date(dates[this.n_days-1]));
+        this.formatTime = this.d3.utcFormat("%b %e, %Y");
+        this.date_start = this.formatTime(new Date(dates[0]));
+        this.date_end = this.formatTime(new Date(dates[this.n_days-1]));
 
       },
       setButton(){
@@ -539,13 +543,20 @@ export default {
         // store time to restart at same point
         self.current_time = start+1
 
-        if (start < this.n_days){
+        if (start < this.n_days-1){
           this.d3.selectAll(".hilite")
           .transition('daily_line')
             .duration(this.day_length) 
             .attr("x", self.xScale(this.days[start]))
           .end()
           .then(() => this.animateLine(self.current_time))
+
+          this.d3.selectAll(".ticker-date")
+          .transition()
+            .duration(this.day_length) 
+            .text(this.dates[start])
+          .end()
+          .then(() => this.animateLine(start))
 
         } else {
           this.d3.selectAll(".hilite")
@@ -556,6 +567,12 @@ export default {
           // reset play/pause button
           self.current_time = 0;
           self.button_text = "Play";
+
+          // animate date ticker
+        /*   this.d3.selectAll(".ticker-date")
+          .transition()
+            .duration(this.day_length) 
+            .text(self.formatTime(new Date(this.dates[start])))//this.dates[0]) */
 
         }
       },
@@ -575,6 +592,17 @@ export default {
           .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
           .attr("opacity", ".7")
           .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) 
+
+          // add date ticker
+/*     map_svg
+        .append("text")
+        .attr("class", "ticker-date") 
+        //.attr("x", 500) // centering on pt
+       // .attr("y", 100)
+       .attr("transform",`translate(600, 500)`)
+        .text(self.formatTime(new Date(this.dates[start])))//this.dates[start])
+        .attr("text-anchor", "end") 
+        console.log(this.dates[start]) */
         
       },
       animateGWL(start){
@@ -619,7 +647,7 @@ export default {
 }
 </script>
 <style scoped lang="scss">
-$dark: rgba(54, 54, 54, 0.7);
+$dark: rgba(54, 54, 54, 0.8);
 $light: #B3B3B3;
 // each piece is a separate div that can be positioned or overlapped with grid
 // mobile first
@@ -821,25 +849,6 @@ text.legend-label {
   color: black;
   stroke-width: 2px;
 }
-.toggle {
-    position: absolute;
-  top: 20%;
-  left: 50%;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  width: 70px;
-  height: 25px;
-  border-radius: 50px;
-  overflow: hidden;
-  outline: none;
-  border: none;
-  cursor: pointer;
-  background-color: $dark; // color for slow
-  transition: background-color ease 0.3s;
-  margin: auto;
-  justify-content: space-evenly;
-}
 #spacer {
   display: flex;
   justify-content: center;
@@ -847,32 +856,6 @@ text.legend-label {
       justify-content: end;
       }
 }
-/* .toggle:before {
-  content: "fast slow";
-  position: absolute;
-  z-index: 2;
-  width: 21px;
-  height: 21px;
-  background: #fff;
-  left: 2px;
-  top: 2px;
-  border-radius: 50%;
-  font: 16px/28px Helvetica;
-  font-weight: bold;
-  text-indent: -37px;
-  word-spacing: 29px;
-  color: #fff;
-  white-space: nowrap;
-  transition: all cubic-bezier(0.3, 1.5, 0.7, 1) 0.3s;
-}
-
-.toggle:checked {
-  background-color: $dark; // color for fast
-}
-
-.toggle:checked:before {
-  left: 47px;
-} */
 #vizlab-wordmark {
   max-width: 200px;
   display: block;
@@ -893,4 +876,45 @@ text.legend-label {
 #label-islands {
   opacity: 0.65;
 }
+.tooltip-span {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted $dark;
+  z-index: 10;
+}
+
+.tooltip {
+  display: inline-block;
+}
+
+.tooltiptext {
+  visibility: hidden;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+.tooltiptext {
+  width: 250px;
+  background-color: rgba(54, 54, 54, 0.95);
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 7px 7px;
+  P {
+  font-size: 0.8 rem;
+  }
+  overflow: visible;
+  //top: 0;
+  //left: 50%;
+  margin-left: -170px;
+  margin-top: 20px;
+}
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+.ticks {
+  font: 10px sans-serif;
+}
+
 </style>

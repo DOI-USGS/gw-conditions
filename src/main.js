@@ -6,7 +6,6 @@ import App from "./App.vue";
 import browserDetect from "vue-browser-detect-plugin";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import VueImg from 'v-img';
 
 
 // social icons
@@ -34,7 +33,6 @@ library.add(faInstagram);
 
 Vue.config.productionTip = false;
 Vue.use(browserDetect);
-Vue.use(VueImg, vueImgConfig);
 
 
 const app = new Vue({

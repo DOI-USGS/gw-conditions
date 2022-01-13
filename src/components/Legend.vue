@@ -85,7 +85,7 @@
       y2="30"
       class="legend-tick"
     />
-  <!--   percentile labels -->
+    <!--   percentile labels -->
     <text
       x="1"
       y="45"
@@ -116,7 +116,7 @@
       class="legend-text"
     >0.25
     </text>
-     <text
+    <text
       x="250"
       y="45"
       class="legend-text"
@@ -128,14 +128,14 @@
       class="legend-text"
     >0.75
     </text>
-        <!--   text labels -->
+    <!--   text labels -->
     <text
       x="22"
       y="-25"
       class="legend-label"
     >Very
     </text>
-     <text
+    <text
       x="22"
       y="-5"
       class="legend-label"
@@ -171,7 +171,7 @@
       class="legend-label"
     >Normal
     </text>
-   <!--  glyphs -->
+    <!--  glyphs -->
     <path
       id="Verylow"
       fill="#BF6200"
