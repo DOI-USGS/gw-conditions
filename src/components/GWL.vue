@@ -95,7 +95,10 @@
           >dataRetrieval package for R</a>. To calculate percentiles we use a historic daily record spanning January 1, 1900 to December 31, 2020. To pull NWIS groundwater data for this historic daily record, we used the USGS <a
             href="https://help.waterdata.usgs.gov/codes-and-parameters/parameters"
             target="_blank"
-          >parameter code</a>, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were used in the historic record, and sites were limited to those with continuous data. This may include provisional data.
+          >parameter code</a>, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were used in the historic record, and sites were limited to those with continuous data. <a
+          href="https://waterdata.usgs.gov/provisional-data-statement/"
+          target="_blank"
+          >Provisional data</a> were included in this analysis. 
         </p>
         <br>
         <hr>
