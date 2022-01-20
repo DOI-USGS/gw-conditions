@@ -262,7 +262,7 @@ export default {
         // reorganize - site is the key with gwl for each day of the wy
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
         var peaky = [];
-        for (i = 1; i < this.n_sites; i++) {
+        for (let i = 1; i < this.n_sites; i++) {
             var key = sites_list[i];
             var day_seq = date_peaks.map(function(d){  return d['day_seq']; });
             var gwl = date_peaks.map(function(d){  return d[key]; });
@@ -276,12 +276,12 @@ export default {
         
         var n_quant = quant_cat.length
         var percData = [];
-          for (i = 0; i < n_quant; i++) {
-          var key_quant = quant_cat[i];
+        for (let j = 0; j < n_quant; j++) {
+          var key_quant = quant_cat[j];
           var day_seq = site_count.map(function(d){ return d['day_seq']});
           var perc = site_count.map(function(d){ return d[key_quant]});
           percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
-          };
+        };
 
         // managing dates and time sequencing
         this.days = site_count.map(function(d) { return  d['day_seq']})
@@ -381,7 +381,7 @@ export default {
         label_month.selectAll(".month_tick")
           .data(time_labels).enter()
           .append("line")
-          .attr("class", function(d,i) { return "label_inner inner_" + d.month_label + "_" + d.year } ) 
+          .attr("class", function(d) { return "label_inner inner_" + d.month_label + "_" + d.year } ) 
           .attr("x1", function(d) { return self.xScale(d.day_seq) })
           .attr("x2", function(d) { return self.xScale(d.day_seq) })
           .attr("y1", 0)
@@ -393,7 +393,7 @@ export default {
           .data(time_labels)
           .enter()
           .append("text")
-          .attr("class", function(d,i) { return "label_name name_" + d.month_label + "_" + d.year } ) 
+          .attr("class", function(d) { return "label_name name_" + d.month_label + "_" + d.year } ) 
           .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
           .attr("y", (label_y+10))
           .text(function(d) { return d.month_label })
@@ -415,10 +415,10 @@ export default {
           .data(year_labels)
           .enter()
           .append("text")
-          .attr("class", function(d,i) { return "label_year label_" + d.year } ) 
+          .attr("class", function(d) { return "label_year label_" + d.year } ) 
           .attr("x", function(d) { return self.xScale(d.day_seq) }) // centering on pt
           .attr("y", (label_y*2+15))
-          .text(function(d, i) { return d.year })
+          .text(function(d) { return d.year })
           .attr("text-anchor", "middle")
           .style("alignment-baseline", "top")
           .attr("font-size", font_size)
