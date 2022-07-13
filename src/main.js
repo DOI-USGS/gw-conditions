@@ -32,6 +32,10 @@ library.add(faInstagram);
 
 Vue.config.productionTip = false;
 Vue.use(browserDetect);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 38372945048bd389cdc976a5304ae4cb7ce37f7d
 
 const app = new Vue({
   router,
