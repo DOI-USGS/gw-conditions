@@ -63,7 +63,8 @@ do_historic_addl_param_fetch <- function(final_target, addl_states, addl_gw_para
                "'0_historic/src/do_historic_gw_fetch.R',",
                "'0_historic/src/fetch_nwis_historic.R',",
                "include_ymls = I('%s')," = task_makefile,
-               "gw_site_tz_xwalk_nm = I('%s'))" = steps[['sites_tz_xwalk']]$target_name)
+               "gw_site_tz_xwalk_nm = I('%s')," = steps[['sites_tz_xwalk']]$target_name,
+               "filename_qualifer = I('_addl_%s'))" = task_name)
     }
   )
   
