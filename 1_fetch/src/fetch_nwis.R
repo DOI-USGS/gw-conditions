@@ -61,7 +61,25 @@ convert_uv_to_dv <- function(target_name, gw_uv_data_fn, site_tz_xwalk) {
 # Only works with one tz_abbr at a time
 POSIXct_to_Date_tz <- function(posix_dates, tz_abbr) {
   # The "AST" for "Atlantic Standard Time" is not recognized by `format()`
-  tz_abbr <- ifelse(tz_abbr == "AST", "America/Virgin", tz_abbr)
+  # According to https://www.r-bloggers.com/2018/07/a-tour-of-timezones-troubles-in-r/
+  # we should be using location-based timezones to properly handle daylight savings time
+  # Not going to worry about the Indiana and Phoenix nuances for now.
+  tz_abbr <- switch(
+    tz_abbr,
+    "AST" = "America/Virgin", 
+    "EST" = "America/New_York",
+    "EDT" = "America/New_York",
+    "CST" = "America/Chicago", 
+    "CDT" = "America/Chicago",
+    "MST" = "America/Denver",
+    "MDT" = "America/Denver",
+    "PST" = "America/Los_Angeles",
+    "PDT" = "America/Los_Angeles",
+    "AKST" = "America/Juneau",
+    "AKDT" = "America/Juneau",
+    "HST" = "US/Hawaii",
+    "HDT" = "US/Hawaii",
+    tz_abbr)
   as.Date(format(posix_dates, "%Y-%m-%d", tz=tz_abbr, usetz=TRUE))
 }
 
