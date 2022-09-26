@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <!-- <WindowSize v-if="checkTypeOfEnv === '-test build-'" /> -->
+    <!--  <HeaderUSWDSBanner /> -->
     <HeaderUSGS />
     <InternetExplorerPage v-if="isInternetExplorer" />
     <!-- an empty string in this case means the 'prod' version of the application   -->
@@ -13,16 +13,14 @@
 </template>
 
 <script>
-    // import WindowSize from "./components/WindowSize";
     import HeaderUSGS from './components/HeaderUSGS';
     import { isMobile } from 'mobile-device-detect';
     export default {
         name: 'App',
         components: {
-            // WindowSize,
             HeaderUSGS,
             InternetExplorerPage: () => import( /* webpackPrefetch: true */ /*webpackChunkName: "internet-explorer-page"*/ "./components/InternetExplorerPage"),
-            //WorkInProgressWarning: () => import( /* webpackPrefetch: true */ /*webpackChunkName: "work-in-progress-warning"*/ "./components/WorkInProgressWarning"),
+            //HeaderUSWDSBanner: () => import( /* webpackPrefetch: true */ /*webpackChunkName: "header-uswds-banner"*/ "./components/HeaderUSWDSBanner"),
             //PreFooterVisualizationsLinks: () => import( /* webpackPrefetch: true */ /*webpackChunkName: "pre-footer-links-visualizations"*/ "./components/PreFooterVisualizationsLinks"),
             PreFooterCodeLinks: () => import( /* webpackPrefetch: true */ /*webpackChunkName: "pre-footer-links-code"*/ "./components/PreFooterCodeLinks"),
             FooterUSGS: () => import( /* webpackPrefetch: true */ /*webpackChunkName: "usgs-footer"*/ "./components/FooterUSGS") // Have Webpack put the footer in a separate chunk so we can load it conditionally (with a v-if) if we desire
@@ -61,78 +59,120 @@
 
 <style lang="scss">
 // Fonts
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;600;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-@import url("https://use.typekit.net/yww2frw.css");
-@import url('https://fonts.googleapis.com/css2?family=Copse&display=swap'); // sort of old timey
-@import url('https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,200;0,300;0,400;0,600;0,700;0,900;1,200;1,300;1,400;1,600;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 
-$Cairo: 'Cairo', sans-serif;
 $Assistant: 'Assistant', sans-serif;
-$Noto: 'Noto Serif', serif;
-$acu_bold: 'acumin-pro', sans-serif;
-$copse: 'Copse', serif;
-$titillium: 'Titillium Wed', sans-serif;
 $open_sans: 'Open Sans', sans-serif;
 
 html,
 body {
       height:100%;
-      background-color: rgb(227, 227, 227);
+      background-color: rgb(223, 223, 223);
       margin: 0;
       padding: 0;
       line-height: 1.2;
-      font-size: 16px;
-      font-weight: 400;
+      font-size: 20px;
+      font-weight: 300;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       width: 100%;
-      @media screen and (max-width: 600px) {
-        font-size: 16px;
+      @media screen and (max-width: 800px) {
+        //font-size: 16px;
       }
-      .axis_label {
-        font-size: 20px;
-        font-weight: 600;
-      }
+  }
+  h1, h2, h3, h4 {
+    line-height: 1;
+    text-align: left;
+    font-family: $Assistant;
+    font-weight: 500;
+    margin: 0 0;
   }
 h1{
   font-size: 3.5em;
-  font-weight: 600;
-  font-family: $Assistant;
-  line-height: 1;
-  text-align: left;
   @media screen and (max-width: 600px) {
     font-size: 2.5em;
   }
 }
 h2{
-  font-weight: 600;
-  text-align: left;
-  font-family:$Assistant;
-  font-size: 3em;
-  margin-top: 5px;
-  line-height: 1;
-  @media screen and (max-width: 600px) {
-    font-size: 2em;
+  font-size: 2.75em;
+  font-weight: 700;
+  @media screen and (max-width: 800px) {
+        font-size: 2rem;
+      }
+  @media screen and (max-width: 650px) {
+    font-size: 1.3em;
   }
-  padding-left: 1rem;
 }
 h3{
   font-size: 1.5em;
-  padding-top: 0em;
-  font-family: $Assistant;
-  font-weight: 300;
-  @media screen and (max-width: 600px) {
+  //padding-top: 0.5em;
+  @media screen and (max-width: 800px) {
+      font-size: 1.3em;
+  }  
+  @media screen and (max-width: 650px) {
       font-size: 1em;
   }  
 }
-p, text {
-  padding: 1em 0 0 0; 
-  font-family: $open_sans;
+h4{
+  font-size: 1.2em;
+  padding-top: 0em;
+  font-weight: 600;
+  @media screen and (max-width: 800px) {
+      font-size: 1em;
+  }  
+  @media screen and (max-width: 650px) {
+      font-size: 1em;
+  }  
+}
+p, text, caption {
+  padding: 0.5em 0 0 0; 
+  font-family: $Assistant;
   font-weight: 400;
   line-height: 1.3;
+  margin: 0px 0px;
+  @media screen and (max-width: 800px) {
+        font-size: 16px;
+      }
 }
-
+caption {
+  padding: 0;
+  font-style: italic;
+  font-size: 0.8rem;
+  display: block;
+  width: 100%;
+  max-width: 700px;
+}
+// make svg text smaller than main text at small viewport sizes so it fits on the screen
+text {
+  //font-size: 20px;
+  @media screen and (max-width: 800px) {
+        font-size: 16px;
+      }
+  @media screen and (max-width: 550px) {
+        font-size: 13px;
+      }
+      // no highlight svg text
+  -webkit-touch-callout: none; /* iOS Safari */
+   -webkit-user-select: none;   /* Chrome/Safari/Opera */
+   -khtml-user-select: none;    /* Konqueror */
+   -moz-user-select: none;      /* Firefox */
+   -ms-user-select: none;       /* Internet Explorer/Edge */
+   user-select: none;           /* Non-prefixed version, currently not supported by any browser */
+   }
+// legend text is scaled differently because the svg has a max-width property set 
+.legend-text {
+ /*  font-size: 16px;
+  @media screen and (max-width: 800px) {
+        font-size: 20px;
+      } */
+    @media screen and (max-width: 550px) {
+        font-size: 20px;
+      }
+}
+span {
+  .tooltiptext {
+    font-size: 0.8rem;
+  }
+}
 </style>

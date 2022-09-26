@@ -1,19 +1,11 @@
 import "core-js/stable";
-import "regenerator-runtime/runtime";
 import Vue from "vue";
 import router from "./router";
 import { store } from "./store/store";
 import App from "./App.vue";
-import uswds from "uswds";
 import browserDetect from "vue-browser-detect-plugin";
-import Vuetify from "vuetify";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import "vuetify/dist/vuetify.min.css";
-import VueCarousel from 'vue-carousel';
-import VueImg from 'v-img';
-import VueSvg from 'vue-svg-loader';
-import gsap from "gsap";
 
 
 // social icons
@@ -30,7 +22,6 @@ const vueImgConfig = {
 }
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
-Vue.prototype.$gsap = gsap;
 
 // social icons
 library.add(faTwitterSquare);
@@ -41,11 +32,7 @@ library.add(faYoutubeSquare);
 library.add(faInstagram);
 
 Vue.config.productionTip = false;
-Vue.use(uswds);
 Vue.use(browserDetect);
-Vue.use(Vuetify);
-Vue.use(VueCarousel);
-Vue.use(VueImg, vueImgConfig);
 
 
 const app = new Vue({

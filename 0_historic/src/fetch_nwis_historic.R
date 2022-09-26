@@ -132,7 +132,7 @@ POSIXct_to_Date_tz <- function(posix_dates, tz_abbr) {
   # According to https://www.r-bloggers.com/2018/07/a-tour-of-timezones-troubles-in-r/
   # we should be using location-based timezones to properly handle daylight savings time
   # Not going to worry about the Indiana and Phoenix nuances for now.
-  tz_abbr <- switch(
+  tz_abbr_adj <- switch(
     tz_abbr,
     "AST" = "America/Virgin", 
     "EST" = "America/New_York",
@@ -148,7 +148,59 @@ POSIXct_to_Date_tz <- function(posix_dates, tz_abbr) {
     "HST" = "US/Hawaii",
     "HDT" = "US/Hawaii",
     tz_abbr)
-  as.Date(format(posix_dates, "%Y-%m-%d", tz=tz_abbr, usetz=TRUE))
+  
+  # Needs to retain POSIXct class and timestamp for extracting tz with '%Z' next
+  format(posix_dates, "%Y-%m-%d %H:%M:%S", tz=tz_abbr_adj, usetz=TRUE) %>% 
+    as.POSIXct(tz=tz_abbr_adj) %>% 
+    # For some reason, timezones above will only return daylight time,
+    # though it might have to due with whether your computer is in
+    # daylight or standard time at the moment you run the conversion
+    # code. I believe that the function below will appropriately account
+    # for that because it will test ST vs DT and do the appropriate switch.
+    adjust_for_daylight_savings(tz_desired = tz_abbr) %>% 
+    # Drop times and timezone before converting to a plain date or it will
+    # adjust using your local timezone.
+    format('%Y-%m-%d') %>% as.Date()
+  
+}
+
+# Note that the output from this fxn will say 'PDT' but mean 'PST'
+# because you can't have a timezone of 'PST' (it will convert to GMT, 
+# even when using `lubridate::force_tz(., 'PST')`). This is used
+# internally before dropping time and going to a day, so I am 
+# accepting the risk.
+adjust_for_daylight_savings <- function(posix_dates, tz_desired) {
+  
+  # To go from daylight time (DT) to standard time
+  #  (ST), subtract an hour and vice versa. If the
+  #  `from` and `to` values are the same, don't 
+  #  change anything about the dates.
+  tz_conversion_xwalk <- tibble(
+    from = c('DT', 'ST', 'ST', 'DT'),
+    to = c('ST', 'DT', 'ST', 'DT'),
+    conversion_sec = c(-3600, 3600, 0, 0)
+  )
+  
+  # There could be more than one timezone if the date range spans across
+  # the standard to daylight savings switch. Thus, we should be able to 
+  # convert each date independently (which happens in this piped sequence)
+  tibble(
+    in_dates = posix_dates,
+    in_tz = format(posix_dates, "%Z")
+  ) %>% 
+    mutate(
+      # Use the last two characters in both the current and desired
+      # timezones for matching with the conversion xwalk
+      from = stringr::str_sub(in_tz, -2, -1),
+      to = stringr::str_sub(tz_desired, -2, -1)
+    ) %>% 
+    # Join in conversion xwalk
+    left_join(tz_conversion_xwalk) %>%
+    # Alter the date values to match the desired timezone.
+    mutate(out_dates = in_dates + conversion_sec) %>% 
+    # Pull out just the dates to return
+    pull(out_dates)
+  
 }
 
 combine_gw_fetches <- function(target_name, dv_fn, uv_fn, uv_addl_fn) {
