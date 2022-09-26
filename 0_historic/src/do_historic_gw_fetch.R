@@ -1,6 +1,6 @@
 do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums, 
                                  gw_site_nums_obj_nm, param_cd, service_cd, request_limit, ..., 
-                                 include_ymls = NULL, gw_site_tz_xwalk_nm = NULL) {
+                                 include_ymls = NULL, gw_site_tz_xwalk_nm = NULL, filename_qualifer = "") {
   
   # Number indicating how many sites to include per dataRetrieval request to prevent
   # errors from requesting too much at once. More relevant for surface water requests.
@@ -43,7 +43,7 @@ do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums,
   download_data <- create_task_step(
     step_name = 'download_data',
     target_name = function(task_name, ...) {
-      sprintf("0_historic/tmp/historic_data_%s_%s.feather", service_cd, task_name)
+      sprintf("0_historic/tmp/historic_data_%s_%s%s.feather", service_cd, task_name, filename_qualifer)
     },
     command = function(..., task_name, steps) {
       psprintf("fetch_gw_historic_%s(" = service_cd,
@@ -60,7 +60,7 @@ do_historic_gw_fetch <- function(final_target, task_makefile, gw_site_nums,
     average_data <- create_task_step(
       step_name = 'average_data',
       target_name = function(task_name, ...) {
-        sprintf("0_historic/tmp/historic_data_avg_%s.feather", task_name)
+        sprintf("0_historic/tmp/historic_data_avg_%s%s.feather", task_name, filename_qualifer)
       },
       command = function(..., task_name, steps) {
         psprintf("convert_uv_to_dv(",
