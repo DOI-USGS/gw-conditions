@@ -35,7 +35,8 @@ do_addl_gw_fetch <- function(final_target, addl_param_cds) {
                "request_limit = uv_fetch_size_limit,",
                "'1_fetch/src/do_gw_fetch.R',",
                "'1_fetch/src/fetch_nwis.R',",
-               "include_ymls = I('%s'))" = task_makefile)
+               "include_ymls = I('%s')," = task_makefile,
+               "gw_site_tz_xwalk_nm = I('gw_quantile_site_tz_xwalk'))")
     }
   )
   
