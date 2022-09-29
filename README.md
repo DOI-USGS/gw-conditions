@@ -34,11 +34,14 @@ In the end the following targets should have been built successfully (because th
 
 - `visualizations/data/gw-conditions-time-labels.csv.ind`
 - `visualizations/data/gw-conditions-peaks-map.svg`
-- `visualizations/data/gw-conditions-wy20.csv.ind`
+- `visualizations/data/gw-conditions-peaks-timeseries.csv.ind`
 - `visualizations/data/gw-conditions-site-coords.csv.ind`
 - `visualizations/data/gw-conditions-daily-proportions.csv.ind`
 
-If you change the `viz_start_date` and `viz_end_date` values in `0_config.yml`, you should also change the name of the `visualizations/data/gw-conditions-wy20.csv.ind` file to reflect your new time period. In the future, we would like to do this automatically, but for now it is a manual step. The Vue code that reads that file would also need to be changed.
+Follow the two steps below in order to retain a copy of the current visualization's timeseries data, so that we can access it in the future without a data pipeline rebuild. 
+
+1. Authenticate to AWS using the Dev VPC. Use `saml2aws login` in your regular command line, and then make sure you choose the `gs-chs-wma-dev` account when prompted. If you are still authenticated to the Prod VPC, try running `saml2aws login --force` in order to force a new login.
+1. Then run `scmake('3_visualize/out/gw-conditions-peaks-timeseries-s3copy.ind')` to push a copy of the `3_visualize/out/gw-conditions-peaks-timeseries.csv` file to the `vizlab-data` bucket on the Dev VPC. The file will be automatically given a new name based on the `viz_start_date` and `viz_end_date` target values, using this pattern: `gw-conditions/viz-previous-peak-data/gw-conditions-viz-peaks-[viz_start_date]_[viz_end_date].csv`.
 
 ## Disclaimer
 
