@@ -41,7 +41,7 @@ In the end the following targets should have been built successfully (because th
 Follow the two steps below in order to retain a copy of the current visualization's timeseries data, so that we can access it in the future without a data pipeline rebuild. 
 
 1. Authenticate to AWS using the Dev VPC. Use `saml2aws login` in your regular command line, and then make sure you choose the `gs-chs-wma-dev` account when prompted. If you are still authenticated to the Prod VPC, try running `saml2aws login --force` in order to force a new login.
-1. Then run `scmake('3_visualize/out/gw-conditions-peaks-timeseries-s3copy.ind')` to push a copy of the `3_visualize/out/gw-conditions-peaks-timeseries.csv` file to the `vizlab-data` bucket on the Dev VPC. The file will be automatically given a new name based on the `viz_start_date` and `viz_end_date` target values, using this pattern: `gw-conditions/viz-previous-peak-data/gw-conditions-viz-peaks-[viz_start_date]_[viz_end_date].csv`.
+1. Then run `scmake('3_visualize/out/gw-conditions-peaks-timeseries-s3copy.ind')` to push a copy of the `3_visualize/out/gw-conditions-peaks-timeseries.csv` file to the `vizlab-data` bucket on the Dev VPC. The file will be automatically given a new name based on the `viz_start_date` and `viz_end_date` target values, using this pattern: `gw-conditions/viz-previous-peak-data/gw-conditions-peaks-timeseries-[viz_start_date]_[viz_end_date].csv`.
 
 ## Disclaimer
 

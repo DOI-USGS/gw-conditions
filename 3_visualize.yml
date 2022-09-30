@@ -75,7 +75,7 @@ targets:
   # This data ends up on the Dev VPC with `us-west-2`; you must login separately using `saml2aws login`
   gw_conditions_peaks_timeseries_s3copy_fname:
     command: sprintf(
-      I('gw-conditions/viz-previous-peak-data/gw-conditions-viz-peaks-%s_%s.csv'),
+      I('gw-conditions/viz-previous-peak-data/gw-conditions-peaks-timeseries-%s_%s.csv'),
       viz_start_date, viz_end_date)
   3_visualize/out/gw-conditions-peaks-timeseries-s3copy.ind:
     command: push_s3(
