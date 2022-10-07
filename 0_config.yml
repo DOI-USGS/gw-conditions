@@ -43,9 +43,9 @@ targets:
 ##-- Fetch configs --##
   
   viz_start_date:
-    command: as.Date(I('2021-01-01'))
+    command: as.Date(I('2021-10-01'))
   viz_end_date:
-    command: as.Date(I('2021-12-31'))
+    command: as.Date(I('2022-09-30'))
   # Use bounding box in case we want to do this regionally someday
   # Start with CONUS only
   # I don't think this is being used any more ...
