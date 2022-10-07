@@ -100,6 +100,7 @@ targets:
     depends:
       - viz_start_date
       - viz_end_date
+      - '1_fetch/src/fetch_nwis.R'
 
   # Combine all data
   1_fetch/out/gw_data.csv:
