@@ -15,6 +15,7 @@ sources:
   - 3_visualize/src/svg_utils_paths.R
   - 3_visualize/src/svg_utils_vue.R
   - 3_visualize/src/sf_utils_shift.R
+  - 3_visualize/src/push_s3.R
 
 targets:
 
@@ -22,7 +23,7 @@ targets:
     depends:
       - visualizations/data/gw-conditions-peaks-map.svg.ind
       - visualizations/data/gw-conditions-site-coords.csv.ind
-      - visualizations/data/gw-conditions-year21.csv.ind
+      - visualizations/data/gw-conditions-peaks-timeseries.csv.ind
       - visualizations/data/gw-conditions-daily-proportions.csv.ind
       - src/assets/gw-conditions-peaks-map.svg # Currently a temporary fix!
 
@@ -37,7 +38,7 @@ targets:
     depends:
      - '2_process/out/nws_states.shp'
       
-  3_visualize/out/gw-conditions-year21.csv:
+  3_visualize/out/gw-conditions-peaks-timeseries.csv:
     command: gwl_to_peak(
       target_name, 
       gw_anomaly_data_w_colors)
@@ -53,17 +54,35 @@ targets:
   
   ##-- Now push the data needed by Vue to S3 --##
 
+  # These data end up on the Prod VPC with `us-west-2`
+  # You must login separately using `saml2aws login`
+  
   visualizations/data/gw-conditions-peaks-map.svg.ind:
     command: s3_put(target_name, '3_visualize/out/gw-conditions-peaks-map.svg', config_file = I('lib/cfg/s3_config_viz.yml'))
     
-  visualizations/data/gw-conditions-year21.csv.ind:
-    command: s3_put(target_name, '3_visualize/out/gw-conditions-year21.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
+  visualizations/data/gw-conditions-peaks-timeseries.csv.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-peaks-timeseries.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
 
   visualizations/data/gw-conditions-site-coords.csv.ind:
     command: s3_put(target_name, '3_visualize/out/gw-conditions-site-coords.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
   
   visualizations/data/gw-conditions-daily-proportions.csv.ind:
     command: s3_put(target_name, '3_visualize/out/gw-conditions-daily-proportions.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
+
+  # We want to keep a copy of each time window we use, but don't want to have to keep changing the 
+  # filename that is used by the Vue code manually. So, we are uploading a copy of the data for
+  # the current viz time window and naming based on the dates.
+  # This data ends up on the Dev VPC with `us-west-2`; you must login separately using `saml2aws login`
+  gw_conditions_peaks_timeseries_s3copy_fname:
+    command: sprintf(
+      I('gw-conditions/viz-previous-peak-data/gw-conditions-peaks-timeseries-%s_%s.csv'),
+      viz_start_date, viz_end_date)
+  3_visualize/out/gw-conditions-peaks-timeseries-s3copy.ind:
+    command: push_s3(
+      upload_ind = target_name,
+      local_file = '3_visualize/out/gw-conditions-peaks-timeseries.csv', 
+      s3_file = gw_conditions_peaks_timeseries_s3copy_fname,
+      config_file = I('lib/cfg/s3_config.yml'))
 
   # TEMPORARY FIX #
   # Currently, we can't inject SVG directly from a URL. So,
