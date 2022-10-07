@@ -195,7 +195,7 @@ adjust_for_daylight_savings <- function(posix_dates, tz_desired) {
       to = stringr::str_sub(tz_desired, -2, -1)
     ) %>% 
     # Join in conversion xwalk
-    left_join(tz_conversion_xwalk) %>%
+    left_join(tz_conversion_xwalk, by = c("from", "to")) %>%
     # Alter the date values to match the desired timezone.
     mutate(out_dates = in_dates + conversion_sec) %>% 
     # Pull out just the dates to return

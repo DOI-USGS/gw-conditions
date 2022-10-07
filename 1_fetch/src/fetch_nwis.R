@@ -53,7 +53,7 @@ convert_uv_to_dv <- function(target_name, gw_uv_data_fn, site_tz_xwalk) {
     
     ### Reduce each instantaneous value to a single average for each date
     group_by(site_no, Date) %>% 
-    summarize(GWL = mean(GWL_inst, na.rm = TRUE)) %>% 
+    summarize(GWL = mean(GWL_inst, na.rm = TRUE), .groups = "keep") %>% 
     write_feather(target_name)
 }
 
@@ -126,7 +126,7 @@ adjust_for_daylight_savings <- function(posix_dates, tz_desired) {
       to = stringr::str_sub(tz_desired, -2, -1)
     ) %>% 
     # Join in conversion xwalk
-    left_join(tz_conversion_xwalk) %>%
+    left_join(tz_conversion_xwalk, by = c("from", "to")) %>%
     # Alter the date values to match the desired timezone.
     mutate(out_dates = in_dates + conversion_sec) %>% 
     # Pull out just the dates to return
