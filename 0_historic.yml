@@ -45,6 +45,9 @@ targets:
       '0_historic/src/do_historic_gw_fetch.R',
       '0_historic/src/fetch_nwis_historic.R')
   # Task table for `uv` includes a step to average the data to daily values.
+  # This step needs the timezones for all the sites.
+  historic_gw_sites_uv_tz:
+    command: fetch_gw_site_tz(historic_gw_sites_uv)
   0_historic/out/historic_gw_data_uv.csv:
     command: do_historic_gw_fetch(
       final_target = target_name,
@@ -55,7 +58,8 @@ targets:
       service_cd = I('uv'),
       request_limit = historic_uv_fetch_size_limit,
       '0_historic/src/do_historic_gw_fetch.R',
-      '0_historic/src/fetch_nwis_historic.R')
+      '0_historic/src/fetch_nwis_historic.R',
+      gw_site_tz_xwalk_nm = I('historic_gw_sites_uv_tz'))
   
   # Special pull for just KS & just FL using `62610`. Plus, HI using `72150`.
   # Read all about why on GitHub: https://github.com/USGS-VIZLAB/gw-conditions/issues/9

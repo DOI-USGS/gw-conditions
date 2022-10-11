@@ -70,6 +70,9 @@ targets:
       - viz_end_date
   
   # Task table for `uv` includes a step to average the data to daily values.
+  # This step needs the timezones for all the sites.
+  gw_quantile_site_tz_xwalk:
+    command: select(gw_quantile_site_info, I('site_no'), I('tz_cd'))
   1_fetch/out/gw_data_uv.csv:
     command: do_gw_fetch(
       final_target = target_name,
@@ -80,7 +83,8 @@ targets:
       service_cd = I('uv'),
       request_limit = uv_fetch_size_limit,
       '1_fetch/src/do_gw_fetch.R',
-      '1_fetch/src/fetch_nwis.R')
+      '1_fetch/src/fetch_nwis.R',
+      gw_site_tz_xwalk_nm = I('gw_quantile_site_tz_xwalk'))
     depends:
       - viz_start_date
       - viz_end_date

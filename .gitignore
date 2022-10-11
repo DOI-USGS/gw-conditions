@@ -46,7 +46,7 @@ vignettes/*.pdf
 .remake
 build/
 
-# Track indicator files for what files are one S3
+# Track indicator files for what files are on S3
 gw-conditions/*
 !gw-conditions/*.ind
 visualizations/data/*
