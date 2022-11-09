@@ -14,7 +14,7 @@
         >
           <img
             class="img"
-            src="@/assets/usgsHeaderAndFooter/images/usgsLogo_white-01.png"
+            src="@/assets/usgsHeaderAndFooter/images/logo.png"
             alt="Home"
           >
         </a>
@@ -57,7 +57,7 @@
     margin-top: 5px;
     margin-bottom:0px;
     border: 0;
-    height: 45px;
+    height: 55px;
     width: auto;
   }
 </style>
