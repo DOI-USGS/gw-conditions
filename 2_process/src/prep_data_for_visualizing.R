@@ -58,3 +58,12 @@ generate_months <- function(file_out, data_in){
     mutate(year_label = ifelse(day_seq == min(day_seq), year, NA)) %>% 
     write_csv(file_out)
 }
+
+# Make sure the data being displayed and used to create labels 
+# fits within the time range asked for
+subset_to_date_range <- function(file_out, daily_data_fn, start_date, end_date) {
+  read_csv(daily_data_fn) %>% 
+    filter(Date >= start_date,
+           Date <= end_date) %>% 
+    write_csv(file_out)
+}

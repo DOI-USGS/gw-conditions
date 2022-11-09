@@ -26,6 +26,7 @@ targets:
       - visualizations/data/gw-conditions-peaks-timeseries.csv.ind
       - visualizations/data/gw-conditions-daily-proportions.csv.ind
       - src/assets/gw-conditions-peaks-map.svg # Currently a temporary fix!
+      - 3_visualize/out/gw-conditions-peaks-timeseries-s3copy.ind
 
   3_visualize/out/gw-conditions-peaks-map.svg:
     command: build_peaks_svg(

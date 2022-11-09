@@ -176,9 +176,11 @@ adjust_for_daylight_savings <- function(posix_dates, tz_desired) {
   #  `from` and `to` values are the same, don't 
   #  change anything about the dates.
   tz_conversion_xwalk <- tibble(
+    # NWIS dates appear to always be reported as standard time,
+    # So we shouldn't subtract an hour when going from DT to ST
     from = c('DT', 'ST', 'ST', 'DT'),
     to = c('ST', 'DT', 'ST', 'DT'),
-    conversion_sec = c(-3600, 3600, 0, 0)
+    conversion_sec = c(0, 3600, 0, 0)
   )
   
   # There could be more than one timezone if the date range spans across
@@ -195,7 +197,7 @@ adjust_for_daylight_savings <- function(posix_dates, tz_desired) {
       to = stringr::str_sub(tz_desired, -2, -1)
     ) %>% 
     # Join in conversion xwalk
-    left_join(tz_conversion_xwalk) %>%
+    left_join(tz_conversion_xwalk, by = c("from", "to")) %>%
     # Alter the date values to match the desired timezone.
     mutate(out_dates = in_dates + conversion_sec) %>% 
     # Pull out just the dates to return
