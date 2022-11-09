@@ -20,8 +20,10 @@ targets:
 
 ##-- Historic GW sites and data --##
 
+  # This data comes from the Dev VPC with `us-west-2`
+
   last_updated:
-    command: c(I('2021-10-20'))
+    command: c(I('2022-09-19 10:00 AM'))
 
   # All sites (including those with years < min_years)
   1_fetch/out/historic_gw_site_info_unfiltered.rds:
@@ -98,6 +100,7 @@ targets:
     depends:
       - viz_start_date
       - viz_end_date
+      - '1_fetch/src/fetch_nwis.R'
 
   # Combine all data
   1_fetch/out/gw_data.csv:

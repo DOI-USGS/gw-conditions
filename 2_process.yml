@@ -27,13 +27,23 @@ targets:
   # current implementation, this means any site that used pcode == '72019'
   depth_below_sites: 
     command: c(gw_sites_dv, gw_sites_uv)
-    
+  
+  # Filter any dates outside of our range to visualize This shouldn't
+  # be needed forever but due to Issue #78, it is for now
+  # https://github.com/USGS-VIZLAB/gw-conditions/issues/78
+  2_process/out/gw_daily_viz_range.csv:
+    command: subset_to_date_range(
+      target_name,
+      daily_data_fn = "1_fetch/out/gw_data.csv",
+      start_date = viz_start_date,
+      end_date = viz_end_date)
+  
   # Calculate quantiles of each  daily value
   2_process/out/gw_daily_quantiles.csv:
     command: compare_to_historic(
       target_name,
       historic_quantile_fn = "1_fetch/out/historic_gw_quantiles.csv",
-      current_data_fn = "1_fetch/out/gw_data.csv",
+      current_data_fn = "2_process/out/gw_daily_viz_range.csv",
       inverse_sites = depth_below_sites)
   
   # Summarize GWL data quantiles as very high, high, normal, low, or very low
