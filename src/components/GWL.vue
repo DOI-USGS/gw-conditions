@@ -543,7 +543,7 @@ export default {
         // animates grey line on timeseries chart to represent current timepoint
         const self = this;
         
-        // store time to restart at same point
+        // store time to restart at same point if animation is paused
         self.current_time = start+1
 
         if (start < this.n_days-1){
@@ -554,12 +554,12 @@ export default {
           .end()
           .then(() => this.animateLine(self.current_time))
 
-          this.d3.selectAll(".ticker-date")
-          .transition()
-            .duration(this.day_length) 
-            .text(this.dates[start])
-          .end()
-          .then(() => this.animateLine(start))
+          // this.d3.selectAll(".ticker-date")
+          // .transition()
+          //   .duration(this.day_length) 
+          //   .text(this.dates[start])
+          // .end()
+          // .then(() => this.animateLine(start))
 
         } else {
           this.d3.selectAll(".hilite")
@@ -595,9 +595,15 @@ export default {
           .append("path") // append path for each site
           .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
           .attr("class", function(d) { return "gwl " + d.key })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
+          .attr("fill", function(d) { 
+            let fillColor = d.gwl[start] == "NA" ? "None" : self.quant_color(d.gwl[start])
+            return  fillColor
+          }) 
           .attr("opacity", ".7")
-          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) 
+          .attr("d", function(d) { 
+            let itemPath = d.gwl[start] == "NA" ? null : self.quant_path_gylph(d.gwl[start])
+            return  itemPath
+          }) 
 
           // add date ticker
 /*     map_svg
@@ -614,16 +620,15 @@ export default {
       animateGWL(start){
         const self = this;
         // animate path d and fill by wy day  
-    
         if (start < this.n_days-1){
-        
+          
           this.peak_grp
             .transition('daily_gwl')
             .duration(this.day_length)
             .each(function(d,i) {
-              let current_path = self.d3.select(this)
-              let today = self.quant_path_gylph(d.gwl[start])
-              let yesterday = self.quant_path_gylph(d.gwl[start-1])
+              let current_path = self.d3.select(this) // current path shape
+              let today = d.gwl[start] == "NA" ? null : self.quant_path_gylph(d.gwl[start]) // set to null if value is NA
+              let yesterday = d.gwl[start-1] == "NA" ? null : self.quant_path_gylph(d.gwl[start-1]) // set to null if value is NA
               if(today != yesterday){
                 self.animatePathD(start, current_path)
               }
@@ -632,12 +637,17 @@ export default {
             .then(() => this.animateGWL(self.current_time)) // loop animation increasing by 1 day
         } else {
       // if it's the last day of the water year, stop animation on the first frame
-
           this.peak_grp
             .transition('daily_gwl')
             .duration(this.day_length)  // duration of each day
-            .attr("d", function(d) { return self.quant_path_gylph(d.gwl[0]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
-            .attr("fill", function(d) { return self.quant_color(d.gwl[0]) })
+            .attr("d", function(d) { 
+              let itemPath = d.gwl[0] == "NA" ? null : self.quant_path_gylph(d.gwl[0])
+              return  itemPath 
+            })
+            .attr("fill", function(d) { 
+              let fillColor = d.gwl[0] == "NA" ? "None" : self.quant_color(d.gwl[0])
+            return  fillColor 
+            })
         }
       },
       animatePathD(start, current_path){
@@ -645,9 +655,13 @@ export default {
         current_path
           .transition()
           .attr("d", function(d) { 
-            return self.quant_path_gylph(d.gwl[start])
-            })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
+            let itemPath = d.gwl[start] == "NA" ? null : self.quant_path_gylph(d.gwl[start])
+            return  itemPath
+          })
+          .attr("fill", function(d) { 
+            let fillColor = d.gwl[start] == "NA" ? "None" : self.quant_color(d.gwl[start])
+            return  fillColor 
+          })
       }
     }
 }
