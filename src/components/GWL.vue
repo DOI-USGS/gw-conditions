@@ -272,7 +272,7 @@ export default {
             let site_y = sites_y[i];
             peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
         };
-        console.log(peaky)
+        
         // same for timeseries data but indexed by percentile category
         const quant_cat = [...new Set(quant_peaks.map(function(d) { return d.quant}))];
         
@@ -309,6 +309,7 @@ export default {
 
         // draw the map
         const map_svg = this.d3.select("svg.map")
+        const start = 0;
         this.drawFrame1(map_svg, peaky, start);
 
         // animated timeseries line chart
@@ -317,7 +318,6 @@ export default {
         this.addLabels(time_container, time_labels, line_height, margin_x, font_size, label_y);
 
         // control animation
-        const start = 0;
         this.animateLine(start);
         this.animateGWL(start);
 
@@ -584,13 +584,16 @@ export default {
         const self = this;
 
         // draw sites with D3
-          this.peak_grp = map_svg.selectAll("path.gwl_glyph")
-            .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
-            .join("path") // match with selection
-            .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
-
-        // draws a path for each site, using the first date
-        this.peak_grp 
+        // set up group to hold paths
+        const peakSvgGroup = map_svg.append("g")
+          .attr("id", "peak-map-grp")
+        
+        // Add path for each site, using the first date
+        this.peak_grp = peakSvgGroup.selectAll("gwl")
+          .data(data)
+          .enter()
+          .append("path") // append path for each site
+          .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
           .attr("class", function(d) { return "gwl " + d.key })
           .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
           .attr("opacity", ".7")
