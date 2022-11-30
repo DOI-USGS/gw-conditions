@@ -264,7 +264,7 @@ export default {
         // reorganize - site is the key with gwl for each day of the wy
         // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
         const peaky = [];
-        for (let i = 1; i < this.n_sites; i++) {
+        for (let i = 0; i < this.n_sites; i++) {
             let key = sites_list[i];
             let day_seq = this.days;
             let gwl = date_peaks.map(function(d){  return d[key]; });
