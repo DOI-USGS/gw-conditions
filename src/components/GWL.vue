@@ -247,11 +247,13 @@ export default {
         // TODO: incorporate additional event annotations 
         const time_labels = data[4]; 
 
-        // days in sequence
-        var day_seq = date_peaks.columns
-        day_seq.shift(); // drop first col with site_no. list of all the active
+        // managing dates and time sequencing
+        this.days = site_count.map(function(d) { return  d['day_seq']})
+        this.n_days = this.days.length
+        this.dates = site_count.map(function(d) { return  d['Date']}) 
+        this.formatDates(this.dates);
         
-        // sites 
+        // list of all the active sites 
         const sites_list = site_coords.map(function(d)  { return d.site_no })
         this.n_sites = sites_list.length // to create nested array for indexing in animation
 
@@ -264,7 +266,7 @@ export default {
         const peaky = [];
         for (let i = 1; i < this.n_sites; i++) {
             let key = sites_list[i];
-            let day_seq = date_peaks.map(function(d){  return d['day_seq']; });
+            let day_seq = this.days;
             let gwl = date_peaks.map(function(d){  return d[key]; });
             let site_x = sites_x[i];
             let site_y = sites_y[i];
@@ -278,16 +280,10 @@ export default {
         const percData = [];
         for (let j = 0; j < n_quant; j++) {
           let key_quant = quant_cat[j];
-          let day_seq = date_peaks.map(function(d){  return d['day_seq']; });
+          let day_seq = this.days;
           let perc = site_count.map(function(d){ return d[key_quant]});
           percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
         };
-
-        // managing dates and time sequencing
-        this.days = site_count.map(function(d) { return  d['day_seq']})
-        this.n_days = this.days.length
-        this.dates = site_count.map(function(d) { return  d['Date']}) 
-        this.formatDates(this.dates);
         
         // slightly different dimensions for drawing line chart on mobile and desktop
         let line_height,
