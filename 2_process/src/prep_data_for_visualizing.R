@@ -61,9 +61,12 @@ generate_months <- function(file_out, data_in){
 
 # Make sure the data being displayed and used to create labels 
 # fits within the time range asked for
+# Filter out sites w/ all NA GWL levels
 subset_to_date_range <- function(file_out, daily_data_fn, start_date, end_date) {
   read_csv(daily_data_fn) %>% 
     filter(Date >= start_date,
            Date <= end_date) %>% 
+    group_by(site_no) %>%
+    filter(!all(is.na(GWL))) %>%
     write_csv(file_out)
 }
