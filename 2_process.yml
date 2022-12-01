@@ -66,6 +66,8 @@ targets:
       sites_sf = gw_sites_sf,
       sites_info = gw_quantile_site_info,
       proj_str = proj_str)
+    depends:
+     - '2_process/out/nws_states.shp'
 
   # Prepare data for peaks SVG
   gw_anomaly_data:
