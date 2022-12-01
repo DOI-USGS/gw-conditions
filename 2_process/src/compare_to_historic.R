@@ -23,6 +23,11 @@ compare_to_historic <- function(target_name, historic_quantile_fn, current_data_
       message(sprintf("Quantiles not available for %s, returning NA.", site))
     } 
     
+    # Pull historic maximum and minimum values
+    min_hist_va <- min(historic_quantiles$quantile_va)
+    max_hist_va <- min(historic_quantiles$quantile_va)
+    
+    # Get percentiles for current values based on historical record
     site_current <- current_data %>% 
       filter(site_no == site) %>% 
       # Add flag for whether an inverse of the GWL value should be used
@@ -35,10 +40,17 @@ compare_to_historic <- function(target_name, historic_quantile_fn, current_data_
         yes = approx(x = site_quantiles$quantile_va, y = site_quantiles$quantile_nm, 
                      xout = GWL*ifelse(is_inverse, -1, 1))$y,
         no = NA)) %>% 
+      # account for values outside of historic range
+      mutate(daily_quant = ifelse(
+        nrow(site_quantiles) > 0 & is.na(daily_quant),
+        yes = case_when(
+          GWL*ifelse(is_inverse, -1, 1) > max_hist_va ~ 100,
+          GWL*ifelse(is_inverse, -1, 1) < min_hist_va ~ 0,
+          TRUE ~ NA_real_
+        ),
+        no = daily_quant)) %>%
       ungroup() %>% 
       select(-is_inverse)
-    
-    # TODO: Handle any new max or new min values when using dates outside of dates used to calculate historic vals
     
     return(site_current)
   }, current_data, historic_quantiles, inverse_sites) %>% 
