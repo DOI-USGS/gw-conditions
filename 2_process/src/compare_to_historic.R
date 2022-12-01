@@ -16,16 +16,16 @@ compare_to_historic <- function(target_name, historic_quantile_fn, current_data_
   # See this comment on GitHub for more detail/background: 
   #   https://github.com/USGS-VIZLAB/gw-conditions/issues/9#issuecomment-854115170
   daily_quantiles <- purrr::map(gw_sites, function(site, current_data, historic_quantiles, inverse_sites) {
-
+  
     site_quantiles <- historic_quantiles %>% filter(site_no == site) 
     
     if(nrow(site_quantiles) == 0) {
       message(sprintf("Quantiles not available for %s, returning NA.", site))
     } 
     
-    # Pull historic maximum and minimum values
-    min_hist_va <- min(historic_quantiles$quantile_va)
-    max_hist_va <- min(historic_quantiles$quantile_va)
+    # Pull historic maximum and minimum values for site
+    min_hist_va <- min(site_quantiles$quantile_va)
+    max_hist_va <- max(site_quantiles$quantile_va)
     
     # Get percentiles for current values based on historical record
     site_current <- current_data %>% 
