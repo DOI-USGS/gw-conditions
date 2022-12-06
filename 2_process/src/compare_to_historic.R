@@ -34,21 +34,14 @@ compare_to_historic <- function(target_name, historic_quantile_fn, current_data_
       mutate(is_inverse = site_no %in% inverse_sites) %>% 
       # Figure out the corresponding quantile for each daily value
       # If there are no non-NA quantiles available, return NA
+      # Account for values outside of historic range by using `rule = 2`.
+      # Repeats top or bottom known quantile for any values outside of historic range
       rowwise() %>% 
       mutate(daily_quant = ifelse(
         nrow(site_quantiles) > 0, 
         yes = approx(x = site_quantiles$quantile_va, y = site_quantiles$quantile_nm, 
-                     xout = GWL*ifelse(is_inverse, -1, 1))$y,
-        no = NA)) %>% 
-      # account for values outside of historic range
-      mutate(daily_quant = ifelse(
-        nrow(site_quantiles) > 0 & is.na(daily_quant),
-        yes = case_when(
-          GWL*ifelse(is_inverse, -1, 1) > max_hist_va ~ 100,
-          GWL*ifelse(is_inverse, -1, 1) < min_hist_va ~ 0,
-          TRUE ~ NA_real_
-        ),
-        no = daily_quant)) %>%
+                     xout = GWL*ifelse(is_inverse, -1, 1), rule=2)$y,
+        no = NA)) %>%
       ungroup() %>% 
       select(-is_inverse)
     
