@@ -7,7 +7,8 @@ add_background_map <- function(svg, svg_width, outline_states, digits) {
   
   bkgrd_grp <- xml_add_child(svg, 'g', 
                              id = "bkgrd-map-grp", 
-                             class='map-bkgrd')
+                             class='map-bkgrd',
+                             transform="translate(-20, 20)")
   purrr::map(map_data$ID, function(polygon_id, map_data, svg_width) {
     d <- map_data %>% 
       filter(ID == polygon_id) %>% 

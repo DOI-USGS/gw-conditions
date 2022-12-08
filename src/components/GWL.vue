@@ -28,9 +28,11 @@
             id="map_gwl"
             class="map"
           />
-          <mapLabels 
-            class="map"
-          />
+          <g transform="translate(-20, 20)">
+            <mapLabels 
+              class="map"
+            />
+          </g>
         </svg>
       </div>
       <div id="legend-container">
@@ -324,7 +326,7 @@ export default {
         this.setScales(quant_path, line_height, margin_x); // axes, color, and line drawing fun
 
         // draw the map
-        const map_svg = this.d3.select("svg.map")
+        const map_svg = this.d3.select("#map_gwl")
         const start = 0;
         this.drawFrame1(map_svg, peaky, start);
 
@@ -603,6 +605,7 @@ export default {
         // set up group to hold paths
         const peakSvgGroup = map_svg.append("g")
           .attr("id", "peak-map-grp")
+          .attr("transform", "translate(-20, 20)")
         
         // Add path for each site, using the first date
         this.peak_grp = peakSvgGroup.selectAll("gwl")
