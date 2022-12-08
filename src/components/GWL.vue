@@ -14,10 +14,24 @@
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
-        <GWLmap
-          id="map_gwl"
+        <svg 
+          id="map_svg" 
+          xmlns="http://www.w3.org/2000/svg" 
+          xmlns:xlink="http://www.w3.org/1999/xlink" 
+          viewBox="0 0 1000 700"
+          preserveAspectRatio="xMidYMid meet" 
+          version="1.1" 
+          role="img"
           class="map"
-        />
+        >
+          <GWLmap
+            id="map_gwl"
+            class="map"
+          />
+          <mapLabels 
+            class="map"
+          />
+        </svg>
       </div>
       <div id="legend-container">
         <Legend />
@@ -28,13 +42,13 @@
             id="button-play"
             class="usa-button usa-button--outline"
           >
-            {{ this.button_text }}
+            {{ button_text }}
           </button>
           <button 
             id="button-speed"
             class="usa-button usa-button--outline"
           >
-            {{ this.button_text_speed }}
+            {{ button_text_speed }}
           </button>
         </div>
       </div>
@@ -61,7 +75,7 @@
         <p
           class="text-content tooltip"
         >
-          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
+          This map animates groundwater levels at {{ n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
           <span class="tooltip-span">using percentiles</span>
           <span
             class="tooltiptext"
@@ -96,8 +110,8 @@
             href="https://help.waterdata.usgs.gov/codes-and-parameters/parameters"
             target="_blank"
           >parameter code</a>, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were used in the historic record, and sites were limited to those with continuous data. <a
-          href="https://waterdata.usgs.gov/provisional-data-statement/"
-          target="_blank"
+            href="https://waterdata.usgs.gov/provisional-data-statement/"
+            target="_blank"
           >Provisional data</a> were included in this analysis. 
         </p>
         <br>
@@ -131,12 +145,14 @@ import { axisBottom, axisLeft } from 'd3-axis';
 import { csv } from 'd3-fetch';
 import { line, path , format} from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
+import mapLabels from "@/assets/gw-conditions-labels-map.svg";
 import { isMobile } from 'mobile-device-detect';
 
 export default {
   name: "GWLsvg",
     components: {
       GWLmap,
+      mapLabels,
       Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend")
     },
     data() {
@@ -886,15 +902,12 @@ text.legend-label {
   stroke-dasharray: 1,3;
   fill: transparent;
   stroke: $dark;
+  opacity: 0.65;
 }
 #map-text text{
-  font-size: 0.6rem;
-  color: $dark;
-  opacity: 0.6;
+  font-size: 0.8em;
+  fill: #6E6E6E;
   font-style: italic;
-}
-#label-islands {
-  opacity: 0.65;
 }
 .tooltip-span {
   position: relative;
