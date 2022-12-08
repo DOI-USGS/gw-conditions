@@ -28,7 +28,7 @@
             id="map_gwl"
             class="map"
           />
-          <g transform="translate(-20, 20)">
+          <g transform="translate(-10, 20)">
             <mapLabels 
               class="map"
             />
@@ -605,7 +605,7 @@ export default {
         // set up group to hold paths
         const peakSvgGroup = map_svg.append("g")
           .attr("id", "peak-map-grp")
-          .attr("transform", "translate(-20, 20)")
+          .attr("transform", "translate(-10, 20)")
         
         // Add path for each site, using the first date
         this.peak_grp = peakSvgGroup.selectAll("gwl")
