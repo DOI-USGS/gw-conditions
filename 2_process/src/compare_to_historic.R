@@ -16,29 +16,30 @@ compare_to_historic <- function(target_name, historic_quantile_fn, current_data_
   # See this comment on GitHub for more detail/background: 
   #   https://github.com/USGS-VIZLAB/gw-conditions/issues/9#issuecomment-854115170
   daily_quantiles <- purrr::map(gw_sites, function(site, current_data, historic_quantiles, inverse_sites) {
-
+  
     site_quantiles <- historic_quantiles %>% filter(site_no == site) 
     
     if(nrow(site_quantiles) == 0) {
       message(sprintf("Quantiles not available for %s, returning NA.", site))
-    } 
+    }
     
+    # Get percentiles for current values based on historical record
     site_current <- current_data %>% 
       filter(site_no == site) %>% 
       # Add flag for whether an inverse of the GWL value should be used
       mutate(is_inverse = site_no %in% inverse_sites) %>% 
       # Figure out the corresponding quantile for each daily value
       # If there are no non-NA quantiles available, return NA
+      # Account for values outside of historic range by using `rule = 2`.
+      # Repeats top or bottom known quantile for any values outside of historic range
       rowwise() %>% 
       mutate(daily_quant = ifelse(
         nrow(site_quantiles) > 0, 
         yes = approx(x = site_quantiles$quantile_va, y = site_quantiles$quantile_nm, 
-                     xout = GWL*ifelse(is_inverse, -1, 1))$y,
-        no = NA)) %>% 
+                     xout = GWL*ifelse(is_inverse, -1, 1), rule=2)$y,
+        no = NA)) %>%
       ungroup() %>% 
       select(-is_inverse)
-    
-    # TODO: Handle any new max or new min values when using dates outside of dates used to calculate historic vals
     
     return(site_current)
   }, current_data, historic_quantiles, inverse_sites) %>% 

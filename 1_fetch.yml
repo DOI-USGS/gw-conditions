@@ -15,7 +15,7 @@ targets:
 
   1_fetch:
     depends:
-      - 1_fetch/out/gw_sites.rds
+      - 1_fetch/out/historic_gw_site_info_filtered.rds
       - 1_fetch/out/gw_data.csv
 
 ##-- Historic GW sites and data --##

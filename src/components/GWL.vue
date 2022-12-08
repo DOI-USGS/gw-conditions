@@ -14,10 +14,26 @@
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
-        <GWLmap
-          id="map_gwl"
+        <svg 
+          id="map_svg" 
+          xmlns="http://www.w3.org/2000/svg" 
+          xmlns:xlink="http://www.w3.org/1999/xlink" 
+          viewBox="0 0 1000 700"
+          preserveAspectRatio="xMidYMid meet" 
+          version="1.1" 
+          role="img"
           class="map"
-        />
+        >
+          <GWLmap
+            id="map_gwl"
+            class="map"
+          />
+          <g transform="translate(-10, 20)">
+            <mapLabels 
+              class="map"
+            />
+          </g>
+        </svg>
       </div>
       <div id="legend-container">
         <Legend />
@@ -28,13 +44,13 @@
             id="button-play"
             class="usa-button usa-button--outline"
           >
-            {{ this.button_text }}
+            {{ button_text }}
           </button>
           <button 
             id="button-speed"
             class="usa-button usa-button--outline"
           >
-            {{ this.button_text_speed }}
+            {{ button_text_speed }}
           </button>
         </div>
       </div>
@@ -61,7 +77,7 @@
         <p
           class="text-content tooltip"
         >
-          This map animates groundwater levels at {{ this.n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
+          This map animates groundwater levels at {{ n_sites }} well sites across the U.S. At each site, groundwater levels are shown relative to the historic record (
           <span class="tooltip-span">using percentiles</span>
           <span
             class="tooltiptext"
@@ -96,8 +112,8 @@
             href="https://help.waterdata.usgs.gov/codes-and-parameters/parameters"
             target="_blank"
           >parameter code</a>, 72019. If no daily values were available for 72019 but instantaneous records were, the daily value was calculated by averaging the instantaneous values per day based on the local time zone. For three states, the 72019 parameter code was not reported and a different parameter code was used to calculate daily groundwater percentiles (62610 was used for Florida and Kansas; 72150 was used for Hawaii). Only groundwater sites with a minimum of 3 years of data were used in the historic record, and sites were limited to those with continuous data. <a
-          href="https://waterdata.usgs.gov/provisional-data-statement/"
-          target="_blank"
+            href="https://waterdata.usgs.gov/provisional-data-statement/"
+            target="_blank"
           >Provisional data</a> were included in this analysis. 
         </p>
         <br>
@@ -131,12 +147,14 @@ import { axisBottom, axisLeft } from 'd3-axis';
 import { csv } from 'd3-fetch';
 import { line, path , format} from 'd3';
 import GWLmap from "@/assets/gw-conditions-peaks-map.svg";
+import mapLabels from "@/assets/gw-conditions-labels-map.svg";
 import { isMobile } from 'mobile-device-detect';
 
 export default {
   name: "GWLsvg",
     components: {
       GWLmap,
+      mapLabels,
       Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend")
     },
     data() {
@@ -186,7 +204,7 @@ export default {
       this.d3 = Object.assign({d3Trans, scaleLinear, scaleThreshold, scaleOrdinal, select, selectAll, csv, utcFormat, line, path, axisBottom, axisLeft, format  });
 
       // resize
-      var window_line = document.getElementById('line-container')
+      const window_line = document.getElementById('line-container')
       this.width = window_line.clientWidth;
       this.height = window.innerHeight*.5;
       this.pal_BuBr = [this.veryhigh, this.high, this.normal, this.low, this.verylow];
@@ -223,65 +241,29 @@ export default {
         // assign data
 
         // builds legend, has row for each category
-        var quant_peaks = data[0]; 
+        const quant_peaks = data[0]; 
 
         // gwl site level timeseries data to make peak animation
         // row for each day/frame, col for each site
         // first column is the day, subsequent are named "gwl_" + site_no
         // site values are svg scaled svg positions for the animation
-        var date_peaks = data[1]; 
+        const date_peaks = data[1]; 
 
         // site coordinates for map
         // TODO: pre-draw on map and pick up with d3
         // requires duplicating map style in R so looks consistent on load
         // need to consider how to handle sites with no data on the first date 
         // variables: x, y, site_no, aqfr_type
-        var site_coords = data[2]; 
+        const site_coords = data[2]; 
 
         // proportion of sites by each category over time
         // variables: Date, day_seq (an integer from 1 to the last day), n_sites, and a column for each gwl category
-        var site_count = data[3]; // number of sites x quant_category x day_seq
+        const site_count = data[3]; // number of sites x quant_category x day_seq
 
         // annotations for the timeline
         // R pipeline pulls out each month and the year for time labels
         // TODO: incorporate additional event annotations 
-        var time_labels = data[4]; 
-
-        // days in sequence
-        var day_seq = date_peaks.columns
-        day_seq.shift(); // drop first col with site_no. list of all the active
-
-        // sites 
-        var sites_list = site_coords.map(function(d)  { return d.site_no })
-        this.n_sites = sites_list.length // to create nested array for indexing in animation
-
-        // site placement on map
-        var sites_x = site_coords.map(function(d) { return d.x })
-        var sites_y = site_coords.map(function(d) { return d.y })
-
-        // reorganize - site is the key with gwl for each day of the wy
-        // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
-        var peaky = [];
-        for (let i = 1; i < this.n_sites; i++) {
-            var key = sites_list[i];
-            var day_seq = date_peaks.map(function(d){  return d['day_seq']; });
-            var gwl = date_peaks.map(function(d){  return d[key]; });
-            var site_x = sites_x[i];
-            var site_y = sites_y[i];
-            peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
-        };
-
-        // same for timeseries data but indexed by percentile category
-        var quant_cat = [...new Set(quant_peaks.map(function(d) { return d.quant}))];
-        
-        var n_quant = quant_cat.length
-        var percData = [];
-        for (let j = 0; j < n_quant; j++) {
-          var key_quant = quant_cat[j];
-          var day_seq = site_count.map(function(d){ return d['day_seq']});
-          var perc = site_count.map(function(d){ return d[key_quant]});
-          percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
-        };
+        const time_labels = data[4]; 
 
         // managing dates and time sequencing
         this.days = site_count.map(function(d) { return  d['day_seq']})
@@ -289,35 +271,71 @@ export default {
         this.dates = site_count.map(function(d) { return  d['Date']}) 
         this.formatDates(this.dates);
         
+        // list of all the active sites 
+        const sites_list = site_coords.map(function(d)  { return d.site_no })
+        this.n_sites = sites_list.length // to create nested array for indexing in animation
+
+        // site placement on map
+        const sites_x = site_coords.map(function(d) { return d.x })
+        const sites_y = site_coords.map(function(d) { return d.y })
+
+        // reorganize - site is the key with gwl for each day of the wy
+        // can be indexed using site key (gwl_#) - and used to bind data to DOM elements
+        const peaky = [];
+        for (let i = 0; i < this.n_sites; i++) {
+            let key = sites_list[i];
+            let day_seq = this.days;
+            let gwl = date_peaks.map(function(d){  return d[key]; });
+            let site_x = sites_x[i];
+            let site_y = sites_y[i];
+            peaky.push({key: key, day_seq: day_seq, gwl: gwl, site_x: site_x, site_y: site_y})
+        };
+        
+        // same for timeseries data but indexed by percentile category
+        const quant_cat = [...new Set(quant_peaks.map(function(d) { return d.quant}))];
+        
+        const n_quant = quant_cat.length
+        const percData = [];
+        for (let j = 0; j < n_quant; j++) {
+          let key_quant = quant_cat[j];
+          let day_seq = this.days;
+          let perc = site_count.map(function(d){ return d[key_quant]});
+          percData.push({key_quant: key_quant, day_seq: day_seq, perc: perc})
+        };
+        
         // slightly different dimensions for drawing line chart on mobile and desktop
+        let line_height,
+            font_size,
+            label_y,
+            margin_x;
         if (this.mobileView){
-          var line_height = 100;
-          var font_size = '16px';
-          var label_y = 10;
-          var margin_x = 35;
+          line_height = 100;
+          font_size = '16px';
+          label_y = 10;
+          margin_x = 35;
           this.mar = 25;
         } else {
-          var line_height = 150;
-          var font_size = '20px';
-          var label_y = 20;
-          var margin_x = 50;
+          line_height = 150;
+          font_size = '20px';
+          label_y = 20;
+          margin_x = 50;
           this.mar = 50;
         }
         // set up scales
-        var quant_path = [...new Set(quant_peaks.map(function(d) { return d.path_quant}))];
+        const quant_path = [...new Set(quant_peaks.map(function(d) { return d.path_quant}))];
         this.setScales(quant_path, line_height, margin_x); // axes, color, and line drawing fun
 
         // draw the map
-        var map_svg = this.d3.select("svg.map")
+        const map_svg = this.d3.select("#map_gwl")
+        const start = 0;
         this.drawFrame1(map_svg, peaky, start);
 
         // animated timeseries line chart
-        var time_container = this.d3.select("#line-container");
+        const time_container = this.d3.select("#line-container");
         this.drawLineChart(time_container, percData, line_height, margin_x);
         this.addLabels(time_container, time_labels, line_height, margin_x, font_size, label_y);
 
         // control animation
-        var start = 0;
         this.animateLine(start);
         this.animateGWL(start);
 
@@ -373,7 +391,7 @@ export default {
         const self = this;
        // timeline labels
 
-        var label_month = time_container.select('#line-chart')
+        const label_month = time_container.select('#line-chart')
           .append("g")
           .attr("transform", "translate(" + 0+ "," + (line_height+this.mar/2) + ")")
 
@@ -406,7 +424,7 @@ export default {
 
 
         // filter to just year annotations for first month they appear
-        var year_labels = time_labels.filter(function(el) {
+        const year_labels = time_labels.filter(function(el) {
           return el.year_label >= 2000;
         });
 
@@ -428,18 +446,18 @@ export default {
         const self = this;
 
         // set up svg for timeline
-        var svg = time_container.select("svg")
+        const svg = time_container.select("svg")
           .attr("viewBox", "0 0 " + this.width + " " + (line_height+this.mar*2))
           .append("g")
           .attr("id", "time-chart")
           .attr("transform", "translate(" + 0 + "," + this.mar/2 + ")")
 
         // define axes
-        var xLine = this.d3.axisBottom()
+        const xLine = this.d3.axisBottom()
           .scale(this.xScale)
           .ticks(0).tickSize(0); // add using imported label data
 
-        var yLine = this.d3.axisLeft().tickFormat(this.d3.format('~%'))
+        const yLine = this.d3.axisLeft().tickFormat(this.d3.format('~%'))
           .scale(this.yScale)
           .ticks(2).tickSizeInner(4).tickSizeOuter(0);
 
@@ -465,7 +483,7 @@ export default {
           .attr("z-index", "1")
 
         // add line chart showing proportion of gages in each category
-        var line_chart = this.d3.select("#time-chart")
+        const line_chart = this.d3.select("#time-chart")
 
         // add percent lines to chart
         line_chart.append("g")
@@ -543,7 +561,7 @@ export default {
         // animates grey line on timeseries chart to represent current timepoint
         const self = this;
         
-        // store time to restart at same point
+        // store time to restart at same point if animation is paused
         self.current_time = start+1
 
         if (start < this.n_days-1){
@@ -554,12 +572,12 @@ export default {
           .end()
           .then(() => this.animateLine(self.current_time))
 
-          this.d3.selectAll(".ticker-date")
-          .transition()
-            .duration(this.day_length) 
-            .text(this.dates[start])
-          .end()
-          .then(() => this.animateLine(start))
+          // this.d3.selectAll(".ticker-date")
+          // .transition()
+          //   .duration(this.day_length) 
+          //   .text(this.dates[start])
+          // .end()
+          // .then(() => this.animateLine(start))
 
         } else {
           this.d3.selectAll(".hilite")
@@ -584,17 +602,27 @@ export default {
         const self = this;
 
         // draw sites with D3
-          this.peak_grp = map_svg.selectAll("path.gwl_glyph")
-            .data(data, function(d) { return d ? d.key : this.class; }) // binds data based on class/key
-            .join("path") // match with selection
-            .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
-
-        // draws a path for each site, using the first date
-        this.peak_grp 
+        // set up group to hold paths
+        const peakSvgGroup = map_svg.append("g")
+          .attr("id", "peak-map-grp")
+          .attr("transform", "translate(-10, 20)")
+        
+        // Add path for each site, using the first date
+        this.peak_grp = peakSvgGroup.selectAll("gwl")
+          .data(data)
+          .enter()
+          .append("path") // append path for each site
+          .attr("transform", d => `translate(` + d.site_x + ' ' + d.site_y + `) scale(0.35 0.35)`)
           .attr("class", function(d) { return "gwl " + d.key })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[start]) }) 
+          .attr("fill", function(d) { 
+            let fillColor = d.gwl[start] == "NA" ? "None" : self.quant_color(d.gwl[start])
+            return  fillColor
+          }) 
           .attr("opacity", ".7")
-          .attr("d", function(d) { return self.quant_path_gylph(d.gwl[start]) }) 
+          .attr("d", function(d) { 
+            let itemPath = d.gwl[start] == "NA" ? null : self.quant_path_gylph(d.gwl[start])
+            return  itemPath
+          }) 
 
           // add date ticker
 /*     map_svg
@@ -611,16 +639,15 @@ export default {
       animateGWL(start){
         const self = this;
         // animate path d and fill by wy day  
-    
         if (start < this.n_days-1){
-        
+          
           this.peak_grp
             .transition('daily_gwl')
             .duration(this.day_length)
             .each(function(d,i) {
-              let current_path = self.d3.select(this)
-              var today = self.quant_path_gylph(d.gwl[start])
-              var yesterday = self.quant_path_gylph(d.gwl[start-1])
+              let current_path = self.d3.select(this) // current path shape
+              let today = d.gwl[start] == "NA" ? null : self.quant_path_gylph(d.gwl[start]) // set to null if value is NA
+              let yesterday = d.gwl[start-1] == "NA" ? null : self.quant_path_gylph(d.gwl[start-1]) // set to null if value is NA
               if(today != yesterday){
                 self.animatePathD(start, current_path)
               }
@@ -629,12 +656,17 @@ export default {
             .then(() => this.animateGWL(self.current_time)) // loop animation increasing by 1 day
         } else {
       // if it's the last day of the water year, stop animation on the first frame
-
           this.peak_grp
             .transition('daily_gwl')
             .duration(this.day_length)  // duration of each day
-            .attr("d", function(d) { return self.quant_path_gylph(d.gwl[0]) })//{ return "M-10 0 C -10 0 0 " + d.gwl[this.n_days-1] + " 10 0 Z" })
-            .attr("fill", function(d) { return self.quant_color(d.gwl[0]) })
+            .attr("d", function(d) { 
+              let itemPath = d.gwl[0] == "NA" ? null : self.quant_path_gylph(d.gwl[0])
+              return  itemPath 
+            })
+            .attr("fill", function(d) { 
+              let fillColor = d.gwl[0] == "NA" ? "None" : self.quant_color(d.gwl[0])
+            return  fillColor 
+            })
         }
       },
       animatePathD(start, current_path){
@@ -642,9 +674,13 @@ export default {
         current_path
           .transition()
           .attr("d", function(d) { 
-            return self.quant_path_gylph(d.gwl[start])
-            })
-          .attr("fill", function(d) { return self.quant_color(d.gwl[start]) })
+            let itemPath = d.gwl[start] == "NA" ? null : self.quant_path_gylph(d.gwl[start])
+            return  itemPath
+          })
+          .attr("fill", function(d) { 
+            let fillColor = d.gwl[start] == "NA" ? "None" : self.quant_color(d.gwl[start])
+            return  fillColor 
+          })
       }
     }
 }
@@ -869,15 +905,12 @@ text.legend-label {
   stroke-dasharray: 1,3;
   fill: transparent;
   stroke: $dark;
+  opacity: 0.65;
 }
 #map-text text{
-  font-size: 0.6rem;
-  color: $dark;
-  opacity: 0.6;
+  font-size: 0.8em;
+  fill: #6E6E6E;
   font-style: italic;
-}
-#label-islands {
-  opacity: 0.65;
 }
 .tooltip-span {
   position: relative;
