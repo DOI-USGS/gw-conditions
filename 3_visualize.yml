@@ -27,6 +27,10 @@ targets:
       - visualizations/data/gw-conditions-daily-proportions.csv.ind
       - src/assets/gw-conditions-peaks-map.svg # Currently a temporary fix!
       - 3_visualize/out/gw-conditions-peaks-timeseries-s3copy.ind
+      - 3_visualize/out/gw-conditions-daily-proportions-s3copy.ind
+      - 3_visualize/out/gw-conditions-site-coords-s3copy.ind
+      - 3_visualize/out/gw-conditions-time-labels-s3copy.ind
+      
 
   3_visualize/out/gw-conditions-peaks-map.svg:
     command: build_peaks_svg(
@@ -84,6 +88,39 @@ targets:
       upload_ind = target_name,
       local_file = '3_visualize/out/gw-conditions-peaks-timeseries.csv', 
       s3_file = gw_conditions_peaks_timeseries_s3copy_fname,
+      config_file = I('lib/cfg/s3_config.yml'))
+  
+  gw_conditions_daily_proportions_s3copy_fname:
+    command: sprintf(
+      I('gw-conditions/viz-previous-peak-data/gw-conditions-daily-proportions-%s_%s.csv'),
+      viz_start_date, viz_end_date)
+  3_visualize/out/gw-conditions-daily-proportions-s3copy.ind:
+    command: push_s3(
+      upload_ind = target_name,
+      local_file = '3_visualize/out/gw-conditions-daily-proportions.csv', 
+      s3_file = gw_conditions_daily_proportions_s3copy_fname,
+      config_file = I('lib/cfg/s3_config.yml'))
+      
+  gw_conditions_site_coords_s3copy_fname:
+    command: sprintf(
+      I('gw-conditions/viz-previous-peak-data/gw-conditions-site-coords-%s_%s.csv'),
+      viz_start_date, viz_end_date)
+  3_visualize/out/gw-conditions-site-coords-s3copy.ind:
+    command: push_s3(
+      upload_ind = target_name,
+      local_file = '3_visualize/out/gw-conditions-site-coords.csv', 
+      s3_file = gw_conditions_site_coords_s3copy_fname,
+      config_file = I('lib/cfg/s3_config.yml'))
+      
+  gw_conditions_time_labels_s3copy_fname:
+    command: sprintf(
+      I('gw-conditions/viz-previous-peak-data/gw-conditions-time-labels-%s_%s.csv'),
+      viz_start_date, viz_end_date)
+  3_visualize/out/gw-conditions-time-labels-s3copy.ind:
+    command: push_s3(
+      upload_ind = target_name,
+      local_file = '2_process/out/gw-conditions-time-labels.csv', 
+      s3_file = gw_conditions_time_labels_s3copy_fname,
       config_file = I('lib/cfg/s3_config.yml'))
 
   # TEMPORARY FIX #
