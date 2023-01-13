@@ -75,6 +75,20 @@ targets:
   visualizations/data/gw-conditions-daily-proportions.csv.ind:
     command: s3_put(target_name, '3_visualize/out/gw-conditions-daily-proportions.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
 
+  # MUST BE RUN MANUALLY, AS UPLOADING FILES UPDATES THE LIVE SITE
+  # Upload to Prod a copy of the timeseries, daily proportions, site coords, and time labels to use on the live site
+  visualizations/data/gw-conditions-peaks-timeseries-live.csv.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-peaks-timeseries.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
+  
+  visualizations/data/gw-conditions-daily-proportions-live.csv.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-daily-proportions.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
+
+  visualizations/data/gw-conditions-site-coords-live.csv.ind:
+    command: s3_put(target_name, '3_visualize/out/gw-conditions-site-coords.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
+    
+  visualizations/data/gw-conditions-time-labels-live.csv.ind:
+    command: s3_put(target_name, '2_process/out/gw-conditions-time-labels.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
+
   # We want to keep a copy of each time window we use, but don't want to have to keep changing the 
   # filename that is used by the Vue code manually. So, we are uploading a copy of the data for
   # the current viz time window and naming based on the dates.
