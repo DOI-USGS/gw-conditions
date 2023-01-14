@@ -96,10 +96,10 @@ targets:
   1_fetch/out/gw_data_uv_addl.csv:
     command: do_addl_gw_fetch(
       final_target = target_name,
-      addl_param_cds = addl_gw_param_cds)
+      addl_param_cds = addl_gw_param_cds,
+      viz_start_date = viz_start_date,
+      viz_end_date = viz_end_date)
     depends:
-      - viz_start_date
-      - viz_end_date
       - '1_fetch/src/fetch_nwis.R'
 
   # Combine all data
