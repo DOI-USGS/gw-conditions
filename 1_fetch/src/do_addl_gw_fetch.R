@@ -1,4 +1,4 @@
-do_addl_gw_fetch <- function(final_target, addl_param_cds) {
+do_addl_gw_fetch <- function(final_target, addl_param_cds, viz_start_date, viz_end_date) {
   # Special pull for just KS & just FL using `62610`. Plus, HI using `72150`.
   # Read all about why on GitHub: https://github.com/USGS-VIZLAB/gw-conditions/issues/9
   
@@ -38,7 +38,8 @@ do_addl_gw_fetch <- function(final_target, addl_param_cds) {
                "include_ymls = I('%s')," = task_makefile,
                "gw_site_tz_xwalk_nm = I('gw_quantile_site_tz_xwalk'),",
                "filename_qualifier = I('_addl_%s'))" = task_name)
-    }
+    },
+    depends = c("viz_start_date", "viz_end_date")
   )
   
   # Create the task plan
