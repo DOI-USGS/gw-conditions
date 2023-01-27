@@ -116,6 +116,7 @@
             target="_blank"
           >Provisional data</a> were included in this analysis. 
         </p>
+        <authorship />
         <br>
         <hr>
         <img
@@ -155,7 +156,8 @@ export default {
     components: {
       GWLmap,
       mapLabels,
-      Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend")
+      Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend"),
+      authorship: () => import( /* webpackPreload: true */ /*webpackChunkName: "section"*/ "./../components/Authorship")
     },
     data() {
     return {
