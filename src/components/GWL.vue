@@ -14,26 +14,13 @@
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
-        <svg 
-          id="map_svg" 
-          xmlns="http://www.w3.org/2000/svg" 
-          xmlns:xlink="http://www.w3.org/1999/xlink" 
-          viewBox="0 0 1000 700"
-          preserveAspectRatio="xMidYMid meet" 
-          version="1.1" 
-          role="img"
-          class="map"
-        >
           <GWLmap
             id="map_gwl"
             class="map"
           />
-          <g transform="translate(-10, 20)">
-            <mapLabels 
-              class="map"
-            />
-          </g>
-        </svg>
+          <mapLabels 
+            class="map labels"
+          />
       </div>
       <div id="legend-container">
         <Legend />
@@ -720,7 +707,7 @@ section {
       }
 
 }
-#map-container{
+#map-container {
   grid-area: map;
   padding: 0rem;
   padding-bottom: 0px;
@@ -731,7 +718,11 @@ section {
   svg.map {
     max-height: 68vh;
   }
+  svg.map.labels {
+    position: absolute;
+  }
 }
+
 #line-container {
   grid-area: line;
   width: 100%;
