@@ -717,6 +717,7 @@ section {
   align-items: center;
   svg.map {
     max-height: 68vh;
+    max-width: 98vw;
     width: 100%;
     height: 100%;
   }
