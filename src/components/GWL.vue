@@ -116,7 +116,11 @@
             target="_blank"
           >Provisional data</a> were included in this analysis. 
         </p>
-        <authorship />
+        <br>
+        <h4>
+          Page development
+        </h4>
+        <authorship class="text-content"/>
         <br>
         <hr>
         <img
