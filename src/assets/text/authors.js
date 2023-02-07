@@ -9,7 +9,7 @@ export default {
         initials: 'CN',
         profile_link: 'https://www.usgs.gov/staff-profiles/cee-nell',
         role: 'developer',
-        contribution: 'contributed to pipeline development and creation of the prebuilt svg paths, developed the website and d3 animation, and reviewed code'
+        contribution: 'led the development of the website and D3 animation, contributed to the development of the data processing pipeline, and reviewed code'
       },
       {
         firstName: 'Lindsay',
@@ -18,7 +18,7 @@ export default {
         initials: 'LP',
         profile_link: 'https://www.usgs.gov/staff-profiles/lindsay-rc-platt',
         role: 'developer',
-        contribution: 'developed the pipeline to pull historic and current groundwater levels, led the development of the prebuilt svg paths, and reviewed code'
+        contribution: 'led the development of the data processing pipeline and reviewed code'
       }
     ],
     // do not delete section. delete any or all individuals as needed. modify content as needed
@@ -31,7 +31,7 @@ export default {
         initials: 'HCD',
         profile_link: 'https://www.usgs.gov/staff-profiles/hayley-corson-dosch',
         role: 'developer',
-        contribution: 'updated the pipeline for calendar year 2022 and reviewed code'
+        contribution: 'contributed to website development and reviewed code'
       }
       ]
 };
