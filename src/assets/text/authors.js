@@ -9,7 +9,7 @@ export default {
         initials: 'CN',
         profile_link: 'https://www.usgs.gov/staff-profiles/cee-nell',
         role: 'developer',
-        contribution: 'contributed to pipeline development and creation of the prebuilt svg paths, developed the website and d3 animation, and reviewed code'
+        contribution: 'contributed to the data processing pipeline, developed the website, and created the d3 animation'
       },
       {
         firstName: 'Lindsay',
