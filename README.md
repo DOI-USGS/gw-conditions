@@ -1,6 +1,8 @@
 # gw-conditions
 
-A visualization showing groundwater conditions as little peaks above or below their normal values. This visualization is built using an R-based pipeline for data processing, and Vue.js + D3.js to create an animated site. The R-based pipeline (1) calculates daily percentiles for each well based on the historic record at each site, and (2) writes an svg map for the base of the animation. The R-based pipeline also pushes the data up to a public S3 bucket. This pipeline leverages an internal package, `library(scipiper)` to automate the workflow. You do not need to run the pipeline to be able to build the app locally, since the app points to data in the S3 bucket.
+A visualization showing groundwater conditions as little peaks above or below their normal values. The final website can be found here: https://labs.waterdata.usgs.gov/visualizations/gw-conditions/index.html#/
+
+This visualization is built using an R-based pipeline for data processing, and Vue.js + D3.js to create an animated site. The R-based pipeline (1) calculates daily percentiles for each well based on the historic record at each site, and (2) writes an svg map for the base of the animation. The R-based pipeline also pushes the data up to a public S3 bucket. This pipeline leverages an internal package, `library(scipiper)` to automate the workflow. You do not need to run the pipeline to be able to build the app locally, since the app points to data in the S3 bucket.
 
 ## Build the visualization locally
 
@@ -43,15 +45,3 @@ Follow the two steps below in order to retain a copy of the current visualizatio
 1. Authenticate to AWS using the Dev VPC. Use `saml2aws login` in your regular command line, and then make sure you choose the `gs-chs-wma-dev` account when prompted. If you are still authenticated to the Prod VPC, try running `saml2aws login --force` in order to force a new login.
 1. Then run `scmake('3_visualize/out/gw-conditions-peaks-timeseries-s3copy.ind')` to push a copy of the `3_visualize/out/gw-conditions-peaks-timeseries.csv` file to the `vizlab-data` bucket on the Dev VPC. The file will be automatically given a new name based on the `viz_start_date` and `viz_end_date` target values, using this pattern: `gw-conditions/viz-previous-peak-data/gw-conditions-peaks-timeseries-[viz_start_date]_[viz_end_date].csv`.
 
-## Disclaimer
-
-This software is in the public domain because it contains materials that originally came from the U.S. Geological Survey, an agency of the United States Department of Interior. For more information, see the official USGS copyright policy at [http://www.usgs.gov/visual-id/credit_usgs.html#copyright](http://www.usgs.gov/visual-id/credit_usgs.html#copyright)
-
-This information is preliminary or provisional and is subject to revision. It is being provided to meet the need for timely best science. The information has not received final approval by the U.S. Geological Survey (USGS) and is provided on the condition that neither the USGS nor the U.S. Government shall be held liable for any damages resulting from the authorized or unauthorized use of the information. Although this software program has been used by the USGS, no warranty, expressed or implied, is made by the USGS or the U.S. Government as to the accuracy and functioning of the program and related program material nor shall the fact of distribution constitute any such warranty, and no responsibility is assumed by the USGS in connection therewith.
-
-This software is provided "AS IS."
-
-
-[
-  ![CC0](http://i.creativecommons.org/p/zero/1.0/88x31.png)
-](http://creativecommons.org/publicdomain/zero/1.0/)
