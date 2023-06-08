@@ -1,53 +1,73 @@
 <template>
-  <div id="author-container" v-if="showAuthors">
+  <div
+    v-if="showAuthors"
+    id="author-container"
+  >
     <p>
       <span id="primary-author-statment">
         The development of {{ appTitle }} was led by 
         <span
           v-for="(author, index) in primaryAuthors" 
-          :key="`${author.initials}-attribution`"
           :id="`initial-${author.initials}`"
+          :key="`${author.initials}-attribution`"
           :class="'author first'"
         >
-          <a v-bind:href="author.profile_link" target="_blank" v-text="author.fullName"></a>
+          <a
+            :href="author.profile_link"
+            target="_blank"
+            v-text="author.fullName"
+          />
           <span v-if="index != Object.keys(primaryAuthors).length - 1 && Object.keys(primaryAuthors).length > 2">, </span>
           <span v-if="index == Object.keys(primaryAuthors).length - 2"> and </span>
         </span>.
       </span>
-      <span id="additional-author-statement" v-if="showAdditionalAuthors">
+      <span
+        v-if="showAdditionalAuthors"
+        id="additional-author-statement"
+      >
         <span
           v-for="(author, index) in additionalAuthors" 
-          :key="`${author.initials}-attribution`"
           :id="`author-${author.initials}`"
+          :key="`${author.initials}-attribution`"
           :class="'author'"
         >
-          <a v-bind:href="author.profile_link" target="_blank" v-text="author.fullName"></a>
+          <a
+            :href="author.profile_link"
+            target="_blank"
+            v-text="author.fullName"
+          />
           <span v-if="index != Object.keys(additionalAuthors).length - 1 && Object.keys(additionalAuthors).length > 2">, </span>
           <span v-if="index == Object.keys(additionalAuthors).length - 2"> and </span>
         </span>
         <span>
-        also contributed to the site.
+          also contributed to the site.
         </span>
       </span>
-      <span id="contribution-statements" v-if="showContributionStatements">
+      <span
+        v-if="showContributionStatements"
+        id="contribution-statements"
+      >
         <span id="primary-author-contribution">
           <span
             v-for="author in primaryAuthors" 
-            :key="`${author.initials}-contribution`"
             :id="`author-${author.initials}`"
+            :key="`${author.initials}-contribution`"
             :class="'author'"
           >
-            <span v-text="author.firstName"> </span> <span v-text="author.contribution"></span>. 
+            <span v-text="author.firstName" /> <span v-text="author.contribution" />. 
           </span>
         </span>
-        <span id="additional-author-contribution"  v-if="showAditionalContributionStatement">
+        <span
+          v-if="showAditionalContributionStatement"
+          id="additional-author-contribution"
+        >
           <span
             v-for="author in additionalAuthors" 
-            :key="`${author.initials}-contribution`"
             :id="`author-${author.initials}`"
+            :key="`${author.initials}-contribution`"
             :class="'author'"
           >
-            <span v-text="author.firstName"> </span> <span v-text="author.contribution"></span>. 
+            <span v-text="author.firstName" /> <span v-text="author.contribution" />. 
           </span>
         </span>
       </span>
@@ -59,7 +79,7 @@
 import { isMobile } from 'mobile-device-detect';
 import authors from "@/assets/text/authors";
 export default {
-  name: "authorship",
+  name: "Authorship",
     components: {
     },
     props: {

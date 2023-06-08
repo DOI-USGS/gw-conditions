@@ -20,7 +20,7 @@ const vueImgConfig = {
   altAsTitle: true
 }
 
-Vue.component("font-awesome-icon", FontAwesomeIcon);
+Vue.component("FontAwesomeIcon", FontAwesomeIcon);
 
 // social icons
 library.add(faTwitterSquare);

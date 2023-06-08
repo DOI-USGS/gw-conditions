@@ -14,13 +14,13 @@
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
       <div id="map-container">
-          <GWLmap
-            id="map_gwl"
-            class="map"
-          />
-          <mapLabels 
-            class="map labels"
-          />
+        <GWLmap
+          id="map_gwl"
+          class="map"
+        />
+        <mapLabels 
+          class="map labels"
+        />
       </div>
       <div id="legend-container">
         <Legend />
@@ -107,7 +107,7 @@
         <h4>
           Page development
         </h4>
-        <authorship class="text-content"/>
+        <authorship class="text-content" />
         <br>
         <hr>
         <img
