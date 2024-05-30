@@ -158,6 +158,10 @@ shift_sf <- function(obj_sf, rotation_deg, scale, shift, proj_str) {
   
   stopifnot(!is.na(st_crs(obj_sf)))
   
+  # store original projection (CONUS) to use to redefine projection
+  # once geometry is projected and shifted
+  proj_orig <- st_crs(obj_sf)
+  
   obj_sf_transf <- st_transform(obj_sf, proj_str)
   obj_sfg <- st_geometry(obj_sf_transf)
   obj_sfg_centroid <- st_centroid(obj_sfg)
@@ -176,10 +180,10 @@ shift_sf <- function(obj_sf, rotation_deg, scale, shift, proj_str) {
   # Want to return a complete `sf` object, not just the geometry
   # Not features were filtered, the values were just updated, so
   # we can make a copy of `obj_sf` and then insert the updated
-  # geometry + add the appropriate projection info
+  # geometry + set the projection to the original CONUS projection
   obj_sf_shifted <- obj_sf_transf # Make a copy
   st_geometry(obj_sf_shifted) <- obj_sfg_shifted
-  st_crs(obj_sf_shifted) <- proj_str
+  st_crs(obj_sf_shifted) <- proj_orig
   
   return(obj_sf_shifted)
 }
@@ -265,6 +269,10 @@ shift_points_sf <- function(pts_sf, rotation_deg, scale, shift, proj_str, ref_sf
   
   stopifnot(!is.na(st_crs(pts_sf)))
   
+  # store original projection (CONUS) to use to redefine projection
+  # once geometry is projected and shifted
+  proj_orig <- st_crs(pts_sf)
+  
   pts_sf_transf <- st_transform(pts_sf, proj_str)
   pts_sfg <- st_geometry(pts_sf_transf)
   
@@ -283,10 +291,10 @@ shift_points_sf <- function(pts_sf, rotation_deg, scale, shift, proj_str, ref_sf
   # Want to return a complete `sf` object, not just the geometry
   # No features were filtered, the values were just updated, so
   # we can make a copy of `pts_sf` and then insert the updated
-  # geometry + add the appropriate projection info
+  # geometry + set the projection to the original CONUS projection
   pts_sf_shifted <- pts_sf # Make a copy
   st_geometry(pts_sf_shifted) <- pts_sfg_shifted
-  st_crs(pts_sf_shifted) <- proj_str
+  st_crs(pts_sf_shifted) <- proj_orig
   
   return(pts_sf_shifted)
 }
