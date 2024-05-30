@@ -144,15 +144,17 @@ import { isMobile } from 'mobile-device-detect';
 
 export default {
   name: "GWLsvg",
-    components: {
-      GWLmap,
-      mapLabels,
-      Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend"),
-      authorship: () => import( /* webpackPreload: true */ /*webpackChunkName: "section"*/ "./../components/Authorship")
-    },
-    data() {
+  components: {
+    GWLmap,
+    mapLabels,
+    Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend"),
+    authorship: () => import( /* webpackPreload: true */ /*webpackChunkName: "section"*/ "./../components/Authorship")
+  },
+  data() {
     return {
       publicPath: process.env.BASE_URL, // this is need for the data files in the public folder, this allows the application to find the files when on different deployment roots
+      vueTier: process.env.VUE_APP_TIER, // this is used to determine the file path suffix for data files
+      dataFileSuffix: null,
       d3: null,
       mobileView: isMobile, // test for mobile
 
@@ -183,7 +185,7 @@ export default {
       yScale: null,
       line: null,
 
-     // Blue-Brown categorical color scale
+      // Blue-Brown categorical color scale
       verylow: "#BF6200",
       low: "#FEB100",
       normal: "#B3B3B3",
@@ -194,8 +196,10 @@ export default {
     }
   },
   mounted(){
+      this.dataFileSuffix = this.vueTier == '' ? '-live' : '' // In the prod site we want to use the '-live' files. These are uploaded manually, to hold off updating the live site until we are ready
+      console.log(`vue tier: ${this.vueTier}, suffix: ${this.dataFileSuffix}`)
       this.d3 = Object.assign({d3Trans, scaleLinear, scaleThreshold, scaleOrdinal, select, selectAll, csv, utcFormat, line, path, axisBottom, axisLeft, format  });
-
+      
       // resize
       const window_line = document.getElementById('line-container')
       this.width = window_line.clientWidth;
@@ -211,21 +215,21 @@ export default {
     },
     methods:{
       isMobile() {
-              if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                  return true
-              } else {
-                  return false
-              }
-          },
-       loadData() {
+        if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            return true
+        } else {
+            return false
+        }
+      },
+      loadData() {
         const self = this;
         // read in data 
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-peaks-timeseries-live.csv",  this.d3.autotype),
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords-live.csv",  this.d3.autotype), 
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions-live.csv",  this.d3.autotype),
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels-live.csv",  this.d3.autotype),
+        self.d3.csv(`https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-peaks-timeseries${self.dataFileSuffix}.csv`,  this.d3.autotype),
+        self.d3.csv(`https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords${self.dataFileSuffix}.csv`,  this.d3.autotype), 
+        self.d3.csv(`https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions${self.dataFileSuffix}.csv`,  this.d3.autotype),
+        self.d3.csv(`https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels${self.dataFileSuffix}.csv`,  this.d3.autotype),
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
