@@ -2,18 +2,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid meet" version="1.1" aria-labelledby="mapTitleID mapDescID" role="img">
   <g id="label-islands" class="map-label" transform="translate(-50, -25) scale(0.95 1)">
-    <path d="M1120.57,345.28H986.12L905.35,447.51l30.77,61.36v98.5" class="line-islands" />
-    <line x1="1120.57" y1="447.51" x2="905.35" y2="447.51" class="line-islands" />
-    <polyline points="23.19 260.82 159.41 260.82 229.82 410.89 129.48 543.08 23.19 543.08" class="line-islands" />
-    <polyline points="128.78 607.37 128.78 543.08 229.82 410.89 386.55 453.28 386.55 513.23 484.19 607.37" class="line-islands" />
-    <polyline points="606.5 607.37 458.75 476.58 386.55 453.28" class="line-islands" />
+    <path d="M1120.57,375.28H986.12L895.35,447.51l30.77,61.36v98.5" class="line-islands" />
+    <line x1="1120.57" y1="447.51" x2="895.35" y2="447.51" class="line-islands" />
+    <polyline points="23.19 280.82 159.41 280.82 229.82 410.89 139.48 535.08 23.19 535.08" class="line-islands" />
+    <polyline points="139.48 607.37 139.48 535.08" class="line-islands" />
+    <polyline points="229.82 410.89 375.55 450 390.55 513.23 460 550 495.19 607.37" class="line-islands" />
+    <polyline points="590.5 607.37 540 540 460 485 375.55 450" class="line-islands" />
     <g id="map-text" transform="translate(-20, 0)">
-      <text transform="translate(990 420.37)" >U.S. Virgin Islands</tspan></text>
+      <text transform="translate(990 415.37)" >U.S. Virgin Islands</tspan></text>
       <text transform="translate(1000 530)" >Puerto Rico</tspan></text>
       <text transform="translate(535 605)" >Hawaii</tspan></text>
-      <text transform="translate(75 558)" >American </tspan><tspan x="0" y="15" >Samoa</tspan></text>
+      <text transform="translate(75 553)" >American </tspan><tspan x="0" y="15" >Samoa</tspan></text>
       <text transform="translate(75 502)" >Guam</text>
-      <text transform="translate(90 400)" >Northern<tspan x="0" y="15">Mariana </tspan><tspan x="0" y="30">Islands</tspan></text>
+      <text transform="translate(90 380)" >Northern<tspan x="0" y="15">Mariana </tspan><tspan x="0" y="30">Islands</tspan></text>
       <text transform="translate(348 580)" ><tspan>Alaska</tspan></text>
     </g>
   </g>
