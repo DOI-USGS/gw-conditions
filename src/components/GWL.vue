@@ -70,7 +70,7 @@
             class="tooltiptext"
             style="font-size: 0.8rem;"
           >
-            The percentile calculates the percent of days in the past that groundwater was below the current value. For a site is in the 10th percentile, water levels have been lower 10% of the time. 
+            The percentile calculates the percent of days in the past that groundwater was below the current value. For a site in the 10th percentile, water levels have been lower 10% of the time. 
           </span>
           ), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
