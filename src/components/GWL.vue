@@ -13,13 +13,16 @@
         </h3>
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
-      <div id="map-container">
-        <GWLmap
-          id="map_gwl"
-          class="map"
-        />
+      <GWLmap
+        id="map_gwl"
+        class="map map-container"
+      />
+      <div 
+        id="map-label-container" 
+        class="map-container"
+      >
         <mapLabels 
-          class="map labels"
+          class="map"
         />
       </div>
       <div id="legend-container">
