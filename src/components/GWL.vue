@@ -793,7 +793,7 @@ section {
  justify-content: center;
   max-width: 550px;
   align-self: center;
-  justify-self: start;
+  justify-self: center;
   svg{
     max-width: 550px;
     align-self: start;
@@ -836,11 +836,12 @@ section {
   align-self: center;
   justify-content: space-evenly;
   position: relative;
+  @media screen and (min-width: 551px) {
+    justify-self: end;
+  }
   @media screen and (max-height: 770px) {
     margin: 0.5rem 0 0.5rem 0;
-  }
-  @media screen and (min-width: 551px) {
-    justify-self: center;
+    justify-self: start;
   }
 }
 .text-content {
