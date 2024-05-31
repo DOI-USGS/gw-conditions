@@ -157,6 +157,7 @@ export default {
     return {
       publicPath: process.env.BASE_URL, // this is need for the data files in the public folder, this allows the application to find the files when on different deployment roots
       vueTier: process.env.VUE_APP_TIER, // this is used to determine the file path suffix for data files
+      dataUrlPrefix: null,
       dataFileSuffix: null,
       d3: null,
       mobileView: isMobile, // test for mobile
@@ -199,8 +200,21 @@ export default {
     }
   },
   mounted(){
-      this.dataFileSuffix = this.vueTier == '' ? '-live' : '' // In the prod site we want to use the '-live' files. These are uploaded manually, to hold off updating the live site until we are ready
-      console.log(`vue tier: ${this.vueTier}, suffix: ${this.dataFileSuffix}`)
+      // In the prod site we want to use the '-live' files. 
+      // In the beta site we want to use the '-beta' files.
+      // These are uploaded manually, to hold off updating the beta or live site until we are ready
+      switch(this.vueTier) {
+        case '-test build-':
+          this.dataFileSuffix = '';
+          break;
+        case '-beta build-':
+          this.dataFileSuffix = '-beta';
+          break;
+        default:
+          this.dataFileSuffix =  '-live';
+      }
+      // The beta site needs to access the data files in the beta bucket on prod
+      this.dataUrlPrefix = this.vueTier == '-beta build-' ? '-beta' : ''
       this.d3 = Object.assign({d3Trans, scaleLinear, scaleThreshold, scaleOrdinal, select, selectAll, csv, utcFormat, line, path, axisBottom, axisLeft, format  });
       
       // resize
@@ -229,10 +243,10 @@ export default {
         // read in data 
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        self.d3.csv(`https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-peaks-timeseries${self.dataFileSuffix}.csv`,  this.d3.autotype),
-        self.d3.csv(`https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords${self.dataFileSuffix}.csv`,  this.d3.autotype), 
-        self.d3.csv(`https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions${self.dataFileSuffix}.csv`,  this.d3.autotype),
-        self.d3.csv(`https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels${self.dataFileSuffix}.csv`,  this.d3.autotype),
+        self.d3.csv(`https://labs${self.dataUrlPrefix}.waterdata.usgs.gov/visualizations/data/gw-conditions-peaks-timeseries${self.dataFileSuffix}.csv`,  this.d3.autotype),
+        self.d3.csv(`https://labs${self.dataUrlPrefix}.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords${self.dataFileSuffix}.csv`,  this.d3.autotype), 
+        self.d3.csv(`https://labs${self.dataUrlPrefix}.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions${self.dataFileSuffix}.csv`,  this.d3.autotype),
+        self.d3.csv(`https://labs${self.dataUrlPrefix}.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels${self.dataFileSuffix}.csv`,  this.d3.autotype),
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
