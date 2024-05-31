@@ -359,7 +359,7 @@ export default {
       },
       formatDates(dates){
 
-        this.formatTime = this.d3.utcFormat("%b %e, %Y");
+        this.formatTime = this.d3.utcFormat("%B %e, %Y");
         this.date_start = this.formatTime(new Date(dates[0]));
         this.date_end = this.formatTime(new Date(dates[this.n_days-1]));
 
@@ -734,13 +734,21 @@ section {
       }
       
   @media screen and (max-height: 770px) {
-    grid-template-columns: 10vw 0.75fr 1.25fr;
+    grid-template-columns: 15% 35% 50%;
     grid-template-rows: max-content;
     grid-template-areas:
-      "title title map"
-      "button legend map"
-      "line line map"
+      "title map map"
+      "null map map"
+      "button button legend"
+      "line line line"
       "text text text";
+    // grid-template-columns: 10vw 0.75fr 1.25fr;
+    // grid-template-rows: max-content;
+    // grid-template-areas:
+    //   "title title map"
+    //   "button legend map"
+    //   "line line map"
+    //   "text text text";
   }
   @media screen and (max-width: 600px) {
     grid-template-columns: 1fr;
@@ -840,8 +848,7 @@ section {
     justify-self: end;
   }
   @media screen and (max-height: 770px) {
-    margin: 0.5rem 0 0.5rem 0;
-    justify-self: start;
+    justify-self: center;
   }
 }
 .text-content {
@@ -881,10 +888,6 @@ section {
   @media screen and (max-width: 550px) {
         font-size: 16px;
       }
-  @media screen and (max-height: 770px) {
-    font-size: 0.8rem;
-  }
-
 }
 button {
     appearance: auto;
@@ -896,9 +899,6 @@ button {
     box-sizing: border-box;
     padding: 1rem 4px;
     margin: 0rem 1rem;
-    @media screen and (max-height: 770px) {
-      margin: 0.25rem 1rem;
-    }
 }
 [type=button], [type=reset], [type=submit], button {
     -webkit-appearance: button;
