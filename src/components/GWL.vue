@@ -718,27 +718,49 @@ section {
       "line line"
       "text text";
       }
-
+      
+  @media screen and (max-height: 770px) {
+    grid-template-columns: 10vw 0.6fr 1.25fr;
+    grid-template-rows: max-content;
+    grid-template-areas:
+      "title title map"
+      "button legend map"
+      "line line map"
+      "text text text";
+  }
+  @media screen and (max-width: 600px) {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "map"
+      "legend"
+      "button"
+      "line"
+      "text";
+  }
 }
-#map-container {
+#map_gwl {
   grid-area: map;
+}
+#map-label-container {
+  grid-area: map;
+}
+.map-container {
+  align-self: center;
+}
+.map {
+  max-height: 68vh;
+  max-width: 98vw;
+  width: 100%;
+  height: 100%;
   padding: 0rem;
   padding-bottom: 0px;
   margin-top: 0.5rem;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  svg.map {
-    max-height: 68vh;
-    max-width: 98vw;
-    width: 100%;
-    height: 100%;
-  }
-  svg.map.labels {
-    position: absolute;
+  @media screen and (max-height: 770px) {
+    max-height: 100vh;
   }
 }
-
 #line-container {
   grid-area: line;
   width: 100%;
@@ -753,15 +775,13 @@ section {
 #legend-container {
    grid-area: legend;
   width: 100%;
-  margin: auto;
-  margin-bottom: 1rem;
+  margin: 1rem 0 1rem 0;
  justify-content: center;
   max-width: 550px;
-  align-self: right;
+  align-self: center;
   justify-self: start;
   svg{
     max-width: 550px;
-    margin: auto;
     align-self: start;
     justify-self: start;
     overflow: visible;
@@ -780,9 +800,8 @@ section {
   grid-area: title;
   width: 100%;
   max-width: 700px;
-  height: auto;
-  margin: auto;
-  align-items: start;
+  align-self: start;
+  justify-self: center;
   h1, h2{
     margin-top: 1rem;
   }
@@ -799,14 +818,16 @@ section {
 }
 #button-container {
   grid-area: button;
-  width: 100%;
-  max-width: 700px;
-  height: auto;
-  min-height: 40px;
-  margin: auto;
-  margin-bottom: 1rem;
+  margin: 1rem 0 1rem 0;
+  align-self: center;
   justify-content: space-evenly;
   position: relative;
+  @media screen and (max-height: 770px) {
+    margin: 0.5rem 0 0.5rem 0;
+  }
+  @media screen and (min-width: 551px) {
+    justify-self: center;
+  }
 }
 .text-content {
   margin: 0.5rem auto;
@@ -845,6 +866,9 @@ section {
   @media screen and (max-width: 550px) {
         font-size: 16px;
       }
+  @media screen and (max-height: 770px) {
+    font-size: 0.8rem;
+  }
 
 }
 button {
@@ -856,7 +880,10 @@ button {
     align-items: center;
     box-sizing: border-box;
     padding: 1rem 4px;
-    margin: 0rem 1rem;;
+    margin: 0rem 1rem;
+    @media screen and (max-height: 770px) {
+      margin: 0.25rem 1rem;
+    }
 }
 [type=button], [type=reset], [type=submit], button {
     -webkit-appearance: button;
@@ -896,11 +923,13 @@ text.legend-label {
   stroke-width: 2px;
 }
 #spacer {
-  display: flex;
-  justify-content: center;
   @media screen and (min-width: 551px) {
-      justify-content: end;
-      }
+    justify-content: end;
+  }
+  @media screen and (max-width: 650px) {
+    display: flex;
+    justify-content: center;
+  }
 }
 #vizlab-wordmark {
   max-width: 200px;
