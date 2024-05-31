@@ -734,7 +734,7 @@ section {
       }
       
   @media screen and (max-height: 770px) {
-    grid-template-columns: 10vw 0.6fr 1.25fr;
+    grid-template-columns: 10vw 0.75fr 1.25fr;
     grid-template-rows: max-content;
     grid-template-areas:
       "title title map"
