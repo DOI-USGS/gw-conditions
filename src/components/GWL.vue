@@ -13,13 +13,16 @@
         </h3>
       <!--   <caption id="caption-gwl">Daily groundwater levels</caption> -->
       </div>
-      <div id="map-container">
-        <GWLmap
-          id="map_gwl"
-          class="map"
-        />
+      <GWLmap
+        id="map_gwl"
+        class="map map-container"
+      />
+      <div 
+        id="map-label-container" 
+        class="map-container"
+      >
         <mapLabels 
-          class="map labels"
+          class="map"
         />
       </div>
       <div id="legend-container">
@@ -70,7 +73,7 @@
             class="tooltiptext"
             style="font-size: 0.8rem;"
           >
-            The percentile calculates the percent of days in the past that groundwater was below the current value. For a site is in the 10th percentile, water levels have been lower 10% of the time. 
+            The percentile calculates the percent of days in the past that groundwater was below the current value. For a site in the 10th percentile, water levels have been lower 10% of the time. 
           </span>
           ), indicating where groundwater is comparatively high or low to what has been observed in the past. The corresponding time series chart shows the percent of sites in each water-level category through time. 
         </p>
@@ -144,15 +147,18 @@ import { isMobile } from 'mobile-device-detect';
 
 export default {
   name: "GWLsvg",
-    components: {
-      GWLmap,
-      mapLabels,
-      Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend"),
-      authorship: () => import( /* webpackPreload: true */ /*webpackChunkName: "section"*/ "./../components/Authorship")
-    },
-    data() {
+  components: {
+    GWLmap,
+    mapLabels,
+    Legend: () => import( /* webpackPreload: true */ /*webpackChunkName: "Legend"*/ "./../components/Legend"),
+    authorship: () => import( /* webpackPreload: true */ /*webpackChunkName: "section"*/ "./../components/Authorship")
+  },
+  data() {
     return {
       publicPath: process.env.BASE_URL, // this is need for the data files in the public folder, this allows the application to find the files when on different deployment roots
+      vueTier: process.env.VUE_APP_TIER, // this is used to determine the file path suffix for data files
+      dataUrlPrefix: null,
+      dataFileSuffix: null,
       d3: null,
       mobileView: isMobile, // test for mobile
 
@@ -183,7 +189,7 @@ export default {
       yScale: null,
       line: null,
 
-     // Blue-Brown categorical color scale
+      // Blue-Brown categorical color scale
       verylow: "#BF6200",
       low: "#FEB100",
       normal: "#B3B3B3",
@@ -194,8 +200,23 @@ export default {
     }
   },
   mounted(){
+      // In the prod site we want to use the '-live' files. 
+      // In the beta site we want to use the '-beta' files.
+      // These are uploaded manually, to hold off updating the beta or live site until we are ready
+      switch(this.vueTier) {
+        case '-test build-':
+          this.dataFileSuffix = '';
+          break;
+        case '-beta build-':
+          this.dataFileSuffix = '-beta';
+          break;
+        default:
+          this.dataFileSuffix =  '-live';
+      }
+      // The beta site needs to access the data files in the beta bucket on prod
+      this.dataUrlPrefix = this.vueTier == '-beta build-' ? '-beta' : ''
       this.d3 = Object.assign({d3Trans, scaleLinear, scaleThreshold, scaleOrdinal, select, selectAll, csv, utcFormat, line, path, axisBottom, axisLeft, format  });
-
+      
       // resize
       const window_line = document.getElementById('line-container')
       this.width = window_line.clientWidth;
@@ -211,21 +232,21 @@ export default {
     },
     methods:{
       isMobile() {
-              if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                  return true
-              } else {
-                  return false
-              }
-          },
-       loadData() {
+        if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            return true
+        } else {
+            return false
+        }
+      },
+      loadData() {
         const self = this;
         // read in data 
         let promises = [
         self.d3.csv(self.publicPath + "quant_peaks.csv",  this.d3.autotype), // used to draw legend shapes - color palette needs to be pulled out
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-peaks-timeseries-live.csv",  this.d3.autotype),
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords-live.csv",  this.d3.autotype), 
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions-live.csv",  this.d3.autotype),
-        self.d3.csv("https://labs.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels-live.csv",  this.d3.autotype),
+        self.d3.csv(`https://labs${self.dataUrlPrefix}.waterdata.usgs.gov/visualizations/data/gw-conditions-peaks-timeseries${self.dataFileSuffix}.csv`,  this.d3.autotype),
+        self.d3.csv(`https://labs${self.dataUrlPrefix}.waterdata.usgs.gov/visualizations/data/gw-conditions-site-coords${self.dataFileSuffix}.csv`,  this.d3.autotype), 
+        self.d3.csv(`https://labs${self.dataUrlPrefix}.waterdata.usgs.gov/visualizations/data/gw-conditions-daily-proportions${self.dataFileSuffix}.csv`,  this.d3.autotype),
+        self.d3.csv(`https://labs${self.dataUrlPrefix}.waterdata.usgs.gov/visualizations/data/gw-conditions-time-labels${self.dataFileSuffix}.csv`,  this.d3.autotype),
         ];
         Promise.all(promises).then(self.callback); // once it's loaded
       },
@@ -338,7 +359,7 @@ export default {
       },
       formatDates(dates){
 
-        this.formatTime = this.d3.utcFormat("%b %e, %Y");
+        this.formatTime = this.d3.utcFormat("%B %e, %Y");
         this.date_start = this.formatTime(new Date(dates[0]));
         this.date_end = this.formatTime(new Date(dates[this.n_days-1]));
 
@@ -711,27 +732,57 @@ section {
       "line line"
       "text text";
       }
-
+      
+  @media screen and (max-height: 770px) {
+    grid-template-columns: 15% 35% 50%;
+    grid-template-rows: max-content;
+    grid-template-areas:
+      "title map map"
+      "null map map"
+      "button button legend"
+      "line line line"
+      "text text text";
+    // grid-template-columns: 10vw 0.75fr 1.25fr;
+    // grid-template-rows: max-content;
+    // grid-template-areas:
+    //   "title title map"
+    //   "button legend map"
+    //   "line line map"
+    //   "text text text";
+  }
+  @media screen and (max-width: 600px) {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "title"
+      "map"
+      "legend"
+      "button"
+      "line"
+      "text";
+  }
 }
-#map-container {
+#map_gwl {
   grid-area: map;
+}
+#map-label-container {
+  grid-area: map;
+}
+.map-container {
+  align-self: center;
+}
+.map {
+  max-height: 68vh;
+  max-width: 98vw;
+  width: 100%;
+  height: 100%;
   padding: 0rem;
   padding-bottom: 0px;
   margin-top: 0.5rem;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  svg.map {
-    max-height: 68vh;
-    max-width: 98vw;
-    width: 100%;
-    height: 100%;
-  }
-  svg.map.labels {
-    position: absolute;
+  @media screen and (max-height: 770px) {
+    max-height: 100vh;
   }
 }
-
 #line-container {
   grid-area: line;
   width: 100%;
@@ -746,15 +797,13 @@ section {
 #legend-container {
    grid-area: legend;
   width: 100%;
-  margin: auto;
-  margin-bottom: 1rem;
+  margin: 1rem 0 1rem 0;
  justify-content: center;
   max-width: 550px;
-  align-self: right;
-  justify-self: start;
+  align-self: center;
+  justify-self: center;
   svg{
     max-width: 550px;
-    margin: auto;
     align-self: start;
     justify-self: start;
     overflow: visible;
@@ -773,9 +822,8 @@ section {
   grid-area: title;
   width: 100%;
   max-width: 700px;
-  height: auto;
-  margin: auto;
-  align-items: start;
+  align-self: start;
+  justify-self: center;
   h1, h2{
     margin-top: 1rem;
   }
@@ -792,14 +840,16 @@ section {
 }
 #button-container {
   grid-area: button;
-  width: 100%;
-  max-width: 700px;
-  height: auto;
-  min-height: 40px;
-  margin: auto;
-  margin-bottom: 1rem;
+  margin: 1rem 0 1rem 0;
+  align-self: center;
   justify-content: space-evenly;
   position: relative;
+  @media screen and (min-width: 551px) {
+    justify-self: end;
+  }
+  @media screen and (max-height: 770px) {
+    justify-self: center;
+  }
 }
 .text-content {
   margin: 0.5rem auto;
@@ -838,7 +888,6 @@ section {
   @media screen and (max-width: 550px) {
         font-size: 16px;
       }
-
 }
 button {
     appearance: auto;
@@ -849,7 +898,7 @@ button {
     align-items: center;
     box-sizing: border-box;
     padding: 1rem 4px;
-    margin: 0rem 1rem;;
+    margin: 0rem 1rem;
 }
 [type=button], [type=reset], [type=submit], button {
     -webkit-appearance: button;
@@ -889,11 +938,13 @@ text.legend-label {
   stroke-width: 2px;
 }
 #spacer {
-  display: flex;
-  justify-content: center;
   @media screen and (min-width: 551px) {
-      justify-content: end;
-      }
+    justify-content: end;
+  }
+  @media screen and (max-width: 650px) {
+    display: flex;
+    justify-content: center;
+  }
 }
 #vizlab-wordmark {
   max-width: 200px;

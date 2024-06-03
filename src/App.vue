@@ -99,7 +99,10 @@ h2{
   font-weight: 700;
   @media screen and (max-width: 800px) {
         font-size: 2rem;
-      }
+  }
+  @media screen and (max-height: 770px) {
+    font-size: 2em;
+  }
   @media screen and (max-width: 650px) {
     font-size: 1.3em;
   }
@@ -109,10 +112,13 @@ h3{
   //padding-top: 0.5em;
   @media screen and (max-width: 800px) {
       font-size: 1.3em;
-  }  
+  }   
+  @media screen and (max-height: 770px) {
+    font-size: 1.25em;
+  } 
   @media screen and (max-width: 650px) {
       font-size: 1em;
-  }  
+  }
 }
 h4{
   font-size: 1.2em;
