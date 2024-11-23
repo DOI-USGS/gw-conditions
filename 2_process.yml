@@ -89,6 +89,7 @@ targets:
       tmp_dir = I('2_process/tmp'))
 
   ##-- Now push the data needed by Vue to S3 --##
-
+  # These data end up on the Prod VPC with `us-west-2`
+  # You must login separately using `ssologin.sh
   visualizations/data/gw-conditions-time-labels.csv.ind:
     command: s3_put(target_name, '2_process/out/gw-conditions-time-labels.csv', config_file = I('lib/cfg/s3_config_viz.yml'))
