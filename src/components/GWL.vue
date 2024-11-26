@@ -169,7 +169,7 @@ export default {
       days: null, // used to index days in sequence
 
       peak_grp: null,
-      day_length: 10, // frame duration in milliseconds
+      day_length: 75, // frame duration in milliseconds
       current_time: 0, // tracking animation timing
       n_days: null,
       n_sites: {},
@@ -395,7 +395,7 @@ export default {
              self.day_length = 300;
              self.button_text_speed = "Faster";
           } else {
-            self.day_length = 10
+            self.day_length = 75;
             self.button_text_speed = "Slower";
           }
         })
