@@ -60,7 +60,7 @@ targets:
   ##-- Now push the data needed by Vue to S3 --##
 
   # These data end up on the Prod VPC with `us-west-2`
-  # You must login separately using `saml2aws login`
+  # You must login separately using `ssologin.sh`
   
   visualizations/data/gw-conditions-peaks-map.svg.ind:
     command: s3_put(target_name, '3_visualize/out/gw-conditions-peaks-map.svg', config_file = I('lib/cfg/s3_config_viz.yml'))
@@ -106,7 +106,7 @@ targets:
   # We want to keep a copy of each time window we use, but don't want to have to keep changing the 
   # filename that is used by the Vue code manually. So, we are uploading a copy of the data for
   # the current viz time window and naming based on the dates.
-  # This data ends up on the Dev VPC with `us-west-2`; you must login separately using `saml2aws login`
+  # This data ends up on the Dev VPC with `us-west-2`; you must login separately using `ssologin.sh`
   gw_conditions_peaks_timeseries_s3copy_fname:
     command: sprintf(
       I('gw-conditions/viz-previous-peak-data/gw-conditions-peaks-timeseries-%s_%s.csv'),
